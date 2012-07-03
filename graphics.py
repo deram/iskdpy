@@ -30,7 +30,7 @@ class ControlLayer(Layer):
         self.text_title.draw()
 
     def on_key_press( self, k , m ):
-        transition=FadeTRTransition
+        transition=FadeTransition
         if k == key.ENTER:
             director.replace( transition( SlideScene(CurrentSlideshow().get_next()), 1.25))
             return True
@@ -45,7 +45,6 @@ class SlideLayer(Layer):
 class SlideScene(Scene):
     def __init__(self, filename=""):
         super(SlideScene, self).__init__()
-        global slideshow
         self.add(ColorLayer(50,30,0,255))
         if (not filename):
             filename=CurrentSlideshow().get_next()
