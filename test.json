@@ -1,0 +1,17 @@
+{
+    "slideshow": {
+        "slideshow_id": "foobar",
+        "size": "1",
+        "playlists": [ 
+            {   "playlist_id": "foolist",
+                "size": "3",
+                "slides": [
+                    { "slide_id": "1", "file": "slide_23_full.jpg", "time": "0" },
+                    { "slide_id": "2", "file": "slide_28_full.jpg", "time": "0" },
+                    { "slide_id": "3", "file": "slide_30_full.png", "time": "0" }
+                ]
+            }
+        ]
+    }
+}
+
