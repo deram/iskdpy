@@ -9,6 +9,7 @@ from pyglet import gl, font
 
 from pyglet.window import key
 
+from slideshow import CurrentSlideshow 
     
 class ControlLayer(Layer):
 
@@ -29,23 +30,25 @@ class ControlLayer(Layer):
         self.text_title.draw()
 
     def on_key_press( self, k , m ):
-        global transition, slide_number
+        transition=FadeTRTransition
         if k == key.ENTER:
-            slide_number = (slide_number+1)%len(slides) 
-            director.replace( transition( SlideScene(slides[slide_number]), 1.25))
+            director.replace( transition( SlideScene(CurrentSlideshow().get_next()), 1.25))
             return True
 
 
 class SlideLayer(Layer):
     def __init__( self, file):
         super( SlideLayer, self ).__init__()
-
         g = Sprite( file, anchor=(0,0) )
         self.add( g )
 
 class SlideScene(Scene):
-    def __init__(self, filename):
-        super(SlideScene, self).__init__(ColorLayer(50,30,0,255), 
-                                         SlideLayer(slides[slide_number] ),
-                                         ControlLayer())
+    def __init__(self, filename=""):
+        super(SlideScene, self).__init__()
+        global slideshow
+        self.add(ColorLayer(50,30,0,255))
+        if (not filename):
+            filename=CurrentSlideshow().get_next()
+        self.add(SlideLayer(filename))
+        self.add(ControlLayer())
 
