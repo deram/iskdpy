@@ -4,35 +4,47 @@ from pprint import pprint
 class Slideshow():
     current=None
     def __init__(self, show=""):
-        self.playlist_number=0
-        self.slide_number=-1
-        json_data=open("test.json").read()
+        self.group_number=1
+        self.slide_number=0
+        if(not show):
+            json_data=open("cache/main.json").read()
+        else:
+            json_data=show
         self.data = json.loads(json_data)
-        #pprint(self.data)
+        pprint(self.data)
 
-    def get_playlists(self):
-        return self.data['slideshow']['playlists']
+    def get_all_slides(self):
+        ret={}
+        for group in self.get_groups().values():
+            for slide in group['slides'].values():
+                ret[slide['id']] = slide
+        return ret
 
-    def get_playlist(self,num):
-        return self.get_playlists()[num]
 
-    def get_playlist_slides(self, num):
-        return self.get_playlist(num)['slides']
 
-    def get_slide(self, playlist, slide):
-        return self.get_playlist_slides(playlist)[slide]
+    def get_groups(self):
+        return self.data['groups']
+
+    def get_group(self,num):
+        return self.get_groups()['group_%d' % num]
+
+    def get_group_slides(self, num):
+        return self.get_group(num)['slides']
+
+    def get_slide(self, group, slide):
+        return self.get_group_slides(group)['slide_%d' % slide]
 
     def get_next(self):
-        slideshowlen=len(self.get_playlists())
-        playlistlen=len(self.get_playlist(self.playlist_number))
+        presentationlen=len(self.get_groups())
+        grouplen=len(self.get_group(self.group_number))
         self.slide_number += 1
-        if ( self.slide_number == playlistlen ):
-            self.slide_number = 0
-            self.playlist_number += 1
-        if ( self.playlist_number == slideshowlen ):
-            self.slide_number = 0
-            self.playlist_number = 0
-        return self.get_slide(self.playlist_number, self.slide_number)['file'].encode('utf8')
+        if ( self.slide_number > grouplen ):
+            self.slide_number = 1
+            self.group_number += 1
+        if ( self.group_number > presentationlen ):
+            self.slide_number = 1
+            self.group_number = 1
+        return "cache/%d.png" % self.get_slide(self.group_number, self.slide_number)['id']
 
 def CurrentSlideshow():
     Slideshow.current
