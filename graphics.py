@@ -2,6 +2,7 @@ from cocos.director import director
 from cocos.layer import Layer, ColorLayer
 from cocos.scene import Scene
 from cocos.scenes.transitions import *
+#from isk_transitions import *
 from cocos.actions import *
 from cocos.sprite import Sprite
 import pyglet
@@ -9,7 +10,7 @@ from pyglet import gl, font
 
 from pyglet.window import key
 
-from slideshow import CurrentSlideshow 
+from isk_presenter import CurrentPresenter
     
 class ControlLayer(Layer):
 
@@ -47,28 +48,18 @@ class SlideScene(Scene):
         super(SlideScene, self).__init__()
         self.scheduled_event=False
         if (not filename):
-            filename=CurrentSlideshow().get_next()
+            slide=CurrentPresenter().get_next()
+            filename=slide.get_cachefile()
         self.add(ColorLayer(50,30,0,255), z=-10)
         self.add(SlideLayer(filename), z=0)
         self.add(ControlLayer(), z=10)
 
     def on_enter(self):
 	if (not self.scheduled_event):
-            print "foo"
             self.scheduled_event = True
             self.schedule_interval(self.change_slide, 10)
         return super(SlideScene, self).on_enter()
 
-#    def on_exit(self):
-#        print self.scheduled_event
-#        if (self.scheduled_event):
-#            print "bar"
-#            self.unschedule(self.change_slide)
-#            self.scheduled_event=False
-
-
     def change_slide(self, dt=0):
         transition=FadeBLTransition #FadeTransition
         director.replace(transition(SlideScene(), 1.25))
-
-

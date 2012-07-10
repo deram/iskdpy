@@ -3,12 +3,8 @@ import base64
 import json
 from pprint import pprint 
 from isk_types import Presentation
+import config
 
-def slideid_to_file(id):
-	return cachefile('%d.png' % id)
-
-def cachefile(name):
-	return 'cache/%s' % name
 
 def get_url_authenticated(url, user="isk", passwd="Kissa"):
 	request = urllib2.Request(url)
@@ -19,13 +15,14 @@ def get_url_authenticated(url, user="isk", passwd="Kissa"):
 
 def get_url_and_save(url, file):
 	resource = get_url_authenticated(url)
-	output = open(file , 'wb')
+        cachefile = '%s/%s' % (config.cache_path, file)
+	output = open(cachefile , 'wb')
 	output.write(resource)
 	output.close()
 	return resource
 
 def get_json():
-	json_data = get_url_and_save('http://isk.depili.fi/displays/3/presentation?format=json', 'cache/main.json')
+	json_data = get_url_and_save('http://isk.depili.fi/displays/3/presentation?format=json', 'main.json')
 	return json_data
 
 def get_slide(slide):
@@ -34,8 +31,7 @@ def get_slide(slide):
 def set_image_timestamp(id, modified):
 	print "to be implemented"
 	
-
-def fill_cache():
+def fill_cache_and_get_presentation():
 	json_data=get_json()
 	tmp=json.loads(json_data)
 	show=Presentation(tmp)
@@ -43,7 +39,7 @@ def fill_cache():
 	for slide in slides.values():
 		print "Fetching: %s" % slide
 		get_slide(slide)
-
+        return show
 
 if __name__ == "__main__":
-	fill_cache()
+	fill_cache_and_get_presentation()

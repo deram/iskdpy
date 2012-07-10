@@ -1,4 +1,4 @@
-
+import config
 
 class Presentation():
 	def __init__(self, data):
@@ -12,7 +12,7 @@ class Presentation():
 		return self.groups.__iter__()
 
 	def __getitem__(self, id):
-		return Group(self.data['groups'][id])
+		return self.groups[id]
 
 	def __len__(self):
 		return self.data['total_groups']
@@ -56,13 +56,13 @@ class Group():
 		return self.slides[id]
 
 	def __len__(self):
-		return self.data['total_slide']
+		return self.data['total_slides']
 
 	def __unicode__(self):
 		tmp=""
 		for i in self:
 			tmp+="\t%s\n" % unicode(i)
-		return 'Group "%s" Position %s Slides: %d\n%s' % ( self.data['name'], self.data['position'], self.data['total_slide'], tmp)
+		return 'Group "%s" Position %s Slides: %d\n%s' % ( self.data['name'], self.data['position'], self.data['total_slides'], tmp)
 
 	def __str__(self):
 		return unicode(self)
@@ -94,6 +94,12 @@ class Slide():
 
 	def get_filename(self):
 		return '%d.png' % self.get_id()
+
+	def get_cachefile(self):
+		return '%s/%d.png' % (config.cache_path, self.get_id())
+
+	def valid(self):
+		return True
 
 if __name__ == "__main__":
 	import json
