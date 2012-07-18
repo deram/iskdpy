@@ -1,3 +1,4 @@
+import os
 import config
 
 class Display():
@@ -123,6 +124,18 @@ class Slide():
 
 	def get_cachefile(self):
 		return '%s/%d.png' % (config.cache_path, self.get_id())
+
+	def get_update_time(self):
+		return self['updated_at']
+
+	def is_cached(self):
+        	file=self.get_cachefile()
+		if os.path.isfile(file):
+        		file_mtime=os.stat(file).st_mtime
+			slide_mtime=self.get_update_time()
+        		return (slide_mtime <= file_mtime)
+		else:
+			return False
 
 	def valid(self):
 		return True
