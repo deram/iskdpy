@@ -2,7 +2,7 @@ import urllib2
 import base64
 import json
 from pprint import pprint 
-from isk_types import Presentation
+from isk_types import Display
 import config
 
 
@@ -10,7 +10,7 @@ def get_url_authenticated(url, user="isk", passwd="Kissa"):
 	request = urllib2.Request(url)
 	base64string = base64.encodestring('%s:%s' % (user, passwd)).replace('\n', '')
 	request.add_header("Authorization", "Basic %s" % base64string)   
-	result = urllib2.urlopen(request)
+	result = urllib2.urlopen(request, None, 1)
 	return result.read()
 
 def get_url_and_save(url, file):
@@ -22,7 +22,7 @@ def get_url_and_save(url, file):
 	return resource
 
 def get_json():
-	json_data = get_url_and_save('http://isk.depili.fi/displays/3/presentation?format=json', 'main.json')
+	json_data = get_url_and_save('http://isk.depili.fi/displays/1?format=json', 'main.json')
 	return json_data
 
 def get_slide(slide):
@@ -31,15 +31,15 @@ def get_slide(slide):
 def set_image_timestamp(id, modified):
 	print "to be implemented"
 	
-def fill_cache_and_get_presentation():
+def fill_cache_and_get_display():
 	json_data=get_json()
 	tmp=json.loads(json_data)
-	show=Presentation(tmp)
-	slides=show.get_all_slides()
+	dpy=Display(tmp)
+	slides=dpy.get_all_slides()
 	for slide in slides.values():
 		print "Fetching: %s" % slide
 		get_slide(slide)
-        return show
+        return dpy
 
 if __name__ == "__main__":
-	fill_cache_and_get_presentation()
+	fill_cache_and_get_display()

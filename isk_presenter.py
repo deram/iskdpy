@@ -11,20 +11,20 @@ class Presenter():
         self.slide=-1
         json_data=open("cache/main.json").read()
         data = json.loads(json_data, "utf8")
-        self.presentation=Presentation(data)
-        #self.presentation=cache.fill_cache_and_get_presentation()
+        self.display=Display(data)
+        #self.display=cache.fill_cache_and_get_display()
 
     def get_all_slides(self):
-        return self.presentation.get_all_slides()
+        return self.display.get_all_slides()
 
     def get_presentation(self):
-        return self.presentation
+        return self.display.get_presentation()
 
     def get_current_group(self):
-        return self.presentation[self.group]
+        return self.get_presentation()[self.group]
 
     def get_current_slide(self):
-        return self.presentation[self.group][self.slide]
+        return self.get_presentation()[self.group][self.slide]
 
     def get_next(self):
         valid_slide=False

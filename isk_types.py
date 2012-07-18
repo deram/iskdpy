@@ -1,5 +1,29 @@
 import config
 
+class Display():
+	def __init__(self, data):
+		self.data=data
+		self.presentation=Presentation(self.data['presentation'])
+		del self.data['presentation']
+                #self.override=OverrideGroup(self.data['override_queue'])
+		del self.data['override_queue']
+
+	def get_presentation(self):
+		return self.presentation
+
+	#def get_override(self):
+	#	return self.override
+
+
+	def get_all_slides(self):
+		tmp={}
+		for group in self.presentation:
+			for slide in group:
+				tmp[ slide['id'] ] = slide
+		#for slide in self.override:
+		#	tmp[ slide['id'] ] = slide
+		return tmp
+
 class Presentation():
 	def __init__(self, data):
 		self.data=data
@@ -32,12 +56,6 @@ class Presentation():
 	def get_group(id):
 		return self[id]
 
-	def get_all_slides(self):
-		tmp={}
-		for g in self:
-			for s in g:
-				tmp[ s['id'] ] = s
-		return tmp
 
 
 
@@ -73,6 +91,14 @@ class Group():
 	def get_slide(id):
 		return self[id]
 
+class OverrideGroup(Group):
+	def __unicode__(self):
+		tmp=""
+		for i in self:
+			tmp+="\t%s\n" % unicode(i)
+		return 'Override Slides: %d\n%s' % ( self.data['total_slides'], tmp)
+
+
 class Slide():
 	def __init__(self, data):
 		self.data=data
@@ -105,10 +131,10 @@ if __name__ == "__main__":
 	import json
 	json_data=open("cache/main.json").read()
 	data = json.loads(json_data, "utf8")
-	presentation=Presentation(data)
+	display=Display(data)
 
-	for s in presentation.get_all_slides().values():
+	for s in display.get_all_slides().values():
 		print s.get_filename()
-	print "DEBUG: %s" % presentation
+	print "DEBUG: %s" % display
 
 
