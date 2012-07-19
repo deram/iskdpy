@@ -36,8 +36,8 @@ class Presentation():
 	def __iter__(self):
 		return self.groups.__iter__()
 
-	def __getitem__(self, id):
-		return self.groups[id]
+	def __getitem__(self, pos):
+		return self.groups[pos]
 
 	def __len__(self):
 		return self.data['total_groups']
@@ -54,10 +54,16 @@ class Presentation():
 	def get_groups(self):
 		return self.groups
 
-	def get_group(id):
-		return self[id]
+	def get_group(pos):
+		return self[pos]
 
-
+	def locate_group(self, id):
+		index=0
+		for group in self:
+			if (group.get_id() == id):
+				break
+			index += 1
+		return index % len(self)
 
 
 class Group():
@@ -85,12 +91,24 @@ class Group():
 
 	def __str__(self):
 		return unicode(self)
+	
+	def get_id(self):
+		return self.data['id']
 
 	def get_slides(self):
 		return self.slides
 
 	def get_slide(id):
 		return self[id]
+
+	def locate_slide(self, id):
+		index=0
+		for slide in self:
+			if (slide.get_id() == id):
+				break
+			index += 1
+		return index % len(self)
+
 
 class OverrideGroup(Group):
 	def __unicode__(self):
@@ -115,6 +133,7 @@ class Slide():
 
 	def __str__(self):
 		return unicode(self)
+
 
 	def get_id(self):
 		return self['id']
