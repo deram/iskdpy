@@ -48,8 +48,8 @@ class SlideScene(Scene):
         super(SlideScene, self).__init__()
         self.scheduled_event=False
         if (not filename):
-            slide=CurrentPresenter().get_next()
-            filename=slide.get_cachefile()
+       	    self.slide=CurrentPresenter().get_next()
+            filename=self.slide.get_cachefile()
         self.add(ColorLayer(50,30,0,255), z=-10)
         self.add(SlideLayer(filename), z=0)
         self.add(ControlLayer(), z=10)
@@ -57,7 +57,8 @@ class SlideScene(Scene):
     def on_enter(self):
 	if (not self.scheduled_event):
             self.scheduled_event = True
-            self.schedule_interval(self.change_slide, 10)
+            duration=self.slide.get_duration()
+            self.schedule_interval(self.change_slide, duration)
         return super(SlideScene, self).on_enter()
 
     def change_slide(self, dt=0):

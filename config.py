@@ -4,6 +4,7 @@ fullscreen=False
 
 displayid=1
 cache_path="cache"
+server="http://isk0.asm.fi/"
 user="isk"
 passwd="Kissa"
 

@@ -9,21 +9,27 @@ class Presenter():
 	def __init__(self):
 		self.group=0
 		self.slide=-1
-		json_data=open("cache/main.json").read()
+		json_data=cache.get_json()
 		data = json.loads(json_data, "utf8")
 		self.display=Display(data)
 		#self.display=cache.fill_cache_and_get_display()
 
 	def update_display(self):
-		json_data=cache.get_json()
-		data = json.loads(json_data, "utf8")
-		tmp=Display(data)
-		grouppos = tmp.get_presentation().locate_group(self.get_current_groupid())
-		slidepos = tmp.get_presentation()[grouppos].locate_slide(self.get_current_slideid())
-		self.group=grouppos
-		self.slide=slidepos
-		self.display=tmp
+		json_data=cache.get_json(reload=False)
+		if json_data:
+			data = json.loads(json_data, "utf8")
+			if( self.get_metadata_updated_at() < data['metadata_updated_at'] ):
+				print "Updating... was: %d new: %d" % (self.get_metadata_updated_at(), data['metadata_updated_at'])
+				tmp=Display(data)
+				grouppos = tmp.get_presentation().locate_group(self.get_current_groupid())
+				slidepos = tmp.get_presentation()[grouppos].locate_slide(self.get_current_slideid())
+				self.group=grouppos
+				self.slide=slidepos
+				self.display=tmp
 		
+	def get_metadata_updated_at(self):
+		return self.display.get_metadata_updated_at()
+
 	def get_current_groupid(self):
 		return self.get_current_group().get_id()
 
@@ -42,8 +48,7 @@ class Presenter():
 	def get_current_slide(self):
 		return self.get_presentation()[self.group][self.slide]
 
-	def get_next(self):
-		self.update_display()
+	def seek_to_next_valid_slide_in_presentation(self):
 		valid_slide=False
 		while (not valid_slide):
 			n_groups = len(self.get_presentation())
@@ -52,14 +57,43 @@ class Presenter():
 			if ( self.slide >= n_slides ):
 				self.slide = 0
 				self.group += 1
-			if ( self.group >= n_groups ):
-				self.slide = 0
-				self.group = 0
-				print "Presentation wrapped"
-			valid_slide = self.get_current_slide().valid()
+				if ( self.group >= n_groups ):
+					self.slide = 0
+					self.group = 0
+					print "Presentation wrapped"
+				print "Next: %s" % unicode(self.get_current_group()).split('\n', 1)[0]
 
-		ret = self.get_current_slide()
+				
+			valid_slide = self.get_current_slide().is_valid()
+
+	def is_override(self):
+		override=self.display.get_override()
+		if len( override ):
+			return override[0].is_valid()
+		return False
+
+	def pop_override_slide(self):
+		override=self.display.get_override()
+		if len( override ):
+			ret=override[0]
+			del override[0]
+			return ret
+		return False
+
+	def get_next(self):
+		if ( not self.slide < 0 ):
+			self.update_display()
+		if ( self.is_override() ):
+			ret = self.pop_override_slide()
+		else:
+			self.seek_to_next_valid_slide_in_presentation()
+			ret = self.get_current_slide()
+
 		cache.refresh_slide(ret)
+		if ret.is_override():
+			cache.post_override_slide(ret)
+		else:
+			cache.post_current_slide(ret)
 		print "Next: %s" % ret
 		return ret
 
