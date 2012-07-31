@@ -1,6 +1,7 @@
 from pprint import pprint
 from isk_types import *
 import cache
+import gc
 
 import json
 
@@ -25,7 +26,11 @@ class Presenter():
 				slidepos = tmp.get_presentation()[grouppos].locate_slide(self.get_current_slideid())
 				self.group=grouppos
 				self.slide=slidepos
+				del self.display
 				self.display=tmp
+			else:
+				del data
+				del json_data
 		
 	def get_metadata_updated_at(self):
 		return self.display.get_metadata_updated_at()
@@ -61,6 +66,9 @@ class Presenter():
 					self.slide = 0
 					self.group = 0
 					print "Presentation wrapped"
+					gc.collect()
+					#pprint(gc.garbage)
+					del gc.garbage[:]
 				print "Next: %s" % unicode(self.get_current_group()).split('\n', 1)[0]
 
 				
