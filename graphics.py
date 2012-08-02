@@ -7,6 +7,8 @@ from cocos.actions import *
 from cocos.sprite import Sprite
 import pyglet
 from pyglet import gl, font
+from datetime import datetime
+from time import strftime
 
 from pyglet.window import key
 
@@ -18,13 +20,16 @@ class ControlLayer(Layer):
 
     def __init__( self ):
         super(ControlLayer, self).__init__()
+        self.scheduled_event=False
         self.push_all_handlers()
-
-        self.text_title = pyglet.text.Label("Slideshow testing",
-            font_size=32,
+        now=datetime.now()
+        self.text_title = pyglet.text.Label(now.strftime("%H:%M:%S") ,
+            color=(0,0,0,255),
+            font_size=40,
             font_name="Franklin Gothic Heavy",
-            x=1280,
-            y=director.get_window_size()[1],
+            bold=True,
+            x=1280-35,
+            y=130,
             anchor_x=font.Text.RIGHT,
             anchor_y=font.Text.TOP )
 
@@ -35,6 +40,19 @@ class ControlLayer(Layer):
         if k == key.ENTER:
             self.do(CallFunc(self.parent.change_slide))
             return True
+
+    def on_enter(self):
+	if (not self.scheduled_event):
+            self.scheduled_event = True
+            self.schedule(self.change_time)
+        return super(ControlLayer, self).on_enter()
+
+    def change_time(self, dt=0):
+        now=datetime.now()
+        self.text_title.begin_update()
+        self.text_title.text=now.strftime("%H:%M:%S")
+        self.text_title.end_update()
+
 
 
 class SlideLayer(Layer):

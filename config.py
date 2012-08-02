@@ -1,10 +1,11 @@
 window=dict(width=1280, height=720, resizable=True)
-scale_down=True
-fullscreen=False
+scale_down=False
+fullscreen=True
+
 
 displayid=1
 cache_path="cache"
-server="http://isk0.asm.fi/"
+server="http://127.0.0.1/"
 user="isk"
 passwd="Kissa"
 
