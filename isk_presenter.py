@@ -71,8 +71,8 @@ class Presenter():
 					del gc.garbage[:]
 				print "Next: %s" % unicode(self.get_current_group()).split('\n', 1)[0]
 
-				
-			valid_slide = self.get_current_slide().is_valid()
+			if ( len(self.get_current_group()) > 0 ):
+				valid_slide = self.get_current_slide().is_valid()
 
 	def is_override(self):
 		override=self.display.get_override()
