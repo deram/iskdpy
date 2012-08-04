@@ -1,8 +1,8 @@
 from cocos.director import director
 from cocos.layer import Layer, ColorLayer
 from cocos.scene import Scene
-from cocos.scenes.transitions import *
-#from isk_transitions import *
+#from cocos.scenes.transitions import *
+from isk_transitions import *
 from cocos.actions import *
 from cocos.sprite import Sprite
 import pyglet

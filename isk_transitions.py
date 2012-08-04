@@ -5,7 +5,7 @@ import cocos.scene as scene
 from cocos.director import director
 from cocos.layer import ColorLayer
 from cocos.sprite import Sprite
-from cocos.transitions import TransitionScene
+from cocos.scenes.transitions import TransitionScene
 
 class FadeTRTransition(TransitionScene):
     '''Fade the tiles of the outgoing scene from the left-bottom corner the to top-right corner.
