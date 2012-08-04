@@ -4,8 +4,9 @@ fullscreen=True
 
 
 displayid=1
+display_name="Sali-av-isk"
 cache_path="cache"
-server="http://127.0.0.1/"
+server="http://85.188.56.129/"
 user="isk"
 passwd="Kissa"
 

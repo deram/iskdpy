@@ -40,6 +40,11 @@ def post_override_slide(slide):
 	data={"override": slide.get_override_id()}
 	post_url_authenticated(url, data)
 
+def post_hello(presenter_name):
+	url='%s/displays/hello' % (config.server)
+	data={"name": presenter_name}
+	config.displayid = int(post_url_authenticated(url, data))
+
 def get_json(reload=True):
 	file='%s/main.json' % config.cache_path
 	url='%s/displays/%d?format=json' % (config.server, config.displayid)
