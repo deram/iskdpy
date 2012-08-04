@@ -138,6 +138,9 @@ class Slide():
 	def get_duration(self):
 		return self['duration']
 
+	def get_clock(self):
+		return self['show_clock']
+
 	def get_filename(self):
 		return '%d.png' % self.get_id()
 

@@ -18,10 +18,11 @@ class ControlLayer(Layer):
 
     is_event_handler = True     #: enable pyglet's events
 
-    def __init__( self ):
+    def __init__( self, clock=True ):
         super(ControlLayer, self).__init__()
         self.scheduled_event=False
         self.push_all_handlers()
+        self.clock=clock
         now=datetime.now()
         self.text_title = pyglet.text.Label(now.strftime("%H:%M:%S") ,
             color=(0,0,0,255),
@@ -34,7 +35,8 @@ class ControlLayer(Layer):
             anchor_y=font.Text.TOP )
 
     def draw( self ):
-        self.text_title.draw()
+        if (self.clock):
+			self.text_title.draw()
 
     def on_key_press( self, k , m ):
         if k == key.ENTER:
@@ -44,7 +46,8 @@ class ControlLayer(Layer):
     def on_enter(self):
 	if (not self.scheduled_event):
             self.scheduled_event = True
-            self.schedule(self.change_time)
+            if (self.clock):
+                self.schedule(self.change_time)
         return super(ControlLayer, self).on_enter()
 
     def change_time(self, dt=0):
@@ -71,7 +74,7 @@ class SlideScene(Scene):
             self.duration=slide.get_duration()
         self.add(ColorLayer(255,255,255,255), z=-10)
         self.add(SlideLayer(self.filename), z=0)
-        self.add(ControlLayer(), z=10)
+        self.add(ControlLayer(clock=slide.get_clock()), z=10)
 
     def on_enter(self):
 	if (not self.scheduled_event):
