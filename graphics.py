@@ -64,17 +64,47 @@ class SlideLayer(Layer):
         g = Sprite( file, anchor=(0,0) )
         self.add( g )
 
+class VideoLayer (Layer):
+    def __init__(self, video_name):
+        super(VideoLayer, self).__init__()
+
+        source = pyglet.media.load(video_name)
+        format = source.video_format
+        if not format:
+            print 'No video track in this source.'
+            return
+
+        self.media_player = pyglet.media.Player()
+        self.media_player.queue(source)
+        self.media_player.play()
+
+    def draw(self):
+        self.media_player.get_texture().blit(0, 0)
+
+
+
 class SlideScene(Scene):
-    def __init__(self, filename=""):
+    def __init__(self, filename="", type=""):
         super(SlideScene, self).__init__()
         self.scheduled_event=False
         if (not filename):
        	    slide=CurrentPresenter().get_next()
             self.filename=slide.get_cachefile()
             self.duration=slide.get_duration()
+            self.clock=slide.get_clock()
+        else:
+            self.filename=filename
+            self.duration=100
+            self.clock=True
+            
         self.add(ColorLayer(255,255,255,255), z=-10)
-        self.add(SlideLayer(self.filename), z=0)
-        self.add(ControlLayer(clock=slide.get_clock()), z=10)
+
+	if (type=="Video"):
+            self.add(VideoLayer(self.filename), z=0)
+	else:
+            self.add(SlideLayer(self.filename), z=0)
+
+        self.add(ControlLayer(self.clock), z=10)
 
     def on_enter(self):
 	if (not self.scheduled_event):

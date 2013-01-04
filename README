@@ -1,2 +1,7 @@
 ISKDPY
 InfoScreenKäkätinDisplay
+
+Depends:
+* Cocos2d
+* pyglet
+* python
