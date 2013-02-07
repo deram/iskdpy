@@ -141,11 +141,16 @@ class Slide():
 	def get_clock(self):
 		return self['show_clock']
 
+	def get_type(self):
+		return self['type']
+
 	def get_filename(self):
+                if (self.get_type()=='video'):
+                    return '%d.mov' % self.get_id()
 		return '%d.png' % self.get_id()
 
 	def get_cachefile(self):
-		return '%s/%d.png' % (config.cache_path, self.get_id())
+		return '%s/%s' % (config.cache_path, self.get_filename())
 
 	def get_update_time(self):
 		return self['updated_at']
