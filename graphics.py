@@ -98,12 +98,16 @@ class ControlLayer(Layer):
 class SlideLayer(Layer):
     def __init__( self, file):
         super( SlideLayer, self ).__init__()
-        g = Sprite( file, anchor=(0,0) )
-        self.add( g )
+        try:
+            g = Sprite( file, anchor=(0,0) )
+        except pyglet.image.codecs.ImageDecodeException:
+            self.invalid = True
+        else:
+            self.add( g )
 
-class VideoLayer (Layer):
+class VideoLayer (SlideLayer):
     def __init__(self, video_name):
-        super(VideoLayer, self).__init__()
+        super(SlideLayer, self).__init__()
 
         source = pyglet.media.load(video_name)
         format = source.video_format
@@ -113,7 +117,24 @@ class VideoLayer (Layer):
 
         self.media_player = pyglet.media.Player()
         self.media_player.queue(source)
+        self.media_player.eos_action=self.media_player.EOS_PAUSE
+        self.media_player.set_handler('on_eos', self.handle_on_eos)
+        self.eos_handled=False
+
+    def handle_on_eos(self):
+        if ( not self.eos_handled ):
+            transition=FadeBLTransition #FadeTransition
+            director.replace(transition(SlideScene(), 1.25))
+        self.eos_handled=True
+        return True
+
+    def on_enter(self):
         self.media_player.play()
+        return super(VideoLayer, self).on_enter()
+
+    def on_exit(self):
+        self.media_player.pause()
+        return super(VideoLayer, self).on_exit()
 
     def draw(self):
         self.media_player.get_texture().blit(0, 0)
@@ -129,6 +150,7 @@ class SlideScene(Scene):
             self.filename=slide.get_cachefile()
             self.duration=slide.get_duration()
             self.clock=slide.get_clock()
+            self.type=slide.get_type()
         else:
             self.filename=filename
             self.duration=100
@@ -136,7 +158,7 @@ class SlideScene(Scene):
             
         self.add(ColorLayer(255,255,255,255), z=-10)
 
-	if (type=="Video"):
+	if (self.type=="video"):
             self.add(VideoLayer(self.filename), z=0)
 	else:
             self.add(SlideLayer(self.filename), z=0)
@@ -144,7 +166,7 @@ class SlideScene(Scene):
         self.add(ControlLayer(self.clock), z=10)
 
     def on_enter(self):
-	if (not self.scheduled_event):
+	if (not self.scheduled_event and self.duration > 0):
             self.scheduled_event = True
             self.schedule_interval(self.change_slide, self.duration)
         return super(SlideScene, self).on_enter()
