@@ -13,7 +13,42 @@ from time import strftime
 from pyglet.window import key
 
 from isk_presenter import CurrentPresenter
-    
+
+class OutlineLabel(pyglet.text.Label):
+    def __init__( self, *args, **kwargs):
+        outline_color = kwargs.pop('outline_color')
+        super(OutlineLabel, self).__init__(*args, **kwargs)
+        x = kwargs.pop('x')
+        y = kwargs.pop('y')
+        kwargs.pop('color')
+        self.outline=[]
+        for dx in (-2,2):
+            for dy in (-2,2):
+                self.outline.append(pyglet.text.Label(*args, x=x+dx, y=y+dy, 
+                                                      color=outline_color, 
+                                                      **kwargs))
+    def draw(self):
+        for item in self.outline:
+            item.draw()
+        super(OutlineLabel, self).draw()
+
+    def set_style(self, *args, **kwargs):
+        super(OutlineLabel, self).set_style(*args, **kwargs)
+        for item in self.outline:
+            item.set_style(*args, **kwargs)
+
+    def begin_update(self):
+        super(OutlineLabel, self).begin_update()
+        for item in self.outline:
+            item.begin_update()
+
+    def end_update(self):
+        super(OutlineLabel, self).end_update()
+        for item in self.outline:
+            item.text=self.text
+            item.end_update()
+
+
 class ControlLayer(Layer):
 
     is_event_handler = True     #: enable pyglet's events
@@ -24,19 +59,21 @@ class ControlLayer(Layer):
         self.push_all_handlers()
         self.clock=clock
         now=datetime.now()
-        self.text_title = pyglet.text.Label(now.strftime("%H:%M:%S") ,
-            color=(0,0,0,255),
+        self.text_title = OutlineLabel(text=now.strftime("%H:%M:%S") ,
+            color=(255,255,255,255),
             font_size=40,
             font_name="Franklin Gothic Heavy",
             bold=True,
             x=1280-35,
             y=130,
             anchor_x=font.Text.RIGHT,
-            anchor_y=font.Text.TOP )
+            anchor_y=font.Text.TOP,
+            outline_color=(0,50,0,255) )
+        self.text_title.set_style('kerning', 2)
 
     def draw( self ):
         if (self.clock):
-			self.text_title.draw()
+            self.text_title.draw()
 
     def on_key_press( self, k , m ):
         if k == key.ENTER:
