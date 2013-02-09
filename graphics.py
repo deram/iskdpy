@@ -36,14 +36,15 @@ class OutlineLabel(cocos.text.Label):
             item.element.end_update()
 
         self.walk(set_element_text)
-        
 
 class ClockLayer(Layer):
     def __init__(self):
         super(ClockLayer, self).__init__()
         now=datetime.now()
+        self.clock_format="%H:%M:%S"
+
         self.add(OutlineLabel(
-            text=now.strftime("%H:%M:%S") ,
+            text=now.strftime(self.clock_format) ,
             color=(255,255,255,255),
             font_size=40,
             font_name="Franklin Gothic Heavy",
@@ -53,13 +54,14 @@ class ClockLayer(Layer):
             anchor_x=font.Text.RIGHT,
             anchor_y=font.Text.TOP,
             outline_color=(0,0,0,255) ), name='label')
+
         self.get('label').set_style('kerning', 2)
         
         self.schedule(self.change_time)
 
     def change_time(self, dt=0):
         now=datetime.now()
-        self.get('label').set_text(now.strftime("%H:%M:%S"))
+        self.get('label').set_text(now.strftime(self.clock_format))
 
 class ControlLayer(Layer):
 
