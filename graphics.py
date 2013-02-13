@@ -13,7 +13,7 @@ from time import strftime
 
 from pyglet.window import key
 
-from isk_presenter import CurrentPresenter
+from isk_presenter import Presenter
 
 class OutlineLabel(cocos.text.Label):
     def __init__( self, *args, **kwargs):
@@ -127,7 +127,7 @@ class SlideScene(Scene):
         super(SlideScene, self).__init__()
         self.scheduled_event=False
         if (not filename):
-       	    slide=CurrentPresenter().get_next()
+       	    slide=Presenter.current().get_next()
             self.filename=slide.get_cachefile()
             self.duration=slide.get_duration()
             self.clock=slide.get_clock()

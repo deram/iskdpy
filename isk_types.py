@@ -1,13 +1,37 @@
 import os
 import config
+import json
+from time import localtime, strftime
 
-class Display():
-	def __init__(self, data):
-		self.data=data
-		self.presentation=Presentation(self.data['presentation'])
-		del self.data['presentation']
-                self.override=OverrideGroup(self.data['override_queue'])
-		del self.data['override_queue']
+class Base(object):
+	def __init__(self, attribs={}):
+		self.attribs=attribs
+
+	def set_attribs(self, dict):
+		self.attribs.update(dict)
+
+	def set_attrib(self, name, value):
+		self.attribs[name]=value
+
+	def get_attrib(self, name, coalesce=None):
+		try:
+			return self.attribs[name]
+		except KeyError:
+			return coalesce
+
+
+class Display(Base):
+	def __init__(self, presentation=None, override=None, attribs=None, name=None):
+		super(Display, self).__init__(attribs=attribs)
+		self.set_attrib('name', name)
+		self.presentation=presentation
+		self.override=override
+
+	def __unicode__(self):
+		return 'Display "%s" Updated: %s\n\t%s\n\t%s' % (self.get_name(), strftime('%x-%X', localtime(self.get_metadata_updated_at())), unicode(self.override).replace('\n', '\n\t'), unicode(self.presentation).replace('\n', '\n\t'))
+
+	def __str__(self):
+		return unicode(self)
 
 	def get_presentation(self):
 		return self.presentation
@@ -16,7 +40,10 @@ class Display():
 		return self.override
 
 	def get_metadata_updated_at(self):
-		return self.data['metadata_updated_at']
+		return self.get_attrib('metadata_updated_at', 0)
+
+	def get_name(self):
+		return self.get_attrib('name', 'unnamed')
 
 	def get_all_slides(self):
 		tmp={}
@@ -27,13 +54,11 @@ class Display():
 			tmp[ slide['id'] ] = slide
 		return tmp
 
-class Presentation():
-	def __init__(self, data):
-		self.data=data
-		self.groups=[]
-		for group in self.data['groups']:
-			self.groups.append(Group(group))
-		del self.data['groups']
+
+class Presentation(Base):
+	def __init__(self,  groups=None, attribs=None):
+		super(Presentation, self).__init__(attribs=attribs)
+		self.groups=groups
 
 	def __iter__(self):
 		return self.groups.__iter__()
@@ -42,16 +67,25 @@ class Presentation():
 		return self.groups[pos]
 
 	def __len__(self):
-		return self.data['total_groups']
+		return self.groups.__len__()
 
 	def __unicode__(self):
 		tmp=""
 		for i in self:
-			tmp+="\t%s\n" % unicode(i)
-		return 'Presentation "%s" Groups: %d Slides: %d\n%s' % ( self.data['name'], self.data['total_groups'], self.data['total_slides'], tmp)
+			tmp+="%s\n" % unicode(i)
+		return 'Presentation "%s" Groups: %d Slides: %d\n\t%s' % ( self.get_name(), len(self), self.get_total_slides(), tmp.replace('\n', '\n\t'))
 
 	def __str__(self):
 		return unicode(self)
+
+	def get_id(self):
+		return self.get_attrib('id', 0)
+	
+	def get_total_slides(self):
+		return self.get_attrib('total_slides', 0)
+	
+	def get_name(self):
+		return self.get_attrib('name', 'unnamed_presentation')
 
 	def get_groups(self):
 		return self.groups
@@ -68,13 +102,10 @@ class Presentation():
 		return index % len(self)
 
 
-class Group():
-	def __init__(self, data):
-		self.data=data
-		self.slides=[]
-		for slide in self.data['slides']:
-			self.slides.append(Slide(slide))
-		del self.data['slides']
+class Group(Base):
+	def __init__(self, slides=None, attribs=None):
+		super(Group, self).__init__(attribs=attribs)
+		self.slides=slides
 
 	def __iter__(self):
 		return self.slides.__iter__()
@@ -83,19 +114,25 @@ class Group():
 		return self.slides[id]
 
 	def __len__(self):
-		return self.data['total_slides']
+		return self.slides.__len__()
 
 	def __unicode__(self):
 		tmp=""
 		for i in self:
 			tmp+="\t%s\n" % unicode(i)
-		return 'Group "%s" Position %s Slides: %d\n%s' % ( self.data['name'], self.data['position'], self.data['total_slides'], tmp)
+		return 'Group "%s" Position %s Slides: %d\n%s' % ( self.get_name(), self.get_position(), len(self), tmp)
 
 	def __str__(self):
 		return unicode(self)
 	
 	def get_id(self):
-		return self.data['id']
+		return self.get_attrib('id', 0)
+	
+	def get_position(self):
+		return self.get_attrib('position',  0)
+	
+	def get_name(self):
+		return self.get_attrib('name',  "unnamed" )
 
 	def get_slides(self):
 		return self.slides
@@ -112,41 +149,47 @@ class Group():
 		return index % len(self)
 
 
-class Slide():
-	def __init__(self, data):
-		self.data=data
+class Slide(Base):
+	def __init__(self, attribs=None):
+		super(Slide, self).__init__(attribs=attribs)
 
 	def __getitem__(self, id):
-		return self.data[id]
+		return self.attribs[id]
 
 	def __len__(self):
-		return len(self.data)
+		return len(self.attribs)
 
 	def __unicode__(self):
-		return 'Slide "%s" Position %s file: %s' % ( self.data['name'], self.data['position'], self.get_filename())
+		return 'Slide "%s" Position %s file: %s' % ( self.get_name(), self.get_position(), self.get_filename())
 
 	def __str__(self):
 		return unicode(self)
 
 
+	def get_name(self):
+		return self.get_attrib('name', "unnamed_slide")
+
+	def get_position(self):
+		return self.get_attrib('position',  0)
+
 	def get_id(self):
-		return self['id']
+		return self.get_attrib('id',  0)
 
 	def get_groupid(self):
-		return self['group']
+		return self.get_attrib('group', 0)
 
 	def get_duration(self):
-		return self['duration']
+		return self.get_attrib('duration', config.default_duration)
 
 	def get_clock(self):
-		return self['show_clock']
+		return self.get_attrib('show_clock', True)
 
 	def get_type(self):
-		return self['type']
+		return self.get_attrib('type', '')
 
 	def get_filename(self):
-                if (self.get_type()=='video'):
-                    return '%d.mov' % self.get_id()
+		if (self.get_type()=='video'):
+			return '%d.mov' % self.get_id()
 		return '%d.png' % self.get_id()
 
 	def get_cachefile(self):
@@ -174,16 +217,15 @@ class Slide():
 		return False
 
 class OverrideGroup(Group):
-	def __init__(self, data):
-		self.slides=[]
-		for slide in data:
-			self.slides.append(OverrideSlide(slide))
+	def __init__(self, slides=None, attribs=None):
+		super(OverrideGroup, self).__init__(attribs=attribs)
+		self.slides=slides
 
 	def __unicode__(self):
 		tmp=""
 		for i in self:
-			tmp+="\t%s\n" % unicode(i)
-		return 'Override Slides: %d\n%s' % ( self.data['total_slides'], tmp)
+			tmp+="t%s\n" % unicode(i)
+		return 'Override Slides: %d\n%s' % ( len(self), tmp)
 
 	def __len__(self):
 		return len(self.slides)
@@ -193,26 +235,14 @@ class OverrideGroup(Group):
 
 class OverrideSlide(Slide):
 	def __unicode__(self):
-		return 'OverrideSlide "%s" Position %s file: %s' % ( self.data['name'], self.data['position'], self.get_filename())
+		return 'OverrideSlide "%s" Position %s file: %s' % ( self.get_name(), self.get_position(), self.get_filename())
 
 	def is_override(self):
 		return True
 
 	def get_override_id(self):
-		return self.data['override_queue_id']
+		return self.get_attrib('override_queue_id', 0)
 		
 	def is_valid(self):
 		return self.is_ready()
-
-
-if __name__ == "__main__":
-	import json
-	json_data=open("cache/main.json").read()
-	data = json.loads(json_data, "utf8")
-	display=Display(data)
-
-	for s in display.get_all_slides().values():
-		print s.get_filename()
-	print "DEBUG: %s" % display
-
 

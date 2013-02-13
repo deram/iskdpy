@@ -1,37 +1,22 @@
 from pprint import pprint
 from isk_types import *
-import cache
+from isk_source import Source 
 import gc
 
 import json
 
 class Presenter():
-	current=None
+	__current=None
 	def __init__(self):
 		self.group=0
 		self.slide=-1
-		json_data=cache.get_json()
-		data = json.loads(json_data, "utf8")
-		self.display=Display(data)
-		#self.display=cache.fill_cache_and_get_display()
+		self.source=Source.factory('NetworkSource')()
+		self.source.connect()
+		self.display=self.source.get_display()
 
 	def update_display(self):
-		json_data=cache.get_json(reload=False)
-		if json_data:
-			data = json.loads(json_data, "utf8")
-			if( self.get_metadata_updated_at() < data['metadata_updated_at'] ):
-				print "Updating... was: %d new: %d" % (self.get_metadata_updated_at(), data['metadata_updated_at'])
-				tmp=Display(data)
-				grouppos = tmp.get_presentation().locate_group(self.get_current_groupid())
-				slidepos = tmp.get_presentation()[grouppos].locate_slide(self.get_current_slideid())
-				self.group=grouppos
-				self.slide=slidepos
-				del self.display
-				self.display=tmp
-			else:
-				del data
-				del json_data
-		
+		self.source.update_display()
+
 	def get_metadata_updated_at(self):
 		return self.display.get_metadata_updated_at()
 
@@ -97,16 +82,14 @@ class Presenter():
 			self.seek_to_next_valid_slide_in_presentation()
 			ret = self.get_current_slide()
 
-		cache.refresh_slide(ret)
-		if ret.is_override():
-			cache.post_override_slide(ret)
-		else:
-			cache.post_current_slide(ret)
+		self.source.update_slide(ret)
+		self.source.slide_done(ret) #XXX move to somewhere more close to slide shown on screen
 		print "Next: %s" % ret
 		return ret
 
-def CurrentPresenter():
-	if (not Presenter.current):
-		Presenter.current = Presenter()
-	return Presenter.current
+	@classmethod
+	def current(cls):
+		if (not cls.__current):
+			cls.__current = cls()
+		return cls.__current
 

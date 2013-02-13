@@ -3,10 +3,10 @@ from cocos.scenes.transitions import *
 from graphics import SlideScene
 from pprint import pprint
 import config
-import cache
+
+import isk_network_source
 
 if __name__ == "__main__":
-    cache.post_hello(config.display_name)
     director.init(**config.window)
     if ( config.scale_down ):
         director.window.set_size(640, 360)
