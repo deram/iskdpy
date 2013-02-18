@@ -10,12 +10,20 @@ class Presenter():
 	def __init__(self):
 		self.group=0
 		self.slide=-1
-		self.source=Source.factory('NetworkSource')()
+
+	def __connect(self):
+		self.source=Source.factory()()
 		self.source.connect()
 		self.display=self.source.get_display()
 
 	def update_display(self):
-		self.source.update_display()
+		if (self.source.update_display()):
+			tmp=self.source.get_display()
+			grouppos = tmp.get_presentation().locate_group(self.get_current_groupid())
+			slidepos = tmp.get_presentation()[grouppos].locate_slide(self.get_current_slideid())
+			self.group=grouppos
+			self.slide=slidepos
+			self.display=tmp
 
 	def get_metadata_updated_at(self):
 		return self.display.get_metadata_updated_at()
@@ -87,9 +95,14 @@ class Presenter():
 		print "Next: %s" % ret
 		return ret
 
+	def get_source(self):
+		return self.source
+
 	@classmethod
 	def current(cls):
 		if (not cls.__current):
-			cls.__current = cls()
+			print "creating singleton entity"
+			cls.__current = Presenter()
+			cls.__current.__connect()
 		return cls.__current
 

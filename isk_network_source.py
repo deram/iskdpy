@@ -26,18 +26,19 @@ class NetworkSource(Source):
 			json_data=self.__get_json(reload=True)
 		else:
 			json_data=self.__get_json()
-		if (json):
+		if (json_data):
 			data = json.loads(json_data, "utf8")
 			if (data):
 				self.display=self.__create_display_tree(data)
+				#print "DEBUG display:\n%s" % self.display
 				return True
 		return False
 
 	def update_slide(self, slide):
-		if (not slide.is_cached()):
+		if (not slide.is_uptodate()):
 			print "Updating: %s" % slide
-			if self.get_slide(slide):
-				self.set_slide_timestamp(slide)
+			if self.__get_slide(slide):
+				self.__set_slide_timestamp(slide)
 				pyglet.resource.reindex()
 		#else:
 		#       set_slide_timestamp(slide) # in case of errors, this might be useful
@@ -54,6 +55,9 @@ class NetworkSource(Source):
 			return self.__post_override_slide(slide)
 		else:
 			return self.__post_current_slide(slide)
+
+	def get_path(self):
+		return self.cache_path
 	
 	def __create_display_tree(self, data):
 		presentation_data=data.pop('presentation')
@@ -99,13 +103,13 @@ class NetworkSource(Source):
 			return False
 
 	def __get_slide(self, slide):
-		location=slide.get_cachefile()
+		location=slide.get_filename()
 		id=slide.get_id()
 		return self.http.get_and_save('%s/slides/%d/full' % (config.server, id), location)
 
 	def __set_slide_timestamp(self, slide):
 		time=slide.get_update_time()
-		location=slide.get_cachefile()
+		location=slide.get_filename()
 		os.utime(location, (time,time))
 	
 	def __fill_cache(self):

@@ -1,7 +1,8 @@
 import os
 import config
 import json
-from time import localtime, strftime
+from time import gmtime, localtime, strftime
+import isk_presenter
 
 class Base(object):
 	def __init__(self, attribs={}):
@@ -21,14 +22,17 @@ class Base(object):
 
 
 class Display(Base):
-	def __init__(self, presentation=None, override=None, attribs=None, name=None):
+	def __init__(self, presentation=None, override=None, attribs={}, name=None):
 		super(Display, self).__init__(attribs=attribs)
-		self.set_attrib('name', name)
+		if name: self.set_attrib('name', name)
 		self.presentation=presentation
-		self.override=override
+		if override: 
+			self.override=override
+		else:
+			self.override=OverrideGroup()
 
 	def __unicode__(self):
-		return 'Display "%s" Updated: %s\n\t%s\n\t%s' % (self.get_name(), strftime('%x-%X', localtime(self.get_metadata_updated_at())), unicode(self.override).replace('\n', '\n\t'), unicode(self.presentation).replace('\n', '\n\t'))
+		return 'Display "%s" Updated: %s\n %s\n %s' % (self.get_name(), strftime('%x-%X', gmtime(self.get_metadata_updated_at())), unicode(self.override).replace('\n', '\n '), unicode(self.presentation).replace('\n', '\n '))
 
 	def __str__(self):
 		return unicode(self)
@@ -56,7 +60,7 @@ class Display(Base):
 
 
 class Presentation(Base):
-	def __init__(self,  groups=None, attribs=None):
+	def __init__(self,  groups=None, attribs={}):
 		super(Presentation, self).__init__(attribs=attribs)
 		self.groups=groups
 
@@ -73,7 +77,7 @@ class Presentation(Base):
 		tmp=""
 		for i in self:
 			tmp+="%s\n" % unicode(i)
-		return 'Presentation "%s" Groups: %d Slides: %d\n\t%s' % ( self.get_name(), len(self), self.get_total_slides(), tmp.replace('\n', '\n\t'))
+		return 'Presentation "%s" Groups: %d Slides: %d\n %s' % ( self.get_name(), len(self), self.get_total_slides(), tmp.replace('\n', '\n '))
 
 	def __str__(self):
 		return unicode(self)
@@ -85,7 +89,7 @@ class Presentation(Base):
 		return self.get_attrib('total_slides', 0)
 	
 	def get_name(self):
-		return self.get_attrib('name', 'unnamed_presentation')
+		return self.get_attrib('name', 'unnamed')
 
 	def get_groups(self):
 		return self.groups
@@ -103,7 +107,7 @@ class Presentation(Base):
 
 
 class Group(Base):
-	def __init__(self, slides=None, attribs=None):
+	def __init__(self, slides=None, attribs={}):
 		super(Group, self).__init__(attribs=attribs)
 		self.slides=slides
 
@@ -119,7 +123,7 @@ class Group(Base):
 	def __unicode__(self):
 		tmp=""
 		for i in self:
-			tmp+="\t%s\n" % unicode(i)
+			tmp+=" %s\n" % unicode(i)
 		return 'Group "%s" Position %s Slides: %d\n%s' % ( self.get_name(), self.get_position(), len(self), tmp)
 
 	def __str__(self):
@@ -150,7 +154,7 @@ class Group(Base):
 
 
 class Slide(Base):
-	def __init__(self, attribs=None):
+	def __init__(self, attribs={}):
 		super(Slide, self).__init__(attribs=attribs)
 
 	def __getitem__(self, id):
@@ -160,14 +164,14 @@ class Slide(Base):
 		return len(self.attribs)
 
 	def __unicode__(self):
-		return 'Slide "%s" Position %s file: %s' % ( self.get_name(), self.get_position(), self.get_filename())
+		return 'Slide "%s" Position %s file: %s (%s)' % ( self.get_name(), self.get_position(), self.get_filename(), strftime('%X', localtime(self.get_update_time())))
 
 	def __str__(self):
 		return unicode(self)
 
 
 	def get_name(self):
-		return self.get_attrib('name', "unnamed_slide")
+		return self.get_attrib('name', "unnamed")
 
 	def get_position(self):
 		return self.get_attrib('position',  0)
@@ -187,13 +191,14 @@ class Slide(Base):
 	def get_type(self):
 		return self.get_attrib('type', '')
 
-	def get_filename(self):
-		if (self.get_type()=='video'):
-			return '%d.mov' % self.get_id()
-		return '%d.png' % self.get_id()
+	def get_suffix(self):
+		if (self.get_type=='video'): 
+			return 'mov'
+		else:
+			return 'png'
 
-	def get_cachefile(self):
-		return '%s/%s' % (config.cache_path, self.get_filename())
+	def get_filename(self):
+		return self.get_attrib('filename', '%s/%d.%s' % (config.cache_path, self.get_id(), self.get_suffix()))
 
 	def get_update_time(self):
 		return self['updated_at']
@@ -201,11 +206,12 @@ class Slide(Base):
 	def is_ready(self):
 		return self['ready']
 
-	def is_cached(self):
-        	file=self.get_cachefile()
+	def is_uptodate(self):
+        	file=self.get_filename()
 		if os.path.isfile(file):
         		file_mtime=os.stat(file).st_mtime
 			slide_mtime=self.get_update_time()
+			#print "is_uptodate %s %s" % (strftime('%X', localtime(slide_mtime)), strftime('%X', localtime(file_mtime)))
         		return (slide_mtime <= file_mtime or (not self.is_ready))
 		else:
 			return False
@@ -217,7 +223,7 @@ class Slide(Base):
 		return False
 
 class OverrideGroup(Group):
-	def __init__(self, slides=None, attribs=None):
+	def __init__(self, slides=[], attribs={}):
 		super(OverrideGroup, self).__init__(attribs=attribs)
 		self.slides=slides
 
