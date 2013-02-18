@@ -17,6 +17,8 @@ class AuthHttp():
 			return result.read()
 		except urllib2.URLError:
 			return False 
+		except socket.timeout:
+			return False
 	
 	def get_and_save(self, url, filename):
 		resource = self.get(url)
