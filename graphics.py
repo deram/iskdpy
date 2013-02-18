@@ -13,7 +13,9 @@ from time import strftime
 
 from pyglet.window import key
 
-from isk_presenter import Presenter
+
+import config
+import isk_presenter
 
 class OutlineLabel(cocos.text.Label):
     def __init__( self, *args, **kwargs):
@@ -41,18 +43,18 @@ class ClockLayer(Layer):
     def __init__(self):
         super(ClockLayer, self).__init__()
         now=datetime.now()
-        self.clock_format="%H:%M:%S"
+        self.clock_format=config.clock['format']
 
         self.add(OutlineLabel(
             text=now.strftime(self.clock_format) ,
             color=(255,255,255,255),
             font_size=40,
-            font_name="Franklin Gothic Heavy",
+            font_name=config.clock['font'],
             bold=True,
-            x=1280-35,
-            y=130,
-            anchor_x=font.Text.RIGHT,
-            anchor_y=font.Text.TOP,
+            x=config.clock['x'],
+            y=config.clock['y'],
+            anchor_x=font.Text.LEFT,
+            anchor_y=font.Text.BOTTOM,
             outline_color=(0,0,0,255) ), name='label')
 
         self.get('label').set_style('kerning', 2)
@@ -123,20 +125,16 @@ class VideoLayer (SlideLayer):
 
 
 class SlideScene(Scene):
-    def __init__(self, filename="", type=""):
+    def __init__(self, slide=None):
         super(SlideScene, self).__init__()
         self.scheduled_event=False
-        if (not filename):
-       	    slide=Presenter.current().get_next()
-            self.filename=slide.get_cachefile()
-            self.duration=slide.get_duration()
-            self.clock=slide.get_clock()
-            self.type=slide.get_type()
-        else:
-            self.filename=filename
-            self.duration=100
-            self.clock=True
-            self.type="video"
+        if (not slide):
+       	    slide=isk_presenter.Presenter.current().get_next()
+
+        self.filename=slide.get_filename()
+        self.duration=slide.get_duration()
+        self.clock=slide.get_clock()
+        self.type=slide.get_type()
             
         self.add(ColorLayer(255,255,255,255), z=-10)
 
