@@ -1,7 +1,7 @@
 import os
 import config
 import json
-from time import gmtime, localtime, strftime
+from time import gmtime, strftime
 import isk_presenter
 
 class Base(object):
@@ -164,7 +164,7 @@ class Slide(Base):
 		return len(self.attribs)
 
 	def __unicode__(self):
-		return 'Slide "%s" Position %s file: %s (%s)' % ( self.get_name(), self.get_position(), self.get_filename(), strftime('%X', localtime(self.get_update_time())))
+		return 'Slide "%s" Position %s file: %s (%s)' % ( self.get_name(), self.get_position(), self.get_filename(), strftime('%X', gmtime(self.get_update_time())))
 
 	def __str__(self):
 		return unicode(self)
@@ -192,7 +192,7 @@ class Slide(Base):
 		return self.get_attrib('type', '')
 
 	def get_suffix(self):
-		if (self.get_type=='video'): 
+		if (self.get_type()=='video'): 
 			return 'mov'
 		else:
 			return 'png'
@@ -211,7 +211,7 @@ class Slide(Base):
 		if os.path.isfile(file):
         		file_mtime=os.stat(file).st_mtime
 			slide_mtime=self.get_update_time()
-			#print "is_uptodate %s %s" % (strftime('%X', localtime(slide_mtime)), strftime('%X', localtime(file_mtime)))
+			#print "is_uptodate %s %s" % (strftime('%X', gmtime(slide_mtime)), strftime('%X', gmtime(file_mtime)))
         		return (slide_mtime <= file_mtime or (not self.is_ready))
 		else:
 			return False
