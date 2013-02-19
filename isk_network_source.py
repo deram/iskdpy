@@ -62,14 +62,14 @@ class NetworkSource(Source):
 	def __create_display_tree(self, data):
 		presentation_data=data.pop('presentation')
 		groups=[]
-		for group in presentation_data.pop('groups'):
+		for group in presentation_data.pop('groups', []):
 			slides=[]
-			for slide in group.pop('slides'):
+			for slide in group.pop('slides', []):
 				slides.append(Slide(attribs=slide))
 			groups.append(Group(slides=slides, attribs=group))
 		presentation = Presentation(groups=groups, attribs=presentation_data)
 		slides=[]
-		for slide in data.pop('override_queue'):
+		for slide in data.pop('override_queue', []):
 			slides.append(OverrideSlide(attribs=slide))
 		override=OverrideGroup(slides=slides)
 
