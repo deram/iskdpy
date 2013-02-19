@@ -98,12 +98,10 @@ class Presentation(Base):
 		return self[pos]
 
 	def locate_group(self, id):
-		index=0
-		for group in self:
+		for index, group in enumerate(self):
 			if (group.get_id() == id):
-				break
-			index += 1
-		return index % len(self)
+				return index
+		return -1
 
 
 class Group(Base):
@@ -145,12 +143,10 @@ class Group(Base):
 		return self[id]
 
 	def locate_slide(self, id):
-		index=0
-		for slide in self:
+		for index, slide in enumerate(self):
 			if (slide.get_id() == id):
-				break
-			index += 1
-		return index % len(self)
+				return index
+		return -1
 
 
 class Slide(Base):

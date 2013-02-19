@@ -1,5 +1,5 @@
 from pprint import pprint
-from isk_types import *
+import isk_types
 from isk_source import Source 
 import gc
 
@@ -8,8 +8,8 @@ import json
 class Presenter():
 	__current=None
 	def __init__(self):
-		self.group=0
-		self.slide=-1
+		self.first_time=True
+		self.seek_to_presentation_beginning()
 
 	def __connect(self):
 		self.source=Source.factory()()
@@ -19,11 +19,22 @@ class Presenter():
 	def update_display(self):
 		if (self.source.update_display()):
 			tmp=self.source.get_display()
-			grouppos = tmp.get_presentation().locate_group(self.get_current_groupid())
-			slidepos = tmp.get_presentation()[grouppos].locate_slide(self.get_current_slideid())
-			self.group=grouppos
-			self.slide=slidepos
+			#print "%s" % tmp
+			try:
+				gid=self.get_current_groupid()
+				sid=self.get_current_slideid()
+				pres=tmp.get_presentation()
+				grouppos = pres.locate_group(gid)
+				slidepos = pres[grouppos].locate_slide(sid)
+				self.group=grouppos
+				self.slide=slidepos
+			except IndexError:
+				self.seek_to_presentation_beginning()
 			self.display=tmp
+
+	def seek_to_presentation_beginning(self):
+		self.group=0
+		self.slide=-1
 
 	def get_metadata_updated_at(self):
 		return self.display.get_metadata_updated_at()
@@ -81,12 +92,20 @@ class Presenter():
 			return ret
 		return False
 
+	def is_empty_presentation(self):
+		return ((self.display.get_presentation().get_total_slides()) == 0)
+
 	def get_next(self):
-		if ( not self.slide < 0 ):
+		if ( not self.first_time ):
 			self.update_display()
+		else:
+			self.first_time=False
 		if ( self.is_override() ):
 			ret = self.pop_override_slide()
 		else:
+			if (self.is_empty_presentation()):
+				print "EMPTY PRESENTATION"
+				return self.get_empty_slide()
 			self.seek_to_next_valid_slide_in_presentation()
 			ret = self.get_current_slide()
 
@@ -97,6 +116,9 @@ class Presenter():
 
 	def get_source(self):
 		return self.source
+
+	def get_empty_slide(self):
+		return isk_types.Slide({'filename': 'base.png', 'duration': 5, 'type': 'image', 'clock':False})
 
 	@classmethod
 	def current(cls):
