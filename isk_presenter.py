@@ -30,6 +30,8 @@ class Presenter():
 				self.slide=slidepos
 			except IndexError:
 				self.seek_to_presentation_beginning()
+			if self.display.get_presentation().get_id() != tmp.get_presentation().get_id():
+				print "Presentation changed."
 			self.display=tmp
 
 	def seek_to_presentation_beginning(self):
