@@ -2,6 +2,7 @@ import urllib2
 from urllib import urlencode
 import base64
 import file
+import socket
 
 class AuthHttp():
 	def __init__(self, user, passwd):
