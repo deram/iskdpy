@@ -4,11 +4,10 @@ from graphics import SlideScene
 from pprint import pprint
 import isk_types
 import config
+import isk_presenter
 
 
 if __name__ == "__main__":
-    import isk_network_source
-    import isk_presenter
     slide=isk_presenter.Presenter.current().get_empty_slide()
     
     director.init(**config.window)

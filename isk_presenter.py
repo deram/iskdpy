@@ -2,8 +2,8 @@ from pprint import pprint
 import isk_types
 from isk_source import Source 
 import gc
-
 import json
+import config
 
 class Presenter():
 	__current=None
@@ -11,10 +11,15 @@ class Presenter():
 		self.first_time=True
 		self.seek_to_presentation_beginning()
 
-	def __connect(self):
-		self.source=Source.factory()()
+	def __connect(self, conf):
+		source_name=conf.pop('source_name')
+		self.source=Source.factory(source_name)(conf)
 		self.source.connect()
 		self.display=self.source.get_display()
+
+	def next_source(self):
+		if len(config.sources):
+			self.__connect(config.sources.pop())
 
 	def update_display(self):
 		if (self.source.update_display()):
@@ -120,13 +125,13 @@ class Presenter():
 		return self.source
 
 	def get_empty_slide(self):
-		return isk_types.Slide({'filename': 'base.png', 'duration': 5, 'type': 'image', 'clock':False})
+		return isk_types.Slide(config.empty_slide)
 
 	@classmethod
 	def current(cls):
 		if (not cls.__current):
 			print "creating singleton entity"
 			cls.__current = Presenter()
-			cls.__current.__connect()
+			cls.__current.next_source()
 		return cls.__current
 

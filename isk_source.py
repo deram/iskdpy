@@ -1,9 +1,8 @@
 
 class Source(object):
 	_subs_ = {}
-	_suborder_ = []
 
-	def __init__(self):
+	def __init__(self, config=None):
 		self.display=None
 
 	def get_display(self):
@@ -27,23 +26,17 @@ class Source(object):
 		return "."
 
 	@classmethod
-	def factory(cls, name=None):
-		if name:
-			try:
-				return cls._subs_[name]
-			except KeyError:
-				raise FactoryError(tag, "Unknown subclass")
-		else:
-			name = cls._suborder_.pop()
-			print 'Used %s' % name
+	def factory(cls, name):
+		try:
 			return cls._subs_[name]
+		except KeyError:
+			raise FactoryError(tag, "Unknown subclass")
 
 	@classmethod
 	def register(cls, name):
 		def decorator(subclass):
 			print "Registered %s" % name
 			cls._subs_[name] = subclass
-			cls._suborder_.append(name)
 			return subclass
 		return decorator
 

@@ -1,4 +1,3 @@
-import config
 from auth_http import *
 import file
 import json
@@ -11,13 +10,13 @@ register=Source.register
 
 @register('NetworkSource')
 class NetworkSource(Source):
-	def __init__(self, server=config.server, cache_path=config.cache_path, display_name=config.display_name):
-		super(NetworkSource, self).__init__()
-		self.server=server
-		self.cache_path=cache_path
+	def __init__(self, config):
+		super(NetworkSource, self).__init__(config)
+		self.server=config['server']
+		self.cache_path=config['cache_path']
 		self.displayid=None
-		self.display_name=display_name
-		self.http=AuthHttp(config.user, config.passwd)
+		self.display_name=config['display_name']
+		self.http=AuthHttp(config['user'], config['passwd'])
 
 	#def get_display():
 
@@ -47,7 +46,7 @@ class NetworkSource(Source):
 		return slide
 
 	def connect(self):
-		self.displayid=self.__post_hello(config.display_name)
+		self.displayid=self.__post_hello(self.display_name)
 		return (self.displayid>0)
 
 	def slide_done(self, slide):
@@ -105,7 +104,7 @@ class NetworkSource(Source):
 	def __get_slide(self, slide):
 		location=slide.get_filename()
 		id=slide.get_id()
-		return self.http.get_and_save('%s/slides/%d/full' % (config.server, id), location)
+		return self.http.get_and_save('%s/slides/%d/full' % (self.server, id), location)
 
 	def __set_slide_timestamp(self, slide):
 		time=slide.get_update_time()
