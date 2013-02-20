@@ -136,7 +136,7 @@ class SlideScene(Scene):
         self.clock=slide.get_clock()
         self.type=slide.get_type()
             
-        self.add(ColorLayer(255,255,255,255), z=-10)
+        self.add(ColorLayer(0,0,0,255), z=-10)
 
 	if (self.type=="video"):
             self.add(VideoLayer(self.filename), z=0)
