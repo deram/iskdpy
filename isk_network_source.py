@@ -43,8 +43,6 @@ class NetworkSource(Source):
 		#       set_slide_timestamp(slide) # in case of errors, this might be useful
 		return slide
 
-		return slide
-
 	def connect(self):
 		self.displayid=self.__post_hello(self.display_name)
 		return (self.displayid>0)

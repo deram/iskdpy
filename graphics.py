@@ -19,6 +19,7 @@ import isk_presenter
 
 class OutlineLabel(cocos.text.Label):
     def __init__( self, *args, **kwargs):
+        self.text=None
         outline_color = kwargs.pop('outline_color')
         super(OutlineLabel, self).__init__(*args, **kwargs)
         x = kwargs.pop('x')
@@ -37,16 +38,18 @@ class OutlineLabel(cocos.text.Label):
             item.element.text=text
             item.element.end_update()
 
-        self.walk(set_element_text)
+        if (self.text != text):
+            self.walk(set_element_text)
+            self.text=text
 
 class ClockLayer(Layer):
     def __init__(self):
         super(ClockLayer, self).__init__()
-        now=datetime.now()
+        self.time=datetime.now()
         self.clock_format=config.clock['format']
 
         self.add(OutlineLabel(
-            text=now.strftime(self.clock_format) ,
+            text=self.time.strftime(self.clock_format) ,
             color=(255,255,255,255),
             font_size=40,
             font_name=config.clock['font'],
@@ -59,11 +62,11 @@ class ClockLayer(Layer):
 
         self.get('label').set_style('kerning', 2)
         
-        self.schedule(self.change_time)
+        self.schedule_interval(self.change_time, 0.2)
 
     def change_time(self, dt=0):
-        now=datetime.now()
-        self.get('label').set_text(now.strftime(self.clock_format))
+        self.time=datetime.now()
+        self.get('label').set_text(self.time.strftime(self.clock_format))
 
 class ControlLayer(Layer):
 
