@@ -203,12 +203,12 @@ class Slide(Base):
 		return self['ready']
 
 	def is_uptodate(self):
-			file=self.get_filename()
+		file=self.get_filename()
 		if os.path.isfile(file):
 			file_mtime=os.stat(file).st_mtime
 			slide_mtime=self.get_update_time()
 			#print "is_uptodate %s %s" % (strftime('%X', gmtime(slide_mtime)), strftime('%X', gmtime(file_mtime)))
-			return (slide_mtime <= file_mtime or (not self.is_ready))
+			return (slide_mtime <= file_mtime)
 		else:
 			return False
 

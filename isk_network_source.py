@@ -39,6 +39,8 @@ class NetworkSource(Source):
 			if self.__get_slide(slide):
 				self.__set_slide_timestamp(slide)
 				pyglet.resource.reindex()
+				#print "Got slide and reindexed"
+				#print pyglet.resource.get_cached_image_names()
 		#else:
 		#       set_slide_timestamp(slide) # in case of errors, this might be useful
 		return slide
