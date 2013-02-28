@@ -38,6 +38,7 @@ class NetworkSource(Source):
 			print "Updating: %s" % slide
 			if self.__get_slide(slide):
 				self.__set_slide_timestamp(slide)
+				self.__invalidate_cached_slide(slide)
 				pyglet.resource.reindex()
 				#print "Got slide and reindexed"
 				#print pyglet.resource.get_cached_image_names()
@@ -57,6 +58,12 @@ class NetworkSource(Source):
 
 	def get_path(self):
 		return self.cache_path
+
+	def __invalidate_cached_slide(self, slide):
+		filename=slide.get_filename()
+		if filename in pyglet.resource._default_loader._cached_images:
+			pyglet.resource._default_loader._cached_images.pop( filename )
+
 	
 	def __create_display_tree(self, data):
 		presentation_data=data.pop('presentation')
@@ -64,12 +71,16 @@ class NetworkSource(Source):
 		for group in presentation_data.pop('groups', []):
 			slides=[]
 			for slide in group.pop('slides', []):
-				slides.append(Slide(attribs=slide))
+				s=Slide(attribs=slide)
+				s.set_attrib('filename', '%s/%d.%s' % (self.cache_path, s.get_id(), s.get_suffix()))
+				slides.append(s)
 			groups.append(Group(slides=slides, attribs=group))
 		presentation = Presentation(groups=groups, attribs=presentation_data)
 		slides=[]
 		for slide in data.pop('override_queue', []):
-			slides.append(OverrideSlide(attribs=slide))
+			s=OverrideSlide(attribs=slide)
+			s.set_attrib('filename', '%s/%d.%s' % (self.cache_path, s.get_id(), s.get_suffix()))
+			slides.append(s)
 		override=OverrideGroup(slides=slides)
 
 		display=Display(presentation=presentation, override=override, attribs=data, name=self.display_name)
