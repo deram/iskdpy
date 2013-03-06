@@ -13,8 +13,3 @@ sources=[ dict( source_name='LocalSource', display_name="test_display", local_di
 
 # local configuration overrides defaults
 from local_config import *
-
-# Sources availlable. Maybe needed to move elsewhere or made totally dynamic...
-import isk_background_network_source
-import isk_network_source
-import isk_local_source

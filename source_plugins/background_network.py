@@ -1,6 +1,6 @@
 from multiprocessing.pool import ThreadPool
 
-import isk_network_source
+from . import network
 
 from isk_source import Source
 from isk_types import *

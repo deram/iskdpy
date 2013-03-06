@@ -2,6 +2,9 @@ from cocos.director import director
 from cocos.scenes.transitions import *
 from graphics import SlideScene
 from pprint import pprint
+
+
+from source_plugins import *
 import isk_types
 import config
 import isk_presenter
