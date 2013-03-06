@@ -1,3 +1,4 @@
+# Default configs override with local_config.py
 window=dict(width=1280, height=720, resizable=True)
 scale_down=True
 fullscreen=False
@@ -8,17 +9,12 @@ empty_slide=dict(filename= 'base.png', duration=10, type= 'image', clock=False)
 default_duration=5
 default_cache_path='cache'
 
-import credentials
-# assumed contents of credentials.py:
-# sites = [ dict(server="http://example/", user="example", passwd="example") ]
-
 sources=[ dict( source_name='LocalSource', display_name="test_display", local_dir="local") ]
-#sources=[ dict( credentials.sites[0].items(), source_name='NetworkSource', display_name="deram-test", cache_path="cache") ]
-#sources=[ dict( credentials.sites[0].items(), source_name='BackgroundNetworkSource', display_name="deram-test", cache_path="cache ") ]
 
-default_source=sources[0]
+# local configuration overrides defaults
+from local_config import *
 
-# Sources in use
+# Sources availlable. Maybe needed to move elsewhere or made totally dynamic...
 import isk_background_network_source
 import isk_network_source
 import isk_local_source
