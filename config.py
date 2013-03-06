@@ -8,12 +8,14 @@ empty_slide=dict(filename= 'base.png', duration=10, type= 'image', clock=False)
 default_duration=5
 default_cache_path='cache'
 
-sources=[ dict( source_name='NetworkSource', display_name="deram-test", cache_path="cache", server="http://isk0.asm.fi/", user="isk", passwd="Kissa") ]
-#sources=[ dict( source_name='BackgroundNetworkSource', display_name="deram-test", cache_path="cache", server="http://isk0.asm.fi/", user="isk", passwd="Kissa") ]
+import credentials
+sources=[ dict( source_name='LocalSource', display_name="test_display", local_dir="local") ]
+#sources=[ dict( credentials.sites[0].items(), source_name='NetworkSource', display_name="deram-test", cache_path="cache") ]
+#sources=[ dict( credentials.sites[0].items(), source_name='BackgroundNetworkSource', display_name="deram-test", cache_path="cache ") ]
 
 default_source=sources[0]
 
 # Sources in use
-#import isk_network_source
 import isk_background_network_source
-#import isk_local_source
+import isk_network_source
+import isk_local_source
