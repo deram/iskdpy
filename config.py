@@ -9,6 +9,9 @@ default_duration=5
 default_cache_path='cache'
 
 import credentials
+# assumed contents of credentials.py:
+# sites = [ dict(server="http://example/", user="example", passwd="example") ]
+
 sources=[ dict( source_name='LocalSource', display_name="test_display", local_dir="local") ]
 #sources=[ dict( credentials.sites[0].items(), source_name='NetworkSource', display_name="deram-test", cache_path="cache") ]
 #sources=[ dict( credentials.sites[0].items(), source_name='BackgroundNetworkSource', display_name="deram-test", cache_path="cache ") ]
