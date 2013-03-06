@@ -18,7 +18,7 @@ class AuthHttp():
 			result = urllib2.urlopen(request, data, self.timeout)
 			return result.read()
 		except urllib2.URLError:
-			print "URLError: Could not connect"
+			print "URLError: Could not connect %s" % (url)
 			return False 
 		except socket.timeout:
 			print "Timeout connecting"
