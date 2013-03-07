@@ -28,9 +28,10 @@ class NetworkSource(Source):
 		if (json_data):
 			data = json.loads(json_data, "utf8")
 			if (data):
-				self.display=self.__create_display_tree(data)
-				#print "DEBUG display:\n%s" % self.display
-				return True
+				if (self.__is_display_updated(data)):
+					self.display=self.__create_display_tree(data)
+					#print "DEBUG display:\n%s" % self.display
+					return True
 		return False
 
 	def update_slide(self, slide):
@@ -64,6 +65,13 @@ class NetworkSource(Source):
 		if filename in pyglet.resource._default_loader._cached_images:
 			pyglet.resource._default_loader._cached_images.pop( filename )
 
+
+	def __is_display_updated(self, data):
+		try:
+			updated_at=self.display.get_metadata_updated_at()
+			return (data['metadata_updated_at'] > updated_at)
+		except:
+			return True
 	
 	def __create_display_tree(self, data):
 		presentation_data=data.pop('presentation')
