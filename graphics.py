@@ -13,9 +13,9 @@ from time import strftime
 
 from pyglet.window import key
 
-
 import config
 import isk_presenter
+import isk_control
 
 class OutlineLabel(cocos.text.Label):
 	def __init__( self, *args, **kwargs):
@@ -67,20 +67,6 @@ class ClockLayer(Layer):
 	def change_time(self, dt=0):
 		self.time=datetime.now()
 		self.get('label').set_text(self.time.strftime(self.clock_format))
-
-class ControlLayer(Layer):
-
-	is_event_handler = True	 #: enable pyglet's events
-
-	def __init__( self):
-		super(ControlLayer, self).__init__()
-		self.push_all_handlers()
-
-	def on_key_press( self, k , m ):
-		if k == key.ENTER:
-			self.do(CallFunc(self.parent.change_slide))
-			return True
-
 
 class SlideLayer(Layer):
 	def __init__( self, file):
@@ -149,7 +135,8 @@ class SlideScene(Scene):
 		if (self.clock):
 			self.add(ClockLayer(), z=5)
 
-		self.add(ControlLayer(), z=10)
+		self.add(isk_control.KeyboardControlLayer(), z=10)
+		self.add(isk_control.RemoteControlLayer(), z=10)
 
 		if (self.duration > 0):
 			self.schedule_interval(self.change_slide, self.duration)

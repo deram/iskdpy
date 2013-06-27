@@ -8,6 +8,12 @@ class Base(object):
 	def __init__(self, attribs={}):
 		self.attribs=attribs
 
+	def __unicode__(self):
+		return unicode(self.attribs)
+
+	def __str__(self):
+		return unicode(self)
+
 	def set_attribs(self, dict):
 		self.attribs.update(dict)
 
@@ -194,7 +200,7 @@ class Slide(Base):
 			return 'png'
 
 	def get_filename(self):
-		return self.get_attrib('filename', '%s/%d.%s' % (config.default_cache_path, self.get_id(), self.get_suffix()))
+		return self.get_attrib('filename', '%s/%s.%s' % (config.default_cache_path, self.get_id(), self.get_suffix()))
 
 	def get_update_time(self):
 		return self['updated_at']

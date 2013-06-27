@@ -24,6 +24,9 @@ class Source(object):
 
 	def get_path(self):
 		return "."
+	
+	def get_control(self):
+		return None
 
 	@classmethod
 	def factory(cls, name):
