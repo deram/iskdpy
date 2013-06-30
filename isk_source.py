@@ -1,9 +1,9 @@
-
 class Source(object):
 	_subs_ = {}
 
 	def __init__(self, config=None):
 		self.display=None
+		self.control=None
 
 	def get_display(self):
 		if (not self.display):
@@ -25,8 +25,11 @@ class Source(object):
 	def get_path(self):
 		return "."
 	
-	def get_control(self):
-		return None
+	def run_control(self):
+		return False
+
+	def register_control(self, control):
+		self.control=control
 
 	@classmethod
 	def factory(cls, name):

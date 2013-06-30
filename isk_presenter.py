@@ -24,20 +24,23 @@ class Presenter():
 	def update_display(self):
 		if (self.source.update_display()):
 			tmp=self.source.get_display()
-			#print "%s" % tmp
-			try:
-				gid=self.get_current_groupid()
-				sid=self.get_current_slideid()
-				pres=tmp.get_presentation()
-				grouppos = pres.locate_group(gid)
-				slidepos = pres[grouppos].locate_slide(sid)
-				self.group=grouppos
-				self.slide=slidepos
-			except IndexError:
-				self.seek_to_presentation_beginning()
-			if self.display.get_presentation().get_id() != tmp.get_presentation().get_id():
-				print "Presentation changed."
-			self.display=tmp
+			if not self.display == tmp:
+				#print "%s" % tmp
+				try:
+					gid=self.get_current_groupid()
+					sid=self.get_current_slideid()
+					pres=tmp.get_presentation()
+					grouppos = pres.locate_group(gid)
+					slidepos = pres[grouppos].locate_slide(sid)
+					self.group=grouppos
+					self.slide=slidepos
+					if self.display.get_presentation().get_id() != tmp.get_presentation().get_id():
+						print "Presentation changed."
+				except (IndexError, AttributeError):
+					self.seek_to_presentation_beginning()
+				self.display=tmp
+				return True
+		return False
 
 	def seek_to_presentation_beginning(self):
 		self.group=0
@@ -103,10 +106,16 @@ class Presenter():
 		return ((self.display.get_presentation().get_total_slides()) == 0)
 
 	def get_next(self):
+		if not self.display:
+			if not self.update_display():
+				print "NO DISPLAY FROM SOURCE"
+				return self.get_empty_slide()
+
 		if ( not self.first_time ):
 			self.update_display()
 		else:
 			self.first_time=False
+
 		if ( self.is_override() ):
 			ret = self.pop_override_slide()
 		else:
