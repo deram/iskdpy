@@ -11,7 +11,7 @@ class Source(object):
 		return self.display
 
 	def update_display(self):
-		return false
+		return False
 
 	def update_slide(self, slide):
 		return slide
