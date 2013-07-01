@@ -117,22 +117,20 @@ class SlideScene(Scene):
 	def __init__(self, slide=None):
 		super(SlideScene, self).__init__()
 		self.scheduled_event=False
-		if (not slide):
-	   		slide=isk_presenter.Presenter.current().get_next()
+		self.slide=slide
+		if (not self.slide):
+	   		self.slide=isk_presenter.Presenter.current().get_next()
 
-		self.filename=slide.get_filename()
-		self.duration=slide.get_duration()
-		self.clock=slide.get_clock()
-		self.type=slide.get_type()
+		self.duration=self.slide.get_duration()
 			
 		self.add(ColorLayer(0,0,0,255), z=-10)
 
-		if (self.type=="video"):
-			self.add(VideoLayer(self.filename), z=0)
+		if (self.slide.get_type=="video"):
+			self.add(VideoLayer(self.slide.get_filename()), z=0)
 		else:
-			self.add(SlideLayer(self.filename), z=0)
+			self.add(SlideLayer(self.slide.get_filename()), z=0)
 
-		if (self.clock):
+		if (self.slide.get_clock()):
 			self.add(ClockLayer(), z=5)
 
 		self.add(isk_control.KeyboardControlLayer(), z=10)
@@ -142,7 +140,9 @@ class SlideScene(Scene):
 			self.schedule_interval(self.change_slide, self.duration)
 
 	def change_slide(self, dt=0):
-		transition=FadeBLTransition #FadeTransition
-		director.replace(transition(SlideScene(), 1.25))
+		slide=isk_presenter.Presenter.current().get_next()
+		if not self.slide==slide and slide.is_ready():
+			transition=FadeBLTransition #FadeTransition
+			director.replace(transition(SlideScene(slide), 1.25))
 
 

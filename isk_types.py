@@ -14,6 +14,10 @@ class Base(object):
 	def __str__(self):
 		return unicode(self)
 
+	def __cmp__(self, other):
+		if isinstance(other, self.__class__):
+			 return cmp(self.__dict__, other.__dict__)
+
 	def set_attribs(self, dict):
 		self.attribs.update(dict)
 
