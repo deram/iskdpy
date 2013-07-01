@@ -119,7 +119,7 @@ class SlideScene(Scene):
 		self.scheduled_event=False
 		self.slide=slide
 		if (not self.slide):
-	   		self.slide=isk_presenter.Presenter.current().get_next()
+	   		self.slide=isk_presenter.Presenter().get_next()
 
 		self.duration=self.slide.get_duration()
 			
@@ -140,7 +140,7 @@ class SlideScene(Scene):
 			self.schedule_interval(self.change_slide, self.duration)
 
 	def change_slide(self, dt=0):
-		slide=isk_presenter.Presenter.current().get_next()
+		slide=isk_presenter.Presenter().get_next()
 		if not self.slide==slide and slide.is_ready():
 			transition=FadeBLTransition #FadeTransition
 			director.replace(transition(SlideScene(slide), 1.25))

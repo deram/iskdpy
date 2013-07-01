@@ -10,7 +10,7 @@ import config
 import isk_presenter
 
 def main():
-	slide=isk_presenter.Presenter.current().get_empty_slide()
+	slide=isk_presenter.Presenter().get_empty_slide()
 	
 	director.init(**config.window)
 	if ( config.scale_down ):

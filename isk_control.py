@@ -21,7 +21,7 @@ class _KeyboardControlLayer(Layer):
 class _RemoteControlLayer(Layer):
 	def __init__(self, *args, **kwargs):
 		super(_RemoteControlLayer, self).__init__(*args, **kwargs)
-		self.source=Presenter.current().get_source()
+		self.source=Presenter().get_source()
 		self.source.register_control(self)
 		self.schedule_interval(self.run, 0.1)
 

@@ -5,7 +5,7 @@ import gc
 import json
 import config
 
-class Presenter():
+class _Presenter():
 	__current=None
 	def __init__(self):
 		self.first_time=True
@@ -136,11 +136,12 @@ class Presenter():
 	def get_empty_slide(self):
 		return isk_types.Slide(config.empty_slide)
 
-	@classmethod
-	def current(cls):
-		if (not cls.__current):
-			print "creating singleton entity"
-			cls.__current = Presenter()
-			cls.__current.next_source()
-		return cls.__current
+_presenter=None
+def Presenter():
+	global _presenter
+	if (not _presenter):
+		print "creating singleton entity"
+		_presenter=_Presenter()
+		_presenter.next_source()
+	return _presenter
 
