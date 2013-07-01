@@ -32,5 +32,6 @@ class BackgroundWebsocketSource(parent):
 	
 	def __get_slides(self):
 		def worker(slide):
-			self.update_slide(slide)
+			if slide.is_ready():
+				self.update_slide(slide)
 		self.pool.map_async(worker, self.display.get_all_slides().values())

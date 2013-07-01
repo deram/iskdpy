@@ -28,17 +28,17 @@ class WebsocketSource(Source):
 	#def get_display():
 
 	def update_display(self):
-		self.socket.send(Event.simple('iskdpy.display_data', self.displayid, self.display_data_cb))
 		return True
 
 	def display_data_cb(self, data):
+		print 'received display_data'
 		if self.__is_display_updated(data):
 			self.display=self.__create_display_tree(data)
 			return True
 		return False
 
 	def update_slide(self, slide):
-		if (not slide.is_uptodate()):
+		if (not slide.is_uptodate()) and slide.is_ready():
 			print "Updating: %s" % slide
 			if self.__get_slide(slide):
 				self.__set_slide_timestamp(slide)
@@ -49,7 +49,7 @@ class WebsocketSource(Source):
 	def connect(self):
 		def connect_cb(data):
 			self.displayid=data.get('id')
-			self.__create_display_tree(data)
+			self.display=self.__create_display_tree(data)
 		data = {'display_name': self.display_name}
 		self.socket.send(Event.simple('iskdpy.hello', data, connect_cb))
 		self.socket.run_all()
