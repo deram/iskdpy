@@ -14,9 +14,11 @@ class Base(object):
 	def __str__(self):
 		return unicode(self)
 
-	def __cmp__(self, other):
-		if isinstance(other, self.__class__):
-			 return cmp(self.__dict__, other.__dict__)
+	def __eq__(self, other):
+		 return isinstance(other, self.__class__) and (self.__dict__== other.__dict__)
+
+	def __neq__(self, other):
+		return not self == other
 
 	def set_attribs(self, dict):
 		self.attribs.update(dict)
@@ -158,23 +160,36 @@ class Group(Base):
 				return index
 		return -1
 
-
+_masterslidestore={}
 class Slide(Base):
 	def __init__(self, attribs={}):
-		super(Slide, self).__init__(attribs=attribs)
+		super(Slide, self).__init__(attribs={})
+		self.id=attribs.get('id', 0)
+
+		global _masterslidestore
+		_masterslidestore.update({self.id: attribs})
+	
+	def master(self):
+		global _masterslidestore
+		return _masterslidestore.get(self.id, None)
+
+	def get_attrib(self, id, default=None):
+		if id in self.attribs:
+			return self.attribs[id]
+		else:
+			return self.master().get(id, default)
 
 	def __getitem__(self, id):
-		return self.attribs[id]
+		return self.get_attrib(id)
 
 	def __len__(self):
-		return len(self.attribs)
+		return len(self.attribs) + len(self.master())
 
 	def __unicode__(self):
-		return 'Slide "%s" Position %s file: %s (%s)' % ( self.get_name(), self.get_position(), self.get_filename(), strftime('%X', gmtime(self.get_update_time())))
+		return 'Slide "%s" (%s) Position %s file: %s (%s)' % ( self.get_name(), self.get_id(), self.get_position(), self.get_filename(), strftime('%X', gmtime(self.get_update_time())))
 
 	def __str__(self):
 		return unicode(self)
-
 
 	def get_name(self):
 		return self.get_attrib('name', "unnamed")
@@ -204,7 +219,7 @@ class Slide(Base):
 			return 'png'
 
 	def get_filename(self):
-		return self.get_attrib('filename', '%s/%s.%s' % (config.default_cache_path, self.get_id(), self.get_suffix()))
+		return self.get_attrib('filename', '%s/%s.%s' % (isk_presenter.Presenter().get_source().get_path(), self.get_id(), self.get_suffix()))
 
 	def get_update_time(self):
 		return self['updated_at']
