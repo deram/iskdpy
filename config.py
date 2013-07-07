@@ -12,4 +12,7 @@ default_cache_path='cache'
 sources=[ dict( source_name='LocalSource', display_name="test_display", local_dir="local") ]
 
 # local configuration overrides defaults
-from local_config import *
+try:
+	from local_config import *
+except:
+	print 'local_config.py not found'
