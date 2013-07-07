@@ -65,7 +65,7 @@ class WebsocketSource(Source):
 	def slide_done(self, slide):
 		if (slide.is_override()):
 			data = {'display_id': self.displayid, 
-				'slide_id': slide.get_attrib('id') }
+				'override_queue_id': slide.get_attrib('override_queue_id') }
 			self.socket.send(Event.simple('iskdpy.override_shown', data))
 		else:
 			data = {'display_id': self.displayid, 
