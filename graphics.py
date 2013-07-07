@@ -2,7 +2,7 @@ import cocos
 from cocos.director import director
 from cocos.layer import Layer, ColorLayer
 from cocos.scene import Scene
-#from cocos.scenes.transitions import *
+from cocos.scenes.transitions import *
 from isk_transitions import *
 from cocos.actions import *
 from cocos.sprite import Sprite
@@ -125,8 +125,9 @@ class SlideScene(Scene):
 			
 		self.add(ColorLayer(0,0,0,255), z=-10)
 
-		if (self.slide.get_type=="video"):
+		if (self.slide.get_type()=="video"):
 			self.add(VideoLayer(self.slide.get_filename()), z=0)
+			self.duration=0
 		else:
 			self.add(SlideLayer(self.slide.get_filename()), z=0)
 
