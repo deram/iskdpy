@@ -15,7 +15,7 @@ class Base(object):
 		return unicode(self)
 
 	def __eq__(self, other):
-		 return isinstance(other, self.__class__) and (self.__dict__== other.__dict__)
+		return isinstance(other, self.__class__) and (self.__dict__== other.__dict__)
 
 	def __neq__(self, other):
 		return not self == other
@@ -165,7 +165,6 @@ class Slide(Base):
 	def __init__(self, attribs={}):
 		super(Slide, self).__init__(attribs={})
 		self.id=attribs.get('id', 0)
-
 		global _masterslidestore
 		_masterslidestore.update({self.id: attribs})
 	
@@ -178,6 +177,10 @@ class Slide(Base):
 			return self.attribs[id]
 		else:
 			return self.master().get(id, default)
+
+	def __eq__(self, other):
+		r=isinstance(other, self.__class__) and (self.master() == other.master())
+		return r
 
 	def __getitem__(self, id):
 		return self.get_attrib(id)
@@ -225,7 +228,7 @@ class Slide(Base):
 		return self['updated_at']
 
 	def is_ready(self):
-		return self['ready']
+		return self.get_attrib('ready', True)
 
 	def is_uptodate(self):
 		file=self.get_filename()
