@@ -1,15 +1,11 @@
-if __name__=="__main__":
-	import sys
-	sys.path.append('.')
-
-from auth_http import *
-import file
+from ..utils.auth_http import *
+from ..utils import file
 import json
 import pyglet.resource
 
-from websocket_rails import WebsocketRails, Event, Channel, NOP
-from isk_source import Source
-from isk_types import *
+from ..utils.websocket_rails import WebsocketRails, Event, Channel, NOP
+from ..source import Source
+from ..types import *
 
 register=Source.register
 

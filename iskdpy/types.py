@@ -2,7 +2,7 @@ import os
 import config
 import json
 from time import gmtime, strftime
-import isk_presenter
+import presenter
 
 class Base(object):
 	def __init__(self, attribs={}):
@@ -219,7 +219,7 @@ class Slide(Base):
 			return 'png'
 
 	def get_filename(self):
-		return self.get_attrib('filename', '%s/%s.%s' % (isk_presenter.Presenter().get_source().get_path(), self.get_id(), self.get_suffix()))
+		return self.get_attrib('filename', '%s/%s.%s' % (presenter.Presenter().get_source().get_path(), self.get_id(), self.get_suffix()))
 
 	def get_update_time(self):
 		return self['updated_at']

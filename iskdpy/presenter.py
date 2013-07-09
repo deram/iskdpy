@@ -1,9 +1,8 @@
-from pprint import pprint
-import isk_types
-from isk_source import Source 
+from . import types
+from .source import Source 
 import gc
 import json
-import config
+from . import config
 
 class _Presenter():
 	__current=None
@@ -81,7 +80,6 @@ class _Presenter():
 					self.group = 0
 					print "Presentation wrapped"
 					gc.collect()
-					#pprint(gc.garbage)
 					del gc.garbage[:]
 				print "Next: %s" % unicode(self.get_current_group()).split('\n', 1)[0]
 
@@ -134,7 +132,7 @@ class _Presenter():
 		return self.source
 
 	def get_empty_slide(self):
-		return isk_types.Slide(config.empty_slide)
+		return types.Slide(config.empty_slide)
 
 _presenter=None
 def Presenter():

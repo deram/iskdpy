@@ -1,10 +1,10 @@
-from auth_http import *
-import file
+from ..utils.auth_http import *
+from ..utils import file
 import json
 import pyglet.resource
 
-from isk_source import Source
-from isk_types import *
+from ..source import Source
+from ..types import *
 
 register=Source.register
 

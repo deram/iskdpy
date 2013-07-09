@@ -1,7 +1,7 @@
 import urllib2
 from urllib import urlencode
 import base64
-import file
+from . import file
 import socket
 
 class AuthHttp():

@@ -1,9 +1,9 @@
 from multiprocessing.pool import ThreadPool
 
-from . import network
+from . import websocketsource
 
-from isk_source import Source
-from isk_types import *
+from ..source import Source
+from ..types import *
 parent=Source.factory('WebsocketSource')
 
 register=Source.register

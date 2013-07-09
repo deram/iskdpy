@@ -2,7 +2,7 @@ from cocos.layer import Layer
 from cocos.actions import *
 from pyglet.window import key
 
-from isk_presenter import Presenter
+from ..presenter import Presenter
 
 class _KeyboardControlLayer(Layer):
 

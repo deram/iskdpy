@@ -3,7 +3,6 @@ from cocos.director import director
 from cocos.layer import Layer, ColorLayer
 from cocos.scene import Scene
 from cocos.scenes.transitions import *
-from isk_transitions import *
 from cocos.actions import *
 from cocos.sprite import Sprite
 import pyglet
@@ -13,9 +12,10 @@ from time import strftime
 
 from pyglet.window import key
 
-import config
-import isk_presenter
-import isk_control
+from .transitions import *
+from .. import config
+from ..presenter import Presenter
+from . import control
 
 class OutlineLabel(cocos.text.Label):
 	def __init__( self, *args, **kwargs):
@@ -119,7 +119,7 @@ class SlideScene(Scene):
 		self.scheduled_event=False
 		self.slide=slide
 		if (not self.slide):
-	   		self.slide=isk_presenter.Presenter().get_next()
+	   		self.slide=Presenter().get_next()
 
 		self.duration=self.slide.get_duration()
 			
@@ -134,14 +134,14 @@ class SlideScene(Scene):
 		if (self.slide.get_clock()):
 			self.add(ClockLayer(), z=5)
 
-		self.add(isk_control.KeyboardControlLayer(), z=10)
-		self.add(isk_control.RemoteControlLayer(), z=10)
+		self.add(control.KeyboardControlLayer(), z=10)
+		self.add(control.RemoteControlLayer(), z=10)
 
 		if (self.duration > 0):
 			self.schedule_interval(self.change_slide, self.duration)
 
 	def change_slide(self, dt=0):
-		slide=isk_presenter.Presenter().get_next()
+		slide=Presenter().get_next()
 		if not self.slide==slide and slide.is_ready():
 			transition=FadeBLTransition #FadeTransition
 			director.replace(transition(SlideScene(slide), 1.25))

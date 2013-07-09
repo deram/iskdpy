@@ -1,8 +1,8 @@
-import file
+from ..utils import file
 import glob
 
-from isk_source import Source
-from isk_types import *
+from ..source import Source
+from ..types import *
 
 register=Source.register
 

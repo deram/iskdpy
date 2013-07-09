@@ -2,8 +2,8 @@ from multiprocessing.pool import ThreadPool
 
 from . import network
 
-from isk_source import Source
-from isk_types import *
+from ..source import Source
+from ..types import *
 parent=Source.factory('NetworkSource')
 
 register=Source.register

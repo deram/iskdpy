@@ -1,5 +1,5 @@
 
 if __name__ == "__main__":
-	import main
+	from iskdpy.main import main
 	import cProfile
-	cProfile.run('main.main()', 'profile')
+	cProfile.run('main()', 'profile')
