@@ -13,6 +13,9 @@ class LocalSource(Source):
 		self.local_dir=config['local_dir']
 		self.display_name=config['display_name']
 		self.files=""
+		if not os.path.exists(self.local_dir):
+			os.makedirs(self.local_dir)
+
 
 	#def get_display():
 

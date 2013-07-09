@@ -5,6 +5,7 @@ import pyglet.resource
 
 from ..source import Source
 from ..types import *
+import os
 
 register=Source.register
 
@@ -17,6 +18,8 @@ class NetworkSource(Source):
 		self.displayid=None
 		self.display_name=config['display_name']
 		self.http=AuthHttp(config['user'], config['passwd'])
+		if not os.path.exists(self.cache_path):
+			os.makedirs(self.cache_path)
 
 	#def get_display():
 

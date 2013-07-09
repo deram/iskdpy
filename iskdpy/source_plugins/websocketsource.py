@@ -7,6 +7,8 @@ from ..utils.websocket_rails import WebsocketRails, Event, Channel, NOP
 from ..source import Source
 from ..types import *
 
+import os
+
 register=Source.register
 
 @register('WebsocketSource')
@@ -20,6 +22,8 @@ class WebsocketSource(Source):
 		self.http=AuthHttp(config['user'], config['passwd'])
 		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'))
 		self.channel=None
+		if not os.path.exists(self.cache_path):
+			os.makedirs(self.cache_path)
 
 	#def get_display():
 
