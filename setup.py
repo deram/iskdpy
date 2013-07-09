@@ -4,9 +4,10 @@ setup(
 	name = "iskdpy",
 	version = "0.0",
 	description = "ISK Display",
-	package_dir = {'isk': '.'},
-	packages=['isk', 'isk.source_plugins'],
-	executables = [Executable("main.py")],
-	options = {"build_exe": {"excludes": ['local_config']}}
+	#package_dir = {'': 'iskdpy'},
+	packages=['iskdpy', 'iskdpy.scene', 'iskdpy.source_plugins', 'iskdpy.utils'],
+        scripts=['iskdpy.py'],
+	executables = [Executable("iskdpy.py")],
+	#options = {"build_exe": {"excludes": ['local_config']}}
 	)
 
