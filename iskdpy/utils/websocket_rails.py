@@ -1,7 +1,9 @@
 import websocket
 import json
 from select import select
+import socket
 import random
+
 def NOP(data):
 	pass
 
@@ -19,10 +21,12 @@ class Event():
 			if isinstance(self.attr, dict):
 				self.id = self.attr.get('id', random.randint(1, 65535))
 				self.channel = self.attr.get('channel')
-				self.data = self.attr.get('data')
-				if 'success' in self.attr:
+				self.data = self.attr.pop('data')
+				if 'success' in self.attr and self.attr.get('success'):
 					self.result = True
 					self.success = self.attr.get('success')
+				else:
+					self.result = False
 				self.connection_id = data[2]
 		except IndexError:
 			pass
@@ -67,8 +71,10 @@ class WebsocketRails():
 		self.timeout=timeout
 		self.conn_id=None
 		self.url=url
+		self.ws=None
 		self.channels={}
 		self.queue={}
+		self.messages=[]
 		self.actions={
 			'websocket_rails.ping': self.__pong,
 			'client_connected': self.__connected
@@ -76,47 +82,55 @@ class WebsocketRails():
 		self._connect()
 
 	def _connect(self):
-		print 'connecting %s' % self.url
-		self.ws=websocket.create_connection(self.url)
-		self.queue={}
-		for channel in self.channels.values():
-			channel.subscribe()
-
-	def _send(self, msg):
 		try:
-			return self.ws.send(msg)
-		except websocket.WebSocketConnectionClosedException:
+			print 'Connecting %s' % self.url
+			self.ws=websocket.create_connection(self.url)
+			self.queue={}
+			for channel in self.channels.values():
+				channel.subscribe()
+			msgs=self.messages
+			while len(self.messages):
+				self.send(self.messages.pop(0))
+		except websocket.WebSocketException as e:
+			pass
+
+	def _send(self, ev):
+		try:
+			return self.ws.send(repr(ev))
+		except (websocket.WebSocketConnectionClosedException, AttributeError):
+			self.messages.append(ev)
 			self._connect()
 		
 	def _recv(self):
 		try:
-			return self.ws.recv()
-		except websocket.WebSocketConnectionClosedException:
+			(rlist, wlist, xlist) = select([self.ws.fileno()],[],[],self.timeout)
+			if rlist:
+				data=self.ws.recv()
+				if data:
+					return Event(data)
+		except (websocket.WebSocketConnectionClosedException, AttributeError, socket.error):
 			self._connect()
 
 	def run(self):
-		(rlist, wlist, xlist) = select([self.ws.fileno()],[],[],self.timeout)
-		if rlist:
-			data=self._recv()
-			if not data:
-				return
-			ev=Event(data)
-			if ev.result and ev.id in self.queue:
-				if ev.success:
-					func=self.queue.pop(ev.id).success_cb
-				else:
-					func=self.queue.pop(ev.id).failure_cb
-
-			elif ev.channel:
-				ch=self.channels.get(ev.channel)
-				func=ch.actions.get(ev.name)
+		ev=self._recv()
+		if not ev:
+			return
+		if ev.result and ev.id in self.queue:
+			if ev.success:
+				func=self.queue.pop(ev.id).success_cb
 			else:
-				func=self.actions.get(ev.name)
+				func=self.queue.pop(ev.id).failure_cb
 
-			if func:
-				return func(ev.data)
-			elif ev:
-				print "UNHANDLED: %s" % ev.__dict__
+		elif ev.channel:
+			ch=self.channels.get(ev.channel)
+			func=ch.actions.get(ev.name)
+		else:
+			func=self.actions.get(ev.name)
+
+		if func:
+			return func(ev.data)
+		elif ev:
+			print "UNHANDLED: %s" % ev.__dict__
 
 	def run_all(self):
 		while len(self.queue):
@@ -124,7 +138,7 @@ class WebsocketRails():
 
 	def send(self, ev):
 		self.queue.update({ev.id: ev})
-		self._send(repr(ev))
+		self._send(ev)
 
 	def channel(self, channel):
 		chan=self.channels.get(channel)
