@@ -37,6 +37,10 @@ class WebsocketSource(Source):
 			return True
 		return False
 
+	def goto_slide_cb(self, data):
+		print 'received goto_slide'
+		self.control.goto_slide(data['group_id'], data['slide_id'])
+
 	def update_slide(self, slide):
 		if (not slide.is_uptodate()) and slide.is_ready():
 			print "Updating: %s" % slide
@@ -55,7 +59,11 @@ class WebsocketSource(Source):
 		self.socket.run_all()
 		if (self.displayid>0):
 			self.channel=self.socket.channel('display_%d' % self.displayid).subscribe()
-			self.channel.actions.update({'data': self.display_data_cb})
+			self.channel.actions.update({
+				'data': self.display_data_cb,
+				'goto_slide': self.goto_slide_cb,
+				'current_slide': NOP
+				})
 			return True
 		return False
 		

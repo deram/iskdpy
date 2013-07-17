@@ -146,4 +146,9 @@ class SlideScene(Scene):
 			transition=FadeBLTransition #FadeTransition
 			director.replace(transition(SlideScene(slide), 1.25))
 
+	def reload_slide(self, dt=0):
+		slide=Presenter().get_current_slide()
+		if not self.slide==slide and slide.is_ready():
+			transition=FadeBLTransition #FadeTransition
+			director.replace(transition(SlideScene(slide), 1.25))
 

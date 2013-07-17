@@ -66,6 +66,28 @@ class _Presenter():
 	def get_current_slide(self):
 		return self.get_presentation()[self.group][self.slide]
 
+	def set_current_slide(self, group_id, slide_id):
+		group=False
+		slide=False
+
+		for i, item in enumerate(self.get_presentation()):
+			if item.get_id()==group_id:
+				group=i
+				break
+
+		for i, item in enumerate(self.get_presentation()[group]):
+			if item.get_id()==slide_id:
+				slide=i
+				break
+		if group >= 0 and slide >=0 and self.get_presentation()[group][slide].is_valid():
+			self.slide=slide
+			self.group=group
+			self.source.update_slide(self.get_current_slide())
+			self.source.slide_done(self.get_current_slide()) #XXX move to somewhere more close to slide shown on screen
+			return True
+		return False
+
+
 	def seek_to_next_valid_slide_in_presentation(self):
 		valid_slide=False
 		while (not valid_slide):

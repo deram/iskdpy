@@ -28,6 +28,10 @@ class _RemoteControlLayer(Layer):
 	def run(self, *args):
 		self.source.run_control()
 
+	def goto_slide(self, group_id, slide_id):
+		if Presenter().set_current_slide(group_id, slide_id):
+			self.do(CallFunc(self.parent.reload_slide))
+
 __rcl=None
 def RemoteControlLayer():
 	global __rcl
