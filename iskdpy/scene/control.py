@@ -14,23 +14,48 @@ class _KeyboardControlLayer(Layer):
 
 	def on_key_press( self, k , m ):
 		if k == key.ENTER:
-			self.do(CallFunc(self.parent.change_slide))
+			Presenter().get_next()
+			self.do(CallFunc(self.parent.reload_slide))
+			return True
+		elif k == key.RIGHT:
+			Presenter().get_next()
+			self.do(CallFunc(self.parent.reload_slide))
+			return True
+		elif k == key.LEFT:
+			Presenter().get_previous()
+			self.do(CallFunc(self.parent.reload_slide))
 			return True
 
 
 class _RemoteControlLayer(Layer):
 	def __init__(self, *args, **kwargs):
 		super(_RemoteControlLayer, self).__init__(*args, **kwargs)
-		self.source=Presenter().get_source()
-		self.source.register_control(self)
+		Presenter().register_control(self)
 		self.schedule_interval(self.run, 0.1)
 
 	def run(self, *args):
-		self.source.run_control()
+		Presenter().run_control()
 
 	def goto_slide(self, group_id, slide_id):
-		if Presenter().set_current_slide(group_id, slide_id):
-			self.do(CallFunc(self.parent.reload_slide))
+		def func(dt=0):
+			if Presenter().set_current_slide(group_id, slide_id):
+				self.parent.reload_slide()
+		self.do(Delay(0.1) + CallFunc(func))
+	
+	def goto_next_slide(self):
+		def func(dt=0):
+			if Presenter().get_next():
+				self.parent.reload_slide()
+		self.do(Delay(0.1) + CallFunc(func))
+
+	def goto_previous_slide(self):
+		def func(dt=0):
+			if Presenter().Presenter().get_previous():
+				self.parent.reload_slide()
+		self.do(Delay(0.1) + CallFunc(func))
+	
+	def reload_slide(self):
+		self.do(Delay(0.1) + CallFunc(self.parent.reload_slide))
 
 __rcl=None
 def RemoteControlLayer():

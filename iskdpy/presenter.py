@@ -1,7 +1,6 @@
-from . import types
+from .types import Slide
 from .source import Source 
 import gc
-import json
 from . import config
 
 class _Presenter():
@@ -9,12 +8,21 @@ class _Presenter():
 	def __init__(self):
 		self.first_time=True
 		self.seek_to_presentation_beginning()
+		self.control=None
 
 	def __connect(self, conf):
 		source_name=conf.pop('source_name')
 		self.source=Source.factory(source_name)(conf)
 		self.source.connect()
 		self.display=self.source.get_display()
+
+	def register_control(self, control):
+		self.control=control
+		self.source.register_control(control)
+
+	def run_control(self):
+		self.source.run_control()
+		self.update_display()
 
 	def next_source(self):
 		if len(config.sources):
@@ -25,18 +33,21 @@ class _Presenter():
 			tmp=self.source.get_display()
 			if not self.display == tmp:
 				#print "%s" % tmp
-				try:
-					gid=self.get_current_groupid()
-					sid=self.get_current_slideid()
-					pres=tmp.get_presentation()
-					grouppos = pres.locate_group(gid)
-					slidepos = pres[grouppos].locate_slide(sid)
-					self.group=grouppos
-					self.slide=slidepos
-					if self.display.get_presentation().get_id() != tmp.get_presentation().get_id():
-						print "Presentation changed."
-				except (IndexError, AttributeError):
+				if self.display.is_manual() and not tmp.is_manual():
+					self.control.goto_next_slide()
+				if self.display.get_presentation().get_id() != tmp.get_presentation().get_id():
+					print "Presentation changed."
 					self.seek_to_presentation_beginning()
+				else:
+					try:
+						pres=tmp.get_presentation()
+						group = pres.locate_group(self.get_current_groupid(), old=self.group)
+						slide = pres[group].locate_slide(self.get_current_slideid(), old=self.slide)
+						self.group=group
+						self.slide=slide
+					except (IndexError, AttributeError):
+						print "Current slide not in presentation, restarting presentation"
+						self.seek_to_presentation_beginning()
 				self.display=tmp
 				return True
 		return False
@@ -66,19 +77,10 @@ class _Presenter():
 	def get_current_slide(self):
 		return self.get_presentation()[self.group][self.slide]
 
-	def set_current_slide(self, group_id, slide_id):
-		group=False
-		slide=False
+	def set_current_slide(self, gid, sid):
+		group = self.get_presentation().locate_group(gid)
+		slide = self.get_presentation()[group].locate_slide(sid)
 
-		for i, item in enumerate(self.get_presentation()):
-			if item.get_id()==group_id:
-				group=i
-				break
-
-		for i, item in enumerate(self.get_presentation()[group]):
-			if item.get_id()==slide_id:
-				slide=i
-				break
 		if group >= 0 and slide >=0 and self.get_presentation()[group][slide].is_valid():
 			self.slide=slide
 			self.group=group
@@ -87,11 +89,9 @@ class _Presenter():
 			return True
 		return False
 
-
 	def seek_to_next_valid_slide_in_presentation(self):
-		valid_slide=False
-		while (not valid_slide):
-			n_groups = len(self.get_presentation())
+		n_groups = len(self.get_presentation())
+		for i in xrange(self.get_presentation().get_total_slides()):
 			n_slides = len(self.get_current_group())
 			self.slide += 1
 			if ( self.slide >= n_slides ):
@@ -106,13 +106,37 @@ class _Presenter():
 				print "Next: %s" % unicode(self.get_current_group()).split('\n', 1)[0]
 
 			if ( len(self.get_current_group()) > 0 ):
-				valid_slide = self.get_current_slide().is_valid()
+				if self.get_current_slide().is_valid():
+					return True
+		return False
+
+	def seek_to_previous_valid_slide_in_presentation(self):
+		n_groups = len(self.get_presentation())
+		for i in xrange(self.get_presentation().get_total_slides()):
+			self.slide -= 1
+			if ( self.slide < 0 ):
+				self.group -= 1
+				if ( self.group < 0 ):
+					self.group = n_groups - 1
+					print "Presentation wrapped"
+					gc.collect()
+					del gc.garbage[:]
+				print "Prev: %s" % unicode(self.get_current_group()).split('\n', 1)[0]
+				self.slide = len(self.get_current_group()) - 1
+
+			if ( len(self.get_current_group()) > 0 ):
+				if self.get_current_slide().is_valid():
+					return True
+		return False
 
 	def is_override(self):
 		override=self.display.get_override()
 		if len( override ):
 			return override[0].is_valid()
 		return False
+
+	def is_manual(self):
+		return self.display.is_manual()
 
 	def pop_override_slide(self):
 		override=self.display.get_override()
@@ -126,6 +150,12 @@ class _Presenter():
 		return ((self.display.get_presentation().get_total_slides()) == 0)
 
 	def get_next(self):
+		return self._get_slide('next')
+
+	def get_previous(self):
+		return self._get_slide('previous')
+
+	def _get_slide(self, slide='next'):
 		if not self.display:
 			if not self.update_display():
 				print "NO DISPLAY FROM SOURCE"
@@ -142,7 +172,10 @@ class _Presenter():
 			if (self.is_empty_presentation()):
 				print "EMPTY PRESENTATION"
 				return self.get_empty_slide()
-			self.seek_to_next_valid_slide_in_presentation()
+			if slide=='next':
+				self.seek_to_next_valid_slide_in_presentation()
+			elif slide=='previous':
+				self.seek_to_previous_valid_slide_in_presentation()
 			ret = self.get_current_slide()
 
 		self.source.update_slide(ret)
@@ -154,7 +187,7 @@ class _Presenter():
 		return self.source
 
 	def get_empty_slide(self):
-		return types.Slide(config.empty_slide)
+		return Slide(config.empty_slide)
 
 _presenter=None
 def Presenter():

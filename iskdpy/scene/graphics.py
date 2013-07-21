@@ -137,14 +137,15 @@ class SlideScene(Scene):
 		self.add(control.KeyboardControlLayer(), z=10)
 		self.add(control.RemoteControlLayer(), z=10)
 
-		if (self.duration > 0):
+		if (self.duration > 0 and not Presenter().is_manual()):
 			self.schedule_interval(self.change_slide, self.duration)
 
 	def change_slide(self, dt=0):
-		slide=Presenter().get_next()
-		if not self.slide==slide and slide.is_ready():
-			transition=FadeBLTransition #FadeTransition
-			director.replace(transition(SlideScene(slide), 1.25))
+		if not Presenter().is_manual():
+			Presenter().get_next()
+			self.reload_slide(dt)
+		else:
+			self.unschedule(self.change_slide)
 
 	def reload_slide(self, dt=0):
 		slide=Presenter().get_current_slide()

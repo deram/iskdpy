@@ -39,7 +39,13 @@ class WebsocketSource(Source):
 
 	def goto_slide_cb(self, data):
 		print 'received goto_slide'
-		self.control.goto_slide(data['group_id'], data['slide_id'])
+		if 'slide' in data.keys():
+			if data['slide']=='next':
+				self.control.goto_next_slide()
+			elif data['slide']=='previous':
+				self.control.goto_previous_slide()
+		else:		
+			self.control.goto_slide(data['group_id'], data['slide_id'])
 
 	def update_slide(self, slide):
 		if (not slide.is_uptodate()) and slide.is_ready():
@@ -73,13 +79,13 @@ class WebsocketSource(Source):
 	def slide_done(self, slide):
 		if (slide.is_override()):
 			data = {'display_id': self.displayid, 
+				'slide_id': slide.get_attrib('id'),
 				'override_queue_id': slide.get_attrib('override_queue_id') }
-			self.socket.send(Event.simple('iskdpy.override_shown', data))
 		else:
 			data = {'display_id': self.displayid, 
 				'group_id': slide.get_attrib('group_id'), 
 				'slide_id': slide.get_attrib('id') }
-			self.socket.send(Event.simple('iskdpy.current_slide', data))
+		self.socket.send(Event.simple('iskdpy.current_slide', data))
 
 	def get_path(self):
 		return self.cache_path
@@ -92,8 +98,8 @@ class WebsocketSource(Source):
 
 	def __is_display_updated(self, data):
 		try:
-			updated_at=self.display.get_metadata_updated_at()
-			return (data['metadata_updated_at'] > updated_at)
+			updated_at=self.display.get_updated_at()
+			return (data['updated_at'] > updated_at)
 		except:
 			return True
 	
