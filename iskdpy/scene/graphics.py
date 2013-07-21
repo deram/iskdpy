@@ -51,7 +51,7 @@ class ClockLayer(Layer):
 		self.add(OutlineLabel(
 			text=self.time.strftime(self.clock_format) ,
 			color=(255,255,255,255),
-			font_size=40,
+			font_size=config.clock.get('size', 40),
 			font_name=config.clock['font'],
 			bold=True,
 			x=config.clock['x'],

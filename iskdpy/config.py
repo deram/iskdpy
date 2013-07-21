@@ -3,7 +3,7 @@ window=dict(width=1280, height=720, resizable=True)
 scale_down=False
 fullscreen=True
 
-clock=dict(x=900, y=10, format="%a %H:%M:%S", font="Franklin Gothic Heavy")
+clock=dict(x=970, y=12, format="%a %H:%M:%S", size=32, font="Franklin Gothic Heavy")
 empty_slide=dict(filename= 'base.png', duration=10, type= 'image', show_clock=False)
 
 default_duration=5
