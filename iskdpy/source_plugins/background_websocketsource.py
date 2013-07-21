@@ -11,7 +11,7 @@ register=Source.register
 class BackgroundWebsocketSource(parent):
 	def __init__(self, config):
 		super(BackgroundWebsocketSource, self).__init__(config)
-		self.pool=ThreadPool()
+		self.pool=ThreadPool(1)
 	#def get_display():
 	#def update_display():
 
