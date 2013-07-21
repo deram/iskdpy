@@ -70,6 +70,9 @@ class Display(Base):
 			tmp[ slide['id'] ] = slide
 		return tmp
 
+	def is_manual(self):
+		return self.get_attrib('manual', False)
+
 
 class Presentation(Base):
 	def __init__(self,  groups=None, attribs={}):
@@ -109,7 +112,9 @@ class Presentation(Base):
 	def get_group(pos):
 		return self[pos]
 
-	def locate_group(self, id):
+	def locate_group(self, id, old=0):
+		if self[old].get_id() == id:
+			return old
 		for index, group in enumerate(self):
 			if (group.get_id() == id):
 				return index
@@ -154,7 +159,9 @@ class Group(Base):
 	def get_slide(id):
 		return self[id]
 
-	def locate_slide(self, id):
+	def locate_slide(self, id, old=0):
+		if self[old].get_id() == id:
+			return old
 		for index, slide in enumerate(self):
 			if (slide.get_id() == id):
 				return index
