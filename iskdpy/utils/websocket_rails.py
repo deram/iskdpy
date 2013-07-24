@@ -97,7 +97,7 @@ class WebsocketRails():
 	def _send(self, ev):
 		try:
 			return self.ws.send(repr(ev))
-		except (websocket.WebSocketConnectionClosedException, AttributeError):
+		except (websocket.WebSocketConnectionClosedException, AttributeError, socket.error):
 			self.messages.append(ev)
 			self._connect()
 		
