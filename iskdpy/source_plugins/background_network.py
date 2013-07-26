@@ -3,12 +3,10 @@ from multiprocessing.pool import ThreadPool
 from . import network
 
 from ..source import Source
-from ..types import *
-parent=Source.factory('NetworkSource')
 
 register=Source.register
 @register('BackgroundNetworkSource')
-class BackgroundNetworkSource(parent):
+class BackgroundNetworkSource(network.NetworkSource):
 	def __init__(self, config):
 		super(BackgroundNetworkSource, self).__init__(config)
 		self.pool=ThreadPool()

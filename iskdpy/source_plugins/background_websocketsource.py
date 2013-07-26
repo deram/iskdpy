@@ -1,14 +1,11 @@
 from multiprocessing.pool import ThreadPool
 
 from . import websocketsource
-
 from ..source import Source
-from ..types import *
-parent=Source.factory('WebsocketSource')
 
 register=Source.register
 @register('BackgroundWebsocketSource')
-class BackgroundWebsocketSource(parent):
+class BackgroundWebsocketSource(websocketsource.WebsocketSource):
 	def __init__(self, config):
 		super(BackgroundWebsocketSource, self).__init__(config)
 		self.pool=ThreadPool(1)

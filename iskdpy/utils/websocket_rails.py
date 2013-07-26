@@ -88,10 +88,9 @@ class WebsocketRails():
 			self.queue={}
 			for channel in self.channels.values():
 				channel.subscribe()
-			msgs=self.messages
 			while len(self.messages):
 				self.send(self.messages.pop(0))
-		except websocket.WebSocketException as e:
+		except websocket.WebSocketException:
 			pass
 
 	def _send(self, ev):

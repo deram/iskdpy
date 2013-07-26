@@ -1,10 +1,10 @@
-from ..utils.auth_http import *
+from ..utils.auth_http import AuthHttp
 from ..utils import file
 import json
 import pyglet.resource
 
 from ..source import Source
-from ..types import *
+from .. import types
 import os
 
 register=Source.register
@@ -82,19 +82,19 @@ class NetworkSource(Source):
 		for group in presentation_data.pop('groups', []):
 			slides=[]
 			for slide in group.pop('slides', []):
-				s=Slide(attribs=slide)
+				s=types.Slide(attribs=slide)
 				s.set_attrib('filename', '%s/%d.%s' % (self.cache_path, s.get_id(), s.get_suffix()))
 				slides.append(s)
-			groups.append(Group(slides=slides, attribs=group))
-		presentation = Presentation(groups=groups, attribs=presentation_data)
+			groups.append(types.Group(slides=slides, attribs=group))
+		presentation = types.Presentation(groups=groups, attribs=presentation_data)
 		slides=[]
 		for slide in data.pop('override_queue', []):
-			s=OverrideSlide(attribs=slide)
+			s=types.OverrideSlide(attribs=slide)
 			s.set_attrib('filename', '%s/%d.%s' % (self.cache_path, s.get_id(), s.get_suffix()))
 			slides.append(s)
-		override=OverrideGroup(slides=slides)
+		override=types.OverrideGroup(slides=slides)
 
-		display=Display(presentation=presentation, override=override, attribs=data, name=self.display_name)
+		display=types.Display(presentation=presentation, override=override, attribs=data, name=self.display_name)
 		return display
 
 	def __post_hello(self, presenter_name):
@@ -141,7 +141,7 @@ class NetworkSource(Source):
 
 
 if __name__ == "__main__":
-	from pprint import pprint
+	#from pprint import pprint
 	source=Source.factory('NetworkSource')()
 	source.connect()
 	source.update_display()

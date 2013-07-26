@@ -1,9 +1,7 @@
 from cocos.director import director
-from cocos.scenes.transitions import *
 from .scene.graphics import SlideScene
 
-from .source_plugins import *
-from . import types
+from . import source_plugins
 from . import config
 from . import presenter
 

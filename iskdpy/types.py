@@ -1,6 +1,5 @@
 import os
 import config
-import json
 from time import gmtime, strftime
 import presenter
 
@@ -109,7 +108,7 @@ class Presentation(Base):
 	def get_groups(self):
 		return self.groups
 
-	def get_group(pos):
+	def get_group(self, pos):
 		return self[pos]
 
 	def locate_group(self, id, old=0):
@@ -156,7 +155,7 @@ class Group(Base):
 	def get_slides(self):
 		return self.slides
 
-	def get_slide(id):
+	def get_slide(self, id):
 		return self[id]
 
 	def locate_slide(self, id, old=0):

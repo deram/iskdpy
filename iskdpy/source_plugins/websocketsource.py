@@ -1,11 +1,11 @@
-from ..utils.auth_http import *
+from ..utils.auth_http import AuthHttp
 from ..utils import file
-import json
 import pyglet.resource
+import json
 
-from ..utils.websocket_rails import WebsocketRails, Event, Channel, NOP
+from ..utils.websocket_rails import WebsocketRails, Event, NOP
 from ..source import Source
-from ..types import *
+from .. import types
 
 import os
 
@@ -33,6 +33,7 @@ class WebsocketSource(Source):
 	def display_data_cb(self, data):
 		print 'received display_data'
 		if self.__is_display_updated(data):
+			file.write(os.path.join(self.cache_path, "display.json"), json.dumps(data))
 			self.display=self.__create_display_tree(data)
 			return True
 		return False
@@ -109,20 +110,20 @@ class WebsocketSource(Source):
 		for group in presentation_data.pop('groups', []):
 			slides=[]
 			for slide in group.pop('slides', []):
-				s=Slide(attribs=slide)
+				s=types.Slide(attribs=slide)
 				s.set_attrib('filename', '%s/%d.%s' % (self.cache_path, s.get_id(), s.get_suffix()))
 				s.set_attrib('group_id', group.get('id'))
 				slides.append(s)
-			groups.append(Group(slides=slides, attribs=group))
-		presentation = Presentation(groups=groups, attribs=presentation_data)
+			groups.append(types.Group(slides=slides, attribs=group))
+		presentation = types.Presentation(groups=groups, attribs=presentation_data)
 		slides=[]
 		for slide in data.pop('override_queue', []):
-			s=OverrideSlide(attribs=slide)
+			s=types.OverrideSlide(attribs=slide)
 			s.set_attrib('filename', '%s/%d.%s' % (self.cache_path, s.get_id(), s.get_suffix()))
 			slides.append(s)
-		override=OverrideGroup(slides=slides)
+		override=types.OverrideGroup(slides=slides)
 
-		display=Display(presentation=presentation, override=override, attribs=data, name=self.display_name)
+		display=types.Display(presentation=presentation, override=override, attribs=data, name=self.display_name)
 		return display
 
 	def __get_slide(self, slide):
@@ -143,7 +144,7 @@ class WebsocketSource(Source):
 
 
 if __name__ == "__main__":
-	from pprint import pprint
+	#from pprint import pprint
 	import config
 	source=Source.factory('WebsocketSource')(config.sources[0])
 	source.connect()

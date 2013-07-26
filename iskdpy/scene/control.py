@@ -1,5 +1,5 @@
 from cocos.layer import Layer
-from cocos.actions import *
+from cocos.actions import Delay, CallFunc
 from pyglet.window import key
 
 from ..presenter import Presenter

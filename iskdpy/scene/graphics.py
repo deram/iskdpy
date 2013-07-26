@@ -2,17 +2,13 @@ import cocos
 from cocos.director import director
 from cocos.layer import Layer, ColorLayer
 from cocos.scene import Scene
-from cocos.scenes.transitions import *
-from cocos.actions import *
+from cocos.actions import CallFunc
 from cocos.sprite import Sprite
 import pyglet
-from pyglet import gl, font
+from pyglet import font
 from datetime import datetime
-from time import strftime
 
-from pyglet.window import key
-
-from .transitions import *
+from . import transitions
 from .. import config
 from ..presenter import Presenter
 from . import control
@@ -150,6 +146,6 @@ class SlideScene(Scene):
 	def reload_slide(self, dt=0):
 		slide=Presenter().get_current_slide()
 		if not self.slide==slide and slide.is_ready():
-			transition=FadeBLTransition #FadeTransition
+			transition=transitions.getTransition('FadeBLTransition') #FadeTransition
 			director.replace(transition(SlideScene(slide), 1.25))
 

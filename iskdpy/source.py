@@ -36,7 +36,7 @@ class Source(object):
 		try:
 			return cls._subs_[name]
 		except KeyError:
-			raise FactoryError(tag, "Unknown subclass")
+			raise FactoryError(name, "Unknown subclass")
 
 	@classmethod
 	def register(cls, name):
@@ -46,4 +46,5 @@ class Source(object):
 			return subclass
 		return decorator
 
-
+class FactoryError(Exception):
+	pass

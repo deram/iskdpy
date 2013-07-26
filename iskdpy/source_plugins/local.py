@@ -1,8 +1,8 @@
-from ..utils import file
 import glob
 
 from ..source import Source
-from ..types import *
+from .. import types
+import os
 
 register=Source.register
 
@@ -31,12 +31,12 @@ class LocalSource(Source):
                                         type='video'
                                 else:
                                         type='image'
-                                slide=Slide({'id':item,'type':type, 'filename':item.replace('\\','/'), 'position':len(slides)+1, 'updated_at':1})
+                                slide=types.Slide({'id':item,'type':type, 'filename':item.replace('\\','/'), 'position':len(slides)+1, 'updated_at':1})
                                 slide.set_attrib('foo', item)
 				slides.append(slide)
-			groups.append(Group(slides=slides))
-			presentation=Presentation(groups=groups, attribs={'total_slides':len(slides)})
-			self.display=Display(presentation=presentation)
+			groups.append(types.Group(slides=slides))
+			presentation=types.Presentation(groups=groups, attribs={'total_slides':len(slides)})
+			self.display=types.Display(presentation=presentation)
 			return True
 		return False
 
@@ -51,7 +51,7 @@ class LocalSource(Source):
 
 
 if __name__ == "__main__":
-	from pprint import pprint
+	#from pprint import pprint
 	source=Source.factory('LocalSource')()
 	source.connect()
 	source.update_display()

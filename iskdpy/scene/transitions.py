@@ -1,13 +1,10 @@
-import pyglet
-
-from cocos.actions import *
-import cocos.scene as scene
+from cocos.actions import CallFunc, FadeOutTRTiles, FadeOutBLTiles, StopGrid
 from cocos.director import director
-from cocos.layer import ColorLayer
-from cocos.sprite import Sprite
-from cocos.scenes.transitions import TransitionScene
+from cocos.scenes import transitions
 
-class FadeTRTransition(TransitionScene):
+__all__= [ 'FadeTRTransition', 'FadeBLTransition']
+
+class FadeTRTransition(transitions.TransitionScene):
 	'''Fade the tiles of the outgoing scene from the left-bottom corner the to top-right corner.
 	'''
 	def __init__( self, *args, **kwargs ):
@@ -37,4 +34,12 @@ class FadeBLTransition(FadeTRTransition):
 	'''
 	def get_action(self,x,y):
 		return FadeOutBLTiles( grid=(x,y), duration=self.duration )
+
+
+
+def getTransition(name):
+	if name == 'FadeBLTransition': return FadeBLTransition
+	if name == 'FadeTRTransition': return FadeTRTransition
+	if name in transitions.__all__:
+		return getattr(transitions, name)
 
