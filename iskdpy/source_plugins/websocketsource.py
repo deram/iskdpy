@@ -13,13 +13,13 @@ register=Source.register
 
 @register('WebsocketSource')
 class WebsocketSource(Source):
-	def __init__(self, config):
-		super(WebsocketSource, self).__init__(config)
-		self.server=config['server']
-		self.cache_path=config['cache_path']
+	def __init__(self, conf):
+		super(WebsocketSource, self).__init__(conf)
+		self.server=conf['server']
+		self.cache_path=conf['cache_path']
 		self.displayid=None
-		self.display_name=config['display_name']
-		self.http=AuthHttp(config['user'], config['passwd'])
+		self.display_name=conf['display_name']
+		self.http=AuthHttp(conf['user'], conf['passwd'])
 		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'))
 		self.channel=None
 		if not os.path.exists(self.cache_path):
@@ -128,13 +128,13 @@ class WebsocketSource(Source):
 
 	def __get_slide(self, slide):
 		location=slide.get_filename()
-		id=slide.get_id()
-		return self.http.get_and_save('%s/slides/%d/full' % (self.server, id), location)
+		sid=slide.get_id()
+		return self.http.get_and_save('%s/slides/%d/full' % (self.server, sid), location)
 
 	def __set_slide_timestamp(self, slide):
 		time=slide.get_update_time()
 		location=slide.get_filename()
-		os.utime(location, (time,time))
+		os.utime(location, (time, time))
 	
 	def __fill_cache(self):
 		slides=self.display.get_all_slides()

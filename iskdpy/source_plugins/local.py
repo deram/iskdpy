@@ -27,12 +27,12 @@ class LocalSource(Source):
 			slides=[]
 			groups=[]
 			for item in files:
-                                if item.endswith(('avi', 'mp4', 'mov', 'mkv')):
-                                        type='video'
-                                else:
-                                        type='image'
-                                slide=types.Slide({'id':item,'type':type, 'filename':item.replace('\\','/'), 'position':len(slides)+1, 'updated_at':1})
-                                slide.set_attrib('foo', item)
+				if item.endswith(('avi', 'mp4', 'mov', 'mkv')):
+					slidetype='video'
+				else:
+					slidetype='image'
+				slide=types.Slide({'id':item,'type':slidetype, 'filename':item.replace('\\','/'), 'position':len(slides)+1, 'updated_at':1})
+				slide.set_attrib('foo', item)
 				slides.append(slide)
 			groups.append(types.Group(slides=slides))
 			presentation=types.Presentation(groups=groups, attribs={'total_slides':len(slides)})
