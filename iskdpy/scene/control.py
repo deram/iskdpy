@@ -50,7 +50,7 @@ class _RemoteControlLayer(Layer):
 
 	def goto_previous_slide(self):
 		def func(dt=0):
-			if Presenter().Presenter().get_previous():
+			if Presenter().get_previous():
 				self.parent.reload_slide()
 		self.do(Delay(0.1) + CallFunc(func))
 	
