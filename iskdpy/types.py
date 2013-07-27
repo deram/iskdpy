@@ -57,6 +57,9 @@ class Display(Base):
 	def get_metadata_updated_at(self):
 		return self.get_attrib('metadata_updated_at', 0)
 
+	def get_updated_at(self):
+		return self.get_attrib('updated_at', 0)
+
 	def get_name(self):
 		return self.get_attrib('name', 'unnamed')
 
