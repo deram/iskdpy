@@ -7,6 +7,7 @@ from cocos.sprite import Sprite
 import pyglet
 from pyglet import font
 from datetime import datetime
+from weakref import proxy as weak
 
 from . import transitions
 from .. import config
@@ -113,17 +114,17 @@ class SlideScene(Scene):
 	def __init__(self, slide=None):
 		super(SlideScene, self).__init__()
 		self.scheduled_event=False
-		self.slide=slide
+		self.slide=weak(slide)
 		if (not self.slide):
-	   		self.slide=Presenter().get_next()
+	   		self.slide=weak(Presenter().get_next())
 
-		self.duration=self.slide.get_duration()
+		duration=self.slide.get_duration()
 			
 		self.add(ColorLayer(0,0,0,255), z=-10)
 
 		if (self.slide.get_type()=="video"):
 			self.add(VideoLayer(self.slide.get_filename()), z=0)
-			self.duration=0
+			duration=0
 		else:
 			self.add(SlideLayer(self.slide.get_filename()), z=0)
 
@@ -133,8 +134,8 @@ class SlideScene(Scene):
 		self.add(control.KeyboardControlLayer(), z=10)
 		self.add(control.RemoteControlLayer(), z=10)
 
-		if (self.duration > 0 and not Presenter().is_manual()):
-			self.schedule_interval(self.change_slide, self.duration)
+		if (duration > 0 and not Presenter().is_manual()):
+			self.schedule_interval(self.change_slide, duration)
 
 	def change_slide(self, dt=0):
 		if not Presenter().is_manual():
@@ -146,7 +147,6 @@ class SlideScene(Scene):
 	def reload_slide(self, dt=0):
 		slide=Presenter().get_current_slide()
 		if not self.slide==slide and slide.is_ready():
-			del self.slide, self.duration
 			transition=transitions.getTransition('FadeBLTransition') #FadeTransition
 			director.replace(transition(SlideScene(slide), 1.25))
 
