@@ -39,9 +39,9 @@ class OutlineLabel(cocos.text.Label):
 			self.walk(set_element_text)
 			self.text=text
 
-class ClockLayer(Layer):
+class _ClockLayer(Layer):
 	def __init__(self):
-		super(ClockLayer, self).__init__()
+		super(_ClockLayer, self).__init__()
 		self.time=datetime.now()
 		self.clock_format=config.clock['format']
 
@@ -64,6 +64,13 @@ class ClockLayer(Layer):
 	def change_time(self, dt=0):
 		self.time=datetime.now()
 		self.get('label').set_text(self.time.strftime(self.clock_format))
+
+__cl=None
+def ClockLayer():
+	global __cl
+	if not __cl:
+		__cl = _ClockLayer()
+	return __cl
 
 class SlideLayer(Layer):
 	def __init__( self, file):
@@ -109,7 +116,6 @@ class VideoLayer (SlideLayer):
 		self.media_player.get_texture().blit(0, 0)
 
 
-
 class SlideScene(Scene):
 	def __init__(self, slide=None):
 		super(SlideScene, self).__init__()
@@ -119,7 +125,7 @@ class SlideScene(Scene):
 	   		self.slide=weak(Presenter().get_next())
 
 		duration=self.slide.get_duration()
-			
+
 		self.add(ColorLayer(0,0,0,255), z=-10)
 
 		if (self.slide.get_type()=="video"):
