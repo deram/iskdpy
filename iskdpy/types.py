@@ -226,7 +226,7 @@ class Slide(Base):
 
 	def get_suffix(self):
 		if (self.get_type()=='video'): 
-			return 'mov'
+			return 'mp4'
 		else:
 			return 'png'
 

@@ -8,6 +8,7 @@ import pyglet
 from pyglet import font
 from datetime import datetime
 from weakref import proxy as weak
+import os
 
 from . import transitions
 from .. import config
@@ -85,7 +86,8 @@ class SlideLayer(Layer):
 class VideoLayer (SlideLayer):
 	def __init__(self, video_name):
 		super(SlideLayer, self).__init__()
-
+                video_name=os.path.join(*video_name.split('/'))
+                print video_name
 		source = pyglet.media.load(video_name)
 		format = source.video_format
 		if not format:
