@@ -147,8 +147,10 @@ class SlideScene(Scene):
 
 	def change_slide(self, dt=0):
 		if not Presenter().is_manual():
-			Presenter().get_next()
-			self.reload_slide(dt)
+			slide=Presenter().get_next()
+			if not self.slide==slide and slide.is_ready():
+				transition=transitions.getTransition('FadeBLTransition') #FadeTransition
+				director.replace(transition(SlideScene(slide), 1.25))
 		else:
 			self.unschedule(self.change_slide)
 
