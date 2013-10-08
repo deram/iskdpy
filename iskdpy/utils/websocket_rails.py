@@ -90,7 +90,7 @@ class WebsocketRails():
 				channel.subscribe()
 			while len(self.messages):
 				self.send(self.messages.pop(0))
-		except websocket.WebSocketException:
+		except (websocket.WebSocketException, socket.error):
 			pass
 
 	def _send(self, ev):
