@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from multiprocessing.pool import ThreadPool
 
 from . import websocketsource
@@ -15,7 +18,7 @@ class BackgroundWebsocketSource(websocketsource.WebsocketSource):
 	def display_data_cb(self, data):
 		ret=super(BackgroundWebsocketSource, self).display_data_cb(data)
 		if ret:
-			print 'get_slides'
+			logger.debug('get_slides')
 			self.__get_slides()
 		return ret
 

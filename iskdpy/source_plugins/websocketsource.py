@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from ..utils.auth_http import AuthHttp
 from ..utils import file
 import pyglet.resource
@@ -31,7 +34,7 @@ class WebsocketSource(Source):
 		return True
 
 	def display_data_cb(self, data):
-		print 'received display_data'
+		logger.debug('Received display_data')
 		if self.__is_display_updated(data):
 			file.write(os.path.join(self.cache_path, "display.json"), json.dumps(data))
 			self.display=self.__create_display_tree(data)
@@ -39,7 +42,7 @@ class WebsocketSource(Source):
 		return False
 
 	def goto_slide_cb(self, data):
-		print 'received goto_slide'
+		logger.debug('Received goto_slide')
 		if 'slide' in data.keys():
 			if data['slide']=='next':
 				self.control.goto_next_slide()
@@ -50,7 +53,7 @@ class WebsocketSource(Source):
 
 	def update_slide(self, slide):
 		if (not slide.is_uptodate()) and slide.is_ready():
-			print "Updating: %s" % slide
+			logger.info("Updating: %s" % slide)
 			if self.__get_slide(slide):
 				self.__set_slide_timestamp(slide)
 				self.__invalidate_cached_slide(slide)

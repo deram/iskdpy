@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import urllib2
 from urllib import urlencode
 import base64
@@ -18,10 +21,10 @@ class AuthHttp():
 			result = urllib2.urlopen(request, data, self.timeout)
 			return result.read()
 		except urllib2.URLError:
-			print "URLError: Could not connect %s" % (url)
+			logger.error("URLError: Could not connect %s" % (url))
 			return False 
 		except socket.timeout:
-			print "Timeout connecting"
+			logger.error("Timeout connecting")
 			return False
 	
 	def get_and_save(self, url, filename):

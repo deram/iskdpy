@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import glob
 
 from ..source import Source
@@ -22,7 +25,7 @@ class LocalSource(Source):
 	def update_display(self):
 		files=glob.glob('%s/*.*' % self.local_dir)
 		if ( self.files != files ):
-			print "Contents of '%s' changed, rebuilding display..." % (self.local_dir)
+			logger.info("Contents of '%s' changed, rebuilding display..." % (self.local_dir))
 			self.files=files
 			slides=[]
 			groups=[]

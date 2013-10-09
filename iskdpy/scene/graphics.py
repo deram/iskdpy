@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import cocos
 from cocos.director import director
 from cocos.layer import Layer, ColorLayer
@@ -87,11 +90,11 @@ class VideoLayer (SlideLayer):
 	def __init__(self, video_name):
 		super(SlideLayer, self).__init__()
                 video_name=os.path.join(*video_name.split('/'))
-                print video_name
+                logger.debug('Video filename: %s' % video_name)
 		source = pyglet.media.load(video_name)
 		format = source.video_format
 		if not format:
-			print 'No video track in this source.'
+			logger.error('No video track in this source.')
 			return
 
 		self.media_player = pyglet.media.Player()

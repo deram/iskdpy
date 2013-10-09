@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from .types import Slide
 from .source import Source 
 import gc
@@ -36,7 +39,7 @@ class _Presenter():
 				if self.display.is_manual() and not tmp.is_manual():
 					self.control.goto_next_slide()
 				if self.display.get_presentation().get_id() != tmp.get_presentation().get_id():
-					print "Presentation changed."
+					logger.info("Presentation changed.")
 					self.seek_to_presentation_beginning()
 				else:
 					try:
@@ -46,7 +49,7 @@ class _Presenter():
 						self.group=group
 						self.slide=slide
 					except (IndexError, AttributeError):
-						print "Current slide not in presentation, restarting presentation"
+						logger.warning("Current slide not in presentation, restarting presentation")
 						self.seek_to_presentation_beginning()
 				self.display=tmp
 				return True
@@ -100,10 +103,10 @@ class _Presenter():
 				if ( self.group >= n_groups ):
 					self.slide = 0
 					self.group = 0
-					print "Presentation wrapped"
+					logger.info("Presentation wrapped")
 					gc.collect()
 					del gc.garbage[:]
-				print "Next: %s" % unicode(self.get_current_group()).split('\n', 1)[0]
+				logger.info("Next: %s" % unicode(self.get_current_group()).split('\n', 1)[0])
 
 			if ( len(self.get_current_group()) > 0 ):
 				if self.get_current_slide().is_valid():
@@ -118,10 +121,10 @@ class _Presenter():
 				self.group -= 1
 				if ( self.group < 0 ):
 					self.group = n_groups - 1
-					print "Presentation wrapped"
+					logger.info("Presentation wrapped")
 					gc.collect()
 					del gc.garbage[:]
-				print "Prev: %s" % unicode(self.get_current_group()).split('\n', 1)[0]
+				logger.info("Prev: %s" % unicode(self.get_current_group()).split('\n', 1)[0])
 				self.slide = len(self.get_current_group()) - 1
 
 			if ( len(self.get_current_group()) > 0 ):
@@ -158,7 +161,7 @@ class _Presenter():
 	def _get_slide(self, slide='next'):
 		if not self.display:
 			if not self.update_display():
-				print "NO DISPLAY FROM SOURCE"
+				logger.error("NO DISPLAY FROM SOURCE")
 				return self.get_empty_slide()
 
 		if ( not self.first_time ):
@@ -170,7 +173,7 @@ class _Presenter():
 			ret = self.pop_override_slide()
 		else:
 			if (self.is_empty_presentation()):
-				print "EMPTY PRESENTATION"
+				logger.warning("EMPTY PRESENTATION")
 				return self.get_empty_slide()
 			if slide=='next':
 				self.seek_to_next_valid_slide_in_presentation()
@@ -180,7 +183,7 @@ class _Presenter():
 
 		self.source.update_slide(ret)
 		self.source.slide_done(ret) #XXX move to somewhere more close to slide shown on screen
-		print "Next: %s" % ret
+		logger.info("Next: %s" % ret)
 		return ret
 
 	def get_source(self):
@@ -193,7 +196,7 @@ _presenter=None
 def Presenter():
 	global _presenter
 	if (not _presenter):
-		print "creating singleton entity"
+		logger.debug("creating singleton entity")
 		_presenter=_Presenter()
 		_presenter.next_source()
 	return _presenter

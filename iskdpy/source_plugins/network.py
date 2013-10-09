@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from ..utils.auth_http import AuthHttp
 from ..utils import file
 import json
@@ -39,7 +42,7 @@ class NetworkSource(Source):
 
 	def update_slide(self, slide):
 		if (not slide.is_uptodate()):
-			print "Updating: %s" % slide
+			logger.info("Updating: %s" % slide)
 			if self.__get_slide(slide):
 				self.__set_slide_timestamp(slide)
 				self.__invalidate_cached_slide(slide)
