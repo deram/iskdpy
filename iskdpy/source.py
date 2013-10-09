@@ -1,3 +1,7 @@
+import logging
+logger = logging.getLogger(__name__)
+
+
 class Source(object):
 	_subs_ = {}
 
@@ -41,7 +45,7 @@ class Source(object):
 	@classmethod
 	def register(cls, name):
 		def decorator(subclass):
-			print "Registered %s" % name
+			logger.debug("Registered %s" % name)
 			cls._subs_[name] = subclass
 			return subclass
 		return decorator

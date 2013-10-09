@@ -1,8 +1,13 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import websocket
 import json
 from select import select
 import socket
 import random
+
+from .misc_utils import RateLimit
 
 def NOP(data):
 	pass
@@ -81,9 +86,10 @@ class WebsocketRails():
 		}
 		self._connect()
 
+	@RateLimit(1)
 	def _connect(self):
 		try:
-			print 'Connecting %s' % self.url
+			logger.info('Connecting %s' % self.url)
 			self.ws=websocket.create_connection(self.url)
 			self.queue={}
 			for channel in self.channels.values():
@@ -129,7 +135,7 @@ class WebsocketRails():
 		if func:
 			return func(ev.data)
 		elif ev:
-			print "UNHANDLED: %s" % ev.__dict__
+			logger.debug("UNHANDLED: %s" % ev.__dict__)
 
 	def run_all(self):
 		while len(self.queue):
