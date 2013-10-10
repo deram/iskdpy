@@ -10,7 +10,7 @@ from . import presenter
 
 def setup_logger():
 	logging.basicConfig(filename='iskdpy.log', 
-						level=logging.INFO,
+						level=logging.DEBUG,
 						format='%(asctime)s %(name)-32s %(levelname)-8s %(message)s',
 						datefmt='%H:%M:%S'
 						)
@@ -28,7 +28,7 @@ def main():
 	setup_logger()
 
 	logger.info('Started')
-	slide=presenter.Presenter().get_empty_slide()
+	slide=presenter.get_empty_slide()
 	
 	director.init(**config.window)
 	if ( config.scale_down ):

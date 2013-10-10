@@ -15,7 +15,7 @@ import os
 
 from . import transitions
 from .. import config
-from ..presenter import Presenter
+from ..import presenter
 from . import control
 
 class OutlineLabel(cocos.text.Label):
@@ -127,7 +127,7 @@ class SlideScene(Scene):
 		self.scheduled_event=False
 		self.slide=weak(slide)
 		if (not self.slide):
-	   		self.slide=weak(Presenter().get_next())
+	   		self.slide=weak(presenter.get_next())
 
 		duration=self.slide.get_duration()
 
@@ -145,12 +145,12 @@ class SlideScene(Scene):
 		self.add(control.KeyboardControlLayer(), z=10)
 		self.add(control.RemoteControlLayer(), z=10)
 
-		if (duration > 0 and not Presenter().is_manual()):
+		if (duration > 0 and not presenter.is_manual()):
 			self.schedule_interval(self.change_slide, duration)
 
 	def change_slide(self, dt=0):
-		if not Presenter().is_manual():
-			slide=Presenter().get_next()
+		if not presenter.is_manual():
+			slide=presenter.get_next()
 			if not self.slide==slide and slide.is_ready():
 				transition=transitions.getTransition('FadeBLTransition') #FadeTransition
 				director.replace(transition(SlideScene(slide), 1.25))
@@ -158,7 +158,7 @@ class SlideScene(Scene):
 			self.unschedule(self.change_slide)
 
 	def reload_slide(self, dt=0):
-		slide=Presenter().get_current_slide()
+		slide=presenter.get_current_slide()
 		if not self.slide==slide and slide.is_ready():
 			transition=transitions.getTransition('FadeBLTransition') #FadeTransition
 			director.replace(transition(SlideScene(slide), 1.25))
