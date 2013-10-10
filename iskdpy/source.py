@@ -4,6 +4,7 @@ logger = logging.getLogger(__name__)
 
 class Source(object):
 	_subs_ = {}
+	_current_ = None
 
 	def __init__(self, config=None):
 		self.display=None
@@ -36,9 +37,10 @@ class Source(object):
 		self.control=control
 
 	@classmethod
-	def factory(cls, name):
+	def factory(cls, name, *args, **kwargs):
 		try:
-			return cls._subs_[name]
+			cls._current_ = cls._subs_[name](*args, **kwargs)
+			return cls._current_
 		except KeyError:
 			raise FactoryError(name, "Unknown subclass")
 
@@ -49,6 +51,10 @@ class Source(object):
 			cls._subs_[name] = subclass
 			return subclass
 		return decorator
+
+	@classmethod
+	def get_current(cls):
+		return cls._current_
 
 class FactoryError(Exception):
 	pass

@@ -8,13 +8,12 @@ from . import config
 
 first_time=True
 control=None
-source=None
 display=None
 group, slide = (0,-1)
 
 def __connect(conf):
-	global source, display
-	source=Source.factory(conf.pop('source_name'))(conf)
+	global display
+	source = Source.factory(conf.pop('source_name'), conf)
 	source.connect()
 	display=source.get_display()
 	seek_to_presentation_beginning()
@@ -33,13 +32,11 @@ def next_source():
 		__connect(config.sources.pop())
 
 def update_display():
-	global display, slide, group
+	global control, display, slide, group
 	if (get_source().update_display()):
 		tmp=get_source().get_display()
 		if not display == tmp:
-			#print "%s" % tmp
-			if display.is_manual() and not tmp.is_manual():
-				control.goto_next_slide()
+			old=display
 			if display.get_presentation().get_id() != tmp.get_presentation().get_id():
 				logger.info("Presentation changed.")
 				seek_to_presentation_beginning()
@@ -54,6 +51,8 @@ def update_display():
 					logger.warning("Current slide not in presentation, restarting presentation")
 					seek_to_presentation_beginning()
 			display=tmp
+			if old.is_manual() and not tmp.is_manual():
+				control.goto_next_slide()
 			return True
 	return False
 
@@ -150,16 +149,16 @@ def is_override():
 		return override[0].is_valid()
 	return False
 
-def is_manual():
-	global display
-	return display.is_manual()
-
 def pop_override_slide():
 	global display
 	override=display.get_override()
 	if len( override ):
 		return override.pop(0)
 	return False
+
+def is_manual():
+	global display
+	return display.is_manual()
 
 def is_empty_presentation():
 	global display
@@ -201,10 +200,9 @@ def _get_slide(slide='next'):
 	return ret
 
 def get_source():
-	global source
-	if not source:
+	if not Source.get_current():
 		next_source()
-	return source
+	return Source.get_current()
 
 def get_empty_slide():
 	return Slide(config.empty_slide)
