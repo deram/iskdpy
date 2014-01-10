@@ -20,12 +20,13 @@ class AuthHttp():
 			request.add_header("Authorization", "Basic %s" % base64string)   
 			result = urllib2.urlopen(request, data, self.timeout)
 			return result.read()
-		except urllib2.URLError:
-			logger.error("URLError: Could not connect %s" % (url))
-			return False 
+		except urllib2.HTTPError, e:
+			logger.error("HTTPError: %s %s %s" % (url, e.code, e.reason))
+		except urllib2.URLError, e:
+			logger.error("URLError: %s %s" % (url, e.reason))
 		except socket.timeout:
 			logger.error("Timeout connecting")
-			return False
+		return False
 	
 	def get_and_save(self, url, filename):
 		resource = self.get(url)
