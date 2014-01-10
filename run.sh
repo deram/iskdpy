@@ -1,3 +1,2 @@
 #!/bin/sh
-export VERSIONER_PYTHON_PREFER_32_BIT=yes
-python2.7 iskdpy.py
+arch -i386 python2.7 iskdpy.py
