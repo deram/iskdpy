@@ -87,7 +87,7 @@ class Presentation(Base):
 		return self.groups[pos]
 
 	def __len__(self):
-		return self.groups.__len__()
+		return len(self.groups)
 
 	def __unicode__(self):
 		tmp=""
@@ -102,7 +102,12 @@ class Presentation(Base):
 		return self.get_attrib('id', 0)
 	
 	def get_total_slides(self):
-		return self.get_attrib('total_slides', 0)
+		total=self.get_attrib('total_slides', 0)
+		if total==0:
+			for g in self.groups:
+				total+=len(g)
+			self.set_attrib('total_slides', total)
+		return total
 	
 	def get_name(self):
 		return self.get_attrib('name', 'unnamed')
@@ -134,7 +139,7 @@ class Group(Base):
 		return self.slides[id]
 
 	def __len__(self):
-		return self.slides.__len__()
+		return len(self.slides)
 
 	def __unicode__(self):
 		tmp=""
@@ -168,33 +173,23 @@ class Group(Base):
 				return index
 		return -1
 
-_masterslidestore={}
 class Slide(Base):
-	def __init__(self, attribs={}):
-		super(Slide, self).__init__(attribs={})
-		self.id=attribs.get('id', 0)
-		global _masterslidestore
-		_masterslidestore.update({self.id: attribs})
+	def __init__(self, attribs=config.empty_slide):
+		super(Slide, self).__init__(attribs=attribs)
 	
-	def master(self):
-		global _masterslidestore
-		return _masterslidestore.get(self.id, None)
-
 	def get_attrib(self, id, default=None):
 		if id in self.attribs:
 			return self.attribs[id]
-		else:
-			return self.master().get(id, default)
 
 	def __eq__(self, other):
-		r=isinstance(other, self.__class__) and (self.master() == other.master())
+		r=isinstance(other, self.__class__) and (self.attribs() == other.attribs())
 		return r
 
 	def __getitem__(self, id):
 		return self.get_attrib(id)
 
 	def __len__(self):
-		return len(self.attribs) + len(self.master())
+		return len(self.attribs)
 
 	def __unicode__(self):
 		return 'Slide "%s" (%s) Position %s file: %s (%s)' % ( self.get_name(), self.get_id(), self.get_position(), self.get_filename(), strftime('%X', gmtime(self.get_update_time())))
@@ -265,11 +260,8 @@ class OverrideGroup(Group):
 			tmp+="t%s\n" % unicode(i)
 		return 'Override Slides: %d\n%s' % ( len(self), tmp)
 
-	def __len__(self):
-		return len(self.slides)
-
 	def __delitem__(self, key):
-		return self.slides.__delitem__(key)
+		del self.slides[key]
 
 class OverrideSlide(Slide):
 	def __unicode__(self):
