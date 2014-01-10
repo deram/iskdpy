@@ -1,12 +1,14 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from cocos.director import director
-from .scene.graphics import SlideScene
+import gc
 
-from . import source_plugins
-from . import config
 from . import presenter
+from . import source_plugins
+from . import output_plugins
+from . import config
+
+from .output import OutputPlugin
 
 def setup_logger():
 	logging.basicConfig(filename='iskdpy.log', 
@@ -27,15 +29,11 @@ def setup_logger():
 def main():
 	setup_logger()
 
-	logger.info('Started')
-	slide=presenter.get_empty_slide()
-	
-	director.init(**config.window)
-	if ( config.scale_down ):
-		director.window.set_size(640, 360)
-	if ( config.fullscreen ):
-		director.window.set_fullscreen(True)
-	director.window.set_mouse_visible(False)
+	gc.disable()
 
-	director.run(SlideScene(slide) )
+	logger.info('Started')
+	presenter.goto_next_slide()
+	output=OutputPlugin.factory(config.output)
+	output.run()
+
 	logger.info('Stopped')

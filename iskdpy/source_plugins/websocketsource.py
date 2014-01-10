@@ -3,12 +3,13 @@ logger = logging.getLogger(__name__)
 
 from ..utils.auth_http import AuthHttp
 from ..utils import file
-import pyglet.resource
 import json
+from threading import Thread
 
 from ..utils.websocket_rails import WebsocketRails, Event, NOP
-from ..source import Source
+from ..source import Source, thread
 from .. import types
+from .. import presenter
 
 import os
 
@@ -23,63 +24,76 @@ class WebsocketSource(Source):
 		self.displayid=None
 		self.display_name=conf['display_name']
 		self.http=AuthHttp(conf['user'], conf['passwd'])
-		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'))
+		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'), 60)
 		self.channel=None
 		if not os.path.exists(self.cache_path):
 			os.makedirs(self.cache_path)
+		self.wsthread=Thread(target=self.__socket_run)
 
 	#def get_display():
 
+	@thread.decorate
 	def update_display(self):
-		return True
+		if self.display:
+			return True
+		else:
+			return False
 
-	def display_data_cb(self, data):
-		logger.debug('Received display_data')
+	@thread.decorate
+	def _display_data_cb(self, data):
 		if self.__is_display_updated(data):
 			file.write(os.path.join(self.cache_path, "display.json"), json.dumps(data))
 			self.display=self.__create_display_tree(data)
+			logger.info('Received display_data. S:%d O:%d %s' % (self.display.get_presentation().get_total_slides(), 
+																len(self.display.get_override()), 
+																('manual' if self.display.is_manual() else '') ))
+			logger.debug('%s' % (self.display) )
+			presenter.display_updated()
 			return True
+		logger.debug('Received old display_data')
 		return False
 
-	def goto_slide_cb(self, data):
+	@thread.decorate
+	def _goto_slide_cb(self, data):
 		logger.debug('Received goto_slide')
 		if 'slide' in data.keys():
 			if data['slide']=='next':
-				self.control.goto_next_slide()
+				presenter.goto_next_slide()
 			elif data['slide']=='previous':
-				self.control.goto_previous_slide()
+				presenter.goto_previous_slide()
 		else:		
-			self.control.goto_slide(data['group_id'], data['slide_id'])
+			presenter.goto_slide(data['group_id'], data['slide_id'])
 
+	@thread.decorate
 	def update_slide(self, slide):
 		if (not slide.is_uptodate()) and slide.is_ready():
 			logger.info("Updating: %s" % slide)
 			if self.__get_slide(slide):
 				self.__set_slide_timestamp(slide)
-				self.__invalidate_cached_slide(slide)
-				pyglet.resource.reindex()
+				presenter.refresh_slide_cache(slide)
 		return slide
 
+	@thread.decorate
 	def connect(self):
-		def connect_cb(data):
-			self.displayid=data.get('id')
-			self.display=self.__create_display_tree(data)
 		data = {'display_name': self.display_name}
-		self.socket.send(Event.simple('iskdpy.hello', data, connect_cb))
+		self.socket.send(Event.simple('iskdpy.hello', data, self._display_data_cb))
 		self.socket.run_all()
 		if (self.displayid>0):
 			self.channel=self.socket.channel('display_%d' % self.displayid).subscribe()
 			self.channel.actions.update({
-				'data': self.display_data_cb,
-				'goto_slide': self.goto_slide_cb,
+				'data': self._display_data_cb,
+				'goto_slide': self._goto_slide_cb,
 				'current_slide': NOP
 				})
+			self.wsthread.start()
 			return True
 		return False
 		
-	def run_control(self):
-		self.socket.run()
+	def __socket_run(self):
+		while True:
+			self.socket.run()
 
+	@thread.decorate
 	def slide_done(self, slide):
 		if (slide.is_override()):
 			data = {'display_id': self.displayid, 
@@ -91,19 +105,16 @@ class WebsocketSource(Source):
 				'slide_id': slide.get_attrib('id') }
 		self.socket.send(Event.simple('iskdpy.current_slide', data))
 
+	@thread.decorate
 	def get_path(self):
 		return self.cache_path
 
-	def __invalidate_cached_slide(self, slide):
-		filename=slide.get_filename()
-		if filename in pyglet.resource._default_loader._cached_images:
-			pyglet.resource._default_loader._cached_images.pop( filename )
-
-
 	def __is_display_updated(self, data):
+		if not self.displayid and 'id' in data: 
+			self.displayid=data['id']
+			return True #First time, data always used.
 		try:
-			updated_at=self.display.get_updated_at()
-			return (data['updated_at'] > updated_at)
+			return data['metadata_updated_at'] > self.display.get_metadata_updated_at()
 		except:
 			return True
 	
@@ -153,7 +164,5 @@ if __name__ == "__main__":
 	source.connect()
 	source.update_display()
 	#source._WebsocketSource__fill_cache()
-	while not source.display:
-		source.run_control()
 	print "%s" % source.display
 

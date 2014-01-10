@@ -2,7 +2,7 @@ from cocos.layer import Layer
 from cocos.actions import Delay, CallFunc
 from pyglet.window import key
 
-from ..import presenter
+from ... import presenter
 
 class _KeyboardControlLayer(Layer):
 
@@ -14,48 +14,28 @@ class _KeyboardControlLayer(Layer):
 
 	def on_key_press( self, k , m ):
 		if k == key.ENTER:
-			presenter.get_next()
-			self.do(CallFunc(self.parent.reload_slide))
+			presenter.goto_next_slide()
 			return True
 		elif k == key.RIGHT:
-			presenter.get_next()
-			self.do(CallFunc(self.parent.reload_slide))
+			presenter.goto_next_slide()
 			return True
 		elif k == key.LEFT:
-			presenter.get_previous()
-			self.do(CallFunc(self.parent.reload_slide))
+			presenter.goto_previous_slide()
 			return True
 
 
 class _RemoteControlLayer(Layer):
 	def __init__(self, *args, **kwargs):
 		super(_RemoteControlLayer, self).__init__(*args, **kwargs)
-		presenter.register_control(self)
 		self.schedule_interval(self.run, 0.1)
+		self.task=None
+
+	def set_task(self, task):
+		self.task=task
 
 	def run(self, *args):
-		presenter.run_control()
-
-	def goto_slide(self, group_id, slide_id):
-		def func(dt=0):
-			if presenter.set_current_slide(group_id, slide_id):
-				self.parent.reload_slide()
-		self.do(Delay(0.1) + CallFunc(func))
-	
-	def goto_next_slide(self):
-		def func(dt=0):
-			if presenter.get_next():
-				self.parent.reload_slide()
-		self.do(Delay(0.1) + CallFunc(func))
-
-	def goto_previous_slide(self):
-		def func(dt=0):
-			if presenter.get_previous():
-				self.parent.reload_slide()
-		self.do(Delay(0.1) + CallFunc(func))
-	
-	def reload_slide(self):
-		self.do(Delay(0.1) + CallFunc(self.parent.reload_slide))
+		if self.task:
+			self.task()
 
 __rcl=None
 def RemoteControlLayer():

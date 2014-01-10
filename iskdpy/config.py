@@ -10,7 +10,7 @@ default_duration=5
 default_cache_path='cache'
 
 sources=[ dict( source_name='LocalSource', display_name="test_display", local_dir="local") ]
-
+output="CocosOutput"
 # local configuration overrides defaults
 try:
 	from local_config import *

@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 from multiprocessing.pool import ThreadPool
 
 from . import websocketsource
-from ..source import Source
+from ..source import Source, thread
 
 register=Source.register
 @register('BackgroundWebsocketSource')
@@ -14,7 +14,8 @@ class BackgroundWebsocketSource(websocketsource.WebsocketSource):
 		self.pool=ThreadPool(1)
 	#def get_display():
 	#def update_display():
-
+	
+	@thread.decorate
 	def display_data_cb(self, data):
 		ret=super(BackgroundWebsocketSource, self).display_data_cb(data)
 		if ret:
@@ -30,6 +31,7 @@ class BackgroundWebsocketSource(websocketsource.WebsocketSource):
 
 	#def get_path(self):
 	
+	@thread.decorate
 	def __get_slides(self):
 		def worker(slide):
 			if slide.is_ready():

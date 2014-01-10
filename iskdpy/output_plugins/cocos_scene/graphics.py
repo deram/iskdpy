@@ -5,7 +5,7 @@ import cocos
 from cocos.director import director
 from cocos.layer import Layer, ColorLayer
 from cocos.scene import Scene
-from cocos.actions import CallFunc
+from cocos.actions import CallFunc, MoveTo, FadeOutBLTiles, FadeOut, StopGrid, AccelDeccel, Hide
 from cocos.sprite import Sprite
 import pyglet
 from pyglet import font
@@ -13,10 +13,9 @@ from datetime import datetime
 from weakref import proxy as weak
 import os
 
-from . import transitions
-from .. import config
-from ..import presenter
 from . import control
+from ... import config
+from ... import presenter
 
 class OutlineLabel(cocos.text.Label):
 	def __init__( self, *args, **kwargs):
@@ -48,6 +47,7 @@ class _ClockLayer(Layer):
 		super(_ClockLayer, self).__init__()
 		self.time=datetime.now()
 		self.clock_format=config.clock['format']
+		self._show=True
 
 		self.add(OutlineLabel(
 			text=self.time.strftime(self.clock_format) ,
@@ -69,6 +69,14 @@ class _ClockLayer(Layer):
 		self.time=datetime.now()
 		self.get('label').set_text(self.time.strftime(self.clock_format))
 
+	def clock_shown(self, show):
+		if self._show != show:
+			if show:
+				self.do(AccelDeccel(MoveTo((0,0), duration=1)))
+			else:
+				self.do(AccelDeccel(MoveTo((0,-100), duration=1)))
+			self._show=show
+
 __cl=None
 def ClockLayer():
 	global __cl
@@ -80,11 +88,21 @@ class SlideLayer(Layer):
 	def __init__( self, file):
 		super( SlideLayer, self ).__init__()
 		try:
-			g = Sprite( file, anchor=(0,0) )
+			self.g = Sprite( file, anchor=(0,0) )
 		except pyglet.image.codecs.ImageDecodeException:
 			self.invalid = True
 		else:
-			self.add( g )
+			self.add( self.g )
+
+	@property
+	def opacity(self):
+		return self._opacity
+
+	@opacity.setter
+	def opacity(self, o):
+		self._opacity=o
+		self.g.opacity=o
+
 
 class VideoLayer (SlideLayer):
 	def __init__(self, video_name):
@@ -100,14 +118,7 @@ class VideoLayer (SlideLayer):
 		self.media_player = pyglet.media.Player()
 		self.media_player.queue(source)
 		self.media_player.eos_action=self.media_player.EOS_PAUSE
-		self.media_player.set_handler('on_eos', self.handle_on_eos)
-		self.eos_handled=False
-
-	def handle_on_eos(self):
-		if ( not self.eos_handled ):
-			self.do(CallFunc(self.parent.change_slide))
-		self.eos_handled=True
-		return True
+		self.media_player.set_handler('on_eos', presenter.goto_next_slide)
 
 	def on_enter(self):
 		self.media_player.play()
@@ -122,44 +133,47 @@ class VideoLayer (SlideLayer):
 
 
 class SlideScene(Scene):
-	def __init__(self, slide=None):
+	def __init__(self, slide):
 		super(SlideScene, self).__init__()
-		self.scheduled_event=False
+
 		self.slide=weak(slide)
-		if (not self.slide):
-	   		self.slide=weak(presenter.get_next())
 
-		duration=self.slide.get_duration()
+		self.add(ColorLayer(0,0,0,255), z=-10, name='color')
 
-		self.add(ColorLayer(0,0,0,255), z=-10)
+		self.add(self.__get_slide_layer(slide), z=0, name='slide')
 
-		if (self.slide.get_type()=="video"):
-			self.add(VideoLayer(self.slide.get_filename()), z=0)
-			duration=0
-		else:
-			self.add(SlideLayer(self.slide.get_filename()), z=0)
-
-		if (self.slide.get_clock()):
-			self.add(ClockLayer(), z=5)
+		self.add(ClockLayer(), z=5, name='clock')
+		ClockLayer().clock_shown(slide.get_clock())
 
 		self.add(control.KeyboardControlLayer(), z=10)
 		self.add(control.RemoteControlLayer(), z=10)
 
-		if (duration > 0 and not presenter.is_manual()):
-			self.schedule_interval(self.change_slide, duration)
-
-	def change_slide(self, dt=0):
-		if not presenter.is_manual():
-			slide=presenter.get_next()
-			if not self.slide==slide and slide.is_ready():
-				transition=transitions.getTransition('FadeBLTransition') #FadeTransition
-				director.replace(transition(SlideScene(slide), 1.25))
+	def __get_slide_layer(self, slide):
+		if (slide.get_type()=="video"):
+			return VideoLayer(slide.get_filename())
 		else:
-			self.unschedule(self.change_slide)
+			return SlideLayer(slide.get_filename())
 
-	def reload_slide(self, dt=0):
-		slide=presenter.get_current_slide()
-		if not self.slide==slide and slide.is_ready():
-			transition=transitions.getTransition('FadeBLTransition') #FadeTransition
-			director.replace(transition(SlideScene(slide), 1.25))
+
+
+	def set_slide(self, slide, transition='normal'):
+		self.get('clock').clock_shown(slide.get_clock())
+		
+		out_layer=self.get('slide')
+		in_layer=self.__get_slide_layer(slide)
+		try:
+			self.remove('temp')
+		except:
+			pass
+		self.remove('slide')
+
+		self.add(out_layer, z=1, name='temp')
+		self.add(in_layer, z=0, name='slide')
+
+		if transition == 'normal':
+			out_layer.do(FadeOutBLTiles(grid=(16,9), duration=1) + Hide() + StopGrid())
+		else:
+			out_layer.do(FadeOut(duration=1))
+
+
 

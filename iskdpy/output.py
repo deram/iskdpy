@@ -1,43 +1,34 @@
 import logging
 logger = logging.getLogger(__name__)
 
+from threading import current_thread
 from .utils.queued_thread import QueuedThread
-thread=QueuedThread()
-thread.start()
+thread=QueuedThread(thread=current_thread())
 
-class Source(object):
+
+class OutputPlugin(object):
 	_subs_ = {}
 	_current_ = None
-	@thread.decorate
-	def __init__(self, config=None):
-		self.display=None
-		self.control=None
 
 	@thread.decorate
-	def get_display(self):
-		if (not self.display):
-			self.update_display()
-		return self.display
+	def __init__(self):
+		pass
 
 	@thread.decorate
-	def update_display(self):
-		return False
+	def run(self):
+		pass
 
 	@thread.decorate
-	def update_slide(self, slide):
-		return slide
+	def set_slide(self, slide):
+		pass
 
 	@thread.decorate
-	def connect(self):
-		return False
+	def refresh_slide_cache(self, slide):
+		pass
 
-	@thread.decorate
-	def slide_done(self, slide):
-		return False
-
-	@thread.decorate
-	def get_path(self):
-		return "."
+	def task(self):
+		global thread
+		thread.work_all()
 
 	@classmethod
 	def factory(cls, name, *args, **kwargs):
@@ -61,3 +52,4 @@ class Source(object):
 
 class FactoryError(Exception):
 	pass
+
