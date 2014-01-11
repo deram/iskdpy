@@ -1,4 +1,4 @@
 
 
 
-\Python27\python.exe setup.py build
+C:\Python27\python.exe setup.py build
