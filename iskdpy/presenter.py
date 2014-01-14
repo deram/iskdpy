@@ -37,7 +37,7 @@ def __handle_manual_mode(old, new):
 
 def __handle_current_slide_updated(old, new):
 	if old.get_id() == new.get_id():
-		if old.get_update_time() < new.get_update_time():
+		if new.is_ready() and (not old.is_ready() or old.get_update_time() < new.get_update_time()):
 			if old.get_type() != 'video':
 				 __show_slide(new)
 
@@ -208,11 +208,14 @@ def __schedule_slide_change(duration=1):
 def __show_slide(slide):
 	__cancel_slide_change()
 
-	if not slide.is_uptodate():
-		repr(get_source().update_slide(slide)) # repr makes possibly async call finish
-	output=OutputPlugin.get_current()
-	output.set_slide(slide)
-	get_source().slide_done(slide)
+	if not slide.is_ready():
+		logger.error('Show Slide skipped: %s' % (slide, ))
+	else:
+		if not slide.is_uptodate():
+			repr(get_source().update_slide(slide)) # repr makes possibly async call finish
+		output=OutputPlugin.get_current()
+		output.set_slide(slide)
+		get_source().slide_done(slide)
 
 	duration=slide.get_duration()
 	if duration > 0 and not __is_manual():
