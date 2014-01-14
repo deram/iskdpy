@@ -47,7 +47,7 @@ class WebsocketSource(Source):
 			logger.info('Received display_data. S:%d O:%d %s' % (self.display.get_presentation().get_total_slides(), 
 																len(self.display.get_override()), 
 																('manual' if self.display.is_manual() else '') ))
-			logger.debug('%s' % (self.display) )
+			logger.debug('\n%s' % (self.display) )
 			presenter.display_updated()
 			return True
 		logger.debug('Received old display_data')
