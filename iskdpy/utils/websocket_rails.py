@@ -120,7 +120,7 @@ class WebsocketRails():
 		ev=self._recv()
 		if not ev:
 			return
-		if if ev.id and ev.id in self.queue:
+		if ev.id and ev.id in self.queue:
 			if ev.result:
 				if ev.success:
 					func=self.queue.pop(ev.id).success_cb
