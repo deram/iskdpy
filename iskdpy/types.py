@@ -192,7 +192,7 @@ class Slide(Base):
 		return len(self.attribs)
 
 	def __unicode__(self):
-		return 'Slide "%s" (%s) Position %s file: %s (%s)' % ( self.get_name(), self.get_id(), self.get_position(), self.get_filename(), strftime('%X', gmtime(self.get_update_time())))
+		return 'Slide "%s" (%s) Position %s file: %s (%s) %s' % ( self.get_name(), self.get_id(), self.get_position(), self.get_filename(), strftime('%X', gmtime(self.get_update_time())), '' if self.is_ready() else 'NOT READY' )
 
 	def __str__(self):
 		return unicode(self)
