@@ -120,11 +120,17 @@ class WebsocketRails():
 		ev=self._recv()
 		if not ev:
 			return
-		if ev.result and ev.id in self.queue:
-			if ev.success:
-				func=self.queue.pop(ev.id).success_cb
+		if if ev.id and ev.id in self.queue:
+			if ev.result:
+				if ev.success:
+					func=self.queue.pop(ev.id).success_cb
+				else:
+					func=self.queue.pop(ev.id).failure_cb
 			else:
-				func=self.queue.pop(ev.id).failure_cb
+				logger.error("UNKNOWN RESULT FOR: %s id:%d" % (ev.name, ev.id))
+				logger.debug("SENT: %s" % self.queue.pop(ev.id).__dict__)
+				logger.debug("RECEIVED: %s" % ev.__dict__)
+				func=NOP
 
 		elif ev.channel:
 			ch=self.channels.get(ev.channel)
