@@ -4,7 +4,6 @@ logger = logging.getLogger(__name__)
 from ..utils.auth_http import AuthHttp
 from ..utils import file
 import json
-from threading import Thread
 
 from ..utils.websocket_rails import WebsocketRails, Event, NOP
 from ..source import Source, thread
@@ -28,7 +27,6 @@ class WebsocketSource(Source):
 		self.channel=None
 		if not os.path.exists(self.cache_path):
 			os.makedirs(self.cache_path)
-		self.wsthread=Thread(target=self.__socket_run)
 
 	#def get_display():
 
@@ -85,7 +83,7 @@ class WebsocketSource(Source):
 				'goto_slide': self._goto_slide_cb,
 				'current_slide': NOP
 				})
-			self.wsthread.start()
+			self.socket.start()
 			return True
 		return False
 		
