@@ -94,7 +94,8 @@ class WebsocketRails():
 	def start(self):
 		if not self.thread:
 			self.running=True
-			self.thread=Thread(target=lambda: while self.running: self.run())
+			self.thread=Thread(target=self._work)
+			self.thread.daemon=True
 			self.thread.start()
 
 	def stop(self):
@@ -102,6 +103,10 @@ class WebsocketRails():
 			self.running=False
 			self.thread.join()
 			self.thread=None
+
+	def _work(self):
+		while self.running:
+			self.run()
 
 	@RateLimit(1)
 	def _connect(self):
