@@ -3,7 +3,7 @@ logger = logging.getLogger(__name__)
 
 import glob
 
-from ..source import Source
+from ..source import Source, thread
 from .. import types
 import os
 
@@ -22,6 +22,7 @@ class LocalSource(Source):
 
 	#def get_display():
 
+	@thread.decorate
 	def update_display(self):
 		files=glob.glob('%s/*.*' % self.local_dir)
 		if ( self.files != files ):
@@ -43,12 +44,15 @@ class LocalSource(Source):
 			return True
 		return False
 
+	@thread.decorate
 	def update_slide(self, slide):
 		return slide
 
+	@thread.decorate
 	def connect(self):
 		return True
 
+	@thread.decorate
 	def slide_done(self, slide):
 		return True
 
