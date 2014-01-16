@@ -1,11 +1,18 @@
+from iskdpy.config import test_configs
 import unittest
-from iskdpy.source_plugins.local import LocalSource
-from iskdpy.source_plugins.websocketsource import WebsocketSource
+from iskdpy.source_plugins import local
+from iskdpy.source_plugins import websocketsource
+
+def NOP(*a,**kw):
+	pass
+
+websocketsource.presenter.refresh_slide_cache=NOP
+websocketsource.presenter.display_updated=NOP
 
 class TestLocalSource(unittest.TestCase):
 	def setUp(self):
-		conf=dict( source_name='LocalSource', display_name="test_display", local_dir="local")	
-		self.source = LocalSource(conf)
+		conf=test_configs['LocalSource']
+		self.source = local.LocalSource(conf)
 
 	def test_update_display(self):
 		self.assertTrue(self.source)
@@ -21,8 +28,8 @@ class TestLocalSource(unittest.TestCase):
 		
 class TestWebsocketSource(unittest.TestCase):
 	def setUp(self):
-		conf=dict( source_name='WebsocketSource', display_name="deram-test", cache_path="cache", server="http://isk0.asm.fi", user="isk", passwd="Kissa")
-		self.source = WebsocketSource(conf)
+		conf=test_configs['WebsocketSource']
+		self.source = websocketsource.WebsocketSource(conf)
 
 	def test_update_display(self):
 		self.assertTrue(self.source)
