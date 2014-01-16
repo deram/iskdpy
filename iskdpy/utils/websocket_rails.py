@@ -7,6 +7,8 @@ from select import select
 import socket
 import random
 
+from threading import Thread, RLock
+
 from .misc_utils import RateLimit
 
 def NOP(data):
@@ -86,35 +88,53 @@ class WebsocketRails():
 		}
 		self._connect()
 
+		self.thread=None
+		self.lock=RLock()
+
+	def start(self):
+		if not self.thread:
+			self.running=True
+			self.thread=Thread(target=lambda: while self.running: self.run())
+			self.thread.start()
+
+	def stop(self):
+		if self.thread and self.running:
+			self.running=False
+			self.thread.join()
+			self.thread=None
+
 	@RateLimit(1)
 	def _connect(self):
-		try:
-			logger.info('Connecting %s' % self.url)
-			self.ws=websocket.create_connection(self.url)
-			self.queue={}
-			for channel in self.channels.values():
-				channel.subscribe()
-			while len(self.messages):
-				self.send(self.messages.pop(0))
-		except (websocket.WebSocketException, socket.error):
-			pass
+		with self.lock:
+			try:
+				logger.info('Connecting %s' % self.url)
+				self.ws=websocket.create_connection(self.url)
+				self.queue={}
+				for channel in self.channels.values():
+					channel.subscribe()
+				while len(self.messages):
+					self.send(self.messages.pop(0))
+			except (websocket.WebSocketException, socket.error):
+				pass
 
 	def _send(self, ev):
-		try:
-			return self.ws.send(repr(ev))
-		except (websocket.WebSocketConnectionClosedException, AttributeError, socket.error):
-			self.messages.append(ev)
-			self._connect()
+		with self.lock:
+			try:
+				return self.ws.send(repr(ev))
+			except (websocket.WebSocketConnectionClosedException, AttributeError, socket.error):
+				self.messages.append(ev)
+				self._connect()
 		
 	def _recv(self):
-		try:
-			(rlist, wlist, xlist) = select([self.ws.fileno()],[],[],self.timeout)
-			if rlist:
-				data=self.ws.recv()
-				if data:
-					return Event(data)
-		except (websocket.WebSocketConnectionClosedException, AttributeError, socket.error):
-			self._connect()
+		with self.lock:
+			try:
+				(rlist, wlist, xlist) = select([self.ws.fileno()],[],[],self.timeout)
+				if rlist:
+					data=self.ws.recv()
+					if data:
+						return Event(data)
+			except (websocket.WebSocketConnectionClosedException, AttributeError, socket.error):
+				self._connect()
 
 	def run(self):
 		ev=self._recv()
