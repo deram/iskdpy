@@ -54,22 +54,22 @@ class Event():
 		return cls([name, {'data':data}], *args, **kwargs)
 
 class Channel():
-	def __init__(self, ws, channel_name):
-		self.ws=ws
+	def __init__(self, wsr, channel_name):
+		self.wsr=wsr
 		self.channel_name=channel_name
 		self.actions={}
 
 	def unsubscribe(self):
-		self.ws.send(Event(['websocket_rails.unsubscribe', {'data':{'channel': self.channel_name }}]))
+		self.wsr.send(Event(['websocket_rails.unsubscribe', {'data':{'channel': self.channel_name }}]))
 		return self
 
 	def subscribe(self):
-		self.ws.send(Event(['websocket_rails.subscribe', {'data':{'channel': self.channel_name }}]))
+		self.wsr.send(Event(['websocket_rails.subscribe', {'data':{'channel': self.channel_name }}]))
 		return self
 
 	def send(self, ev):
 		ev.channel=self.channel_name
-		self.ws.send(ev)
+		self.wsr.send(ev)
 		return self
 
 class WebsocketRails():
