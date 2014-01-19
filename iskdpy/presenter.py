@@ -2,7 +2,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from .types import Slide, Display
-from .source import Source 
+from .source import Source
 from .output import OutputPlugin 
 #import gc
 from . import config
@@ -29,8 +29,11 @@ def _next_source():
 		_connect(config.sources.pop())
 
 def _handle_manual_mode(old, new):
-	if old != new:
-		if new:
+	if new:
+		if old:
+			if old.is_manual() == new.is_manual():
+				return
+		if new.is_manual():
 			_cancel_slide_change()
 		else:
 			_schedule_slide_change()
@@ -41,31 +44,46 @@ def _handle_current_slide_updated(old, new):
 			if old.get_type() != 'video':
 				 _show_slide(new)
 
+def _handle_display_changed(old, new):
+	if not old == new:
+		if not old or old.get_name() != new.get_name():
+			logger.info("Display changed.")
+			_seek_to_presentation_beginning()
+			return True
+		elif old.get_presentation().get_id() != new.get_presentation().get_id():
+			logger.info("Presentation changed.")
+			_seek_to_presentation_beginning()
+			return True
+	return False
+
+
+def _handle_presentation_updated(old, new):
+	global spos, gpos
+	try:
+		new_gpos = new.locate_group(_get_current_groupid(), old=gpos)
+		new_spos = new[new_gpos].locate_slide(_get_current_slideid(), old=spos)
+	except (IndexError, AttributeError):
+		logger.warning("Current slide not in presentation, restarting presentation")
+		_seek_to_presentation_beginning()
+	else:
+		gpos=new_gpos
+		spos=new_spos
+	return True
+
 def _update_display():
 	global display, spos, gpos
 	if (get_source().update_display()):
 		new_display=get_source().get_display()
-		if not display == new_display:
-			old_display=display
-			old_slide=_get_current_slide()
-			if display.get_presentation().get_id() != old_display.get_presentation().get_id():
-				logger.info("Presentation changed.")
-				_seek_to_presentation_beginning()
-			else:
-				try:
-					pres=new_display.get_presentation()
-					new_gpos = pres.locate_group(_get_current_groupid(), old=gpos)
-					new_spos = pres[new_gpos].locate_slide(_get_current_slideid(), old=spos)
-				except (IndexError, AttributeError):
-					logger.warning("Current slide not in presentation, restarting presentation")
-					_seek_to_presentation_beginning()
-				else:
-					gpos=new_gpos
-					spos=new_spos
+		old_display=display
+		if _handle_display_changed(old_display, new_display):
 			display=new_display
-			_handle_manual_mode(old_display.is_manual(), new_display.is_manual())
+		elif _handle_presentation_updated(old_display.get_presentation(), new_display.get_presentation()):
+			old_slide=_get_current_slide()
+			display=new_display
 			_handle_current_slide_updated(old_slide, _get_current_slide())
-			return True
+	
+		_handle_manual_mode(old_display, new_display)
+		return True
 	return False
 
 def _seek_to_presentation_beginning():
@@ -92,15 +110,15 @@ def _get_current_slide():
 
 def _set_current_slide(gid, sid):
 	global spos, gpos
-	new_gpos = _get_presentation().locate_group(gid)
-	new_spos = _get_presentation()[new_gpos].locate_slide(sid)
-
 	try:
+		new_gpos = _get_presentation().locate_group(gid)
+		new_spos = _get_presentation()[new_gpos].locate_slide(sid)
+
 		if _get_presentation()[new_gpos][new_spos].is_valid():
 			spos=new_spos
 			gpos=new_gpos
 			return True
-	except (IndexError, AttributeError):
+	except (IndexError, AttributeError, TypeError):
 		logger.warning("Slide not in presentation. Not changing.")
 	return False
 
