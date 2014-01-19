@@ -49,12 +49,14 @@ class TestPresenter(unittest.TestCase):
 	def test002_simple_display_data(self):
 		presenter.Source.dpy=gen_test_dpy()
 		presenter.Source.dpy_updated=True
+		self.assertTrue(presenter._update_display())
+
 		self.assertTrue(presenter._get_next())
 
 		current=presenter._get_current_slide()
-		for i in xrange(15):
+		for i in xrange(13):
 			self.assertTrue(presenter._get_next())
-		for i in xrange(15):
+		for i in xrange(13):
 			self.assertTrue(presenter._get_previous())
 		self.assertTrue(current==presenter._get_current_slide())
 

@@ -71,7 +71,7 @@ def _handle_presentation_updated(old, new):
 	return True
 
 def _update_display():
-	global display, spos, gpos
+	global display
 	if (get_source().update_display()):
 		new_display=get_source().get_display()
 		old_display=display
@@ -241,23 +241,27 @@ def _show_slide(slide):
 
 @thread.decorate
 def display_updated():
-	_update_display()
+	return _update_display()
 
 @thread.decorate
 def goto_next_slide():
 	slide=_get_next()
 	_show_slide(slide)
+	return True
 
 @thread.decorate
 def goto_previous_slide():
 	slide=_get_previous()
 	_show_slide(slide)
+	return True
 
 @thread.decorate
 def goto_slide(gid, sid):
 	if _set_current_slide(gid, sid):
 		slide=_get_current_slide()
 		_show_slide(slide)
+		return True
+	return False
 
 @thread.decorate
 def get_source():
