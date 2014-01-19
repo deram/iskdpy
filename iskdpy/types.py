@@ -181,7 +181,7 @@ class Slide(Base):
 		super(Slide, self).__init__(attribs=attribs)
 	
 	def __eq__(self, other):
-		r=isinstance(other, self.__class__) and (self.attribs() == other.attribs())
+		r=isinstance(other, self.__class__) and (self.attribs == other.attribs)
 		return r
 
 	def __getitem__(self, id):

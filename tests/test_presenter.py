@@ -50,12 +50,13 @@ class TestPresenter(unittest.TestCase):
 		presenter.Source.dpy=gen_test_dpy()
 		presenter.Source.dpy_updated=True
 		self.assertTrue(presenter._get_next())
-		self.assertTrue(presenter._get_next())
-		self.assertTrue(presenter._get_next())
-		self.assertTrue(presenter._get_next())
-		self.assertTrue(presenter._get_next())
-		self.assertTrue(presenter._get_next())
-		self.assertTrue(presenter._get_next())
+
+		current=presenter._get_current_slide()
+		for i in xrange(15):
+			self.assertTrue(presenter._get_next())
+		for i in xrange(15):
+			self.assertTrue(presenter._get_previous())
+		self.assertTrue(current==presenter._get_current_slide())
 
 	def test003_set_current_slide(self):
 		self.assertTrue(presenter._set_current_slide("2","23"))
