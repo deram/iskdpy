@@ -2,6 +2,7 @@ from iskdpy.config import test_configs
 import unittest
 from iskdpy.source_plugins import local
 from iskdpy.source_plugins import websocketsource
+from iskdpy.source import Source
 
 def NOP(*a,**kw):
 	pass
@@ -12,7 +13,7 @@ websocketsource.presenter.display_updated=NOP
 class TestLocalSource(unittest.TestCase):
 	def setUp(self):
 		conf=test_configs['LocalSource']
-		self.source = local.LocalSource(conf)
+		self.source=Source.factory(conf.pop('source_name'), conf)
 
 	def test_update_display(self):
 		self.assertTrue(self.source)
@@ -29,7 +30,7 @@ class TestLocalSource(unittest.TestCase):
 class TestWebsocketSource(unittest.TestCase):
 	def setUp(self):
 		conf=test_configs['WebsocketSource']
-		self.source = websocketsource.WebsocketSource(conf)
+		self.source=Source.factory(conf.pop('source_name'), conf)
 
 	def test_update_display(self):
 		self.assertTrue(self.source)

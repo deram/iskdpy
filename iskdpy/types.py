@@ -35,7 +35,10 @@ class Display(Base):
 	def __init__(self, presentation=None, override=None, attribs={}, name=None):
 		super(Display, self).__init__(attribs=attribs)
 		if name: self.set_attrib('name', name)
-		self.presentation=presentation
+		if presentation:
+			self.presentation=presentation
+		else:
+			self.presentation=Presentation()
 		if override: 
 			self.override=override
 		else:
@@ -76,7 +79,7 @@ class Display(Base):
 
 
 class Presentation(Base):
-	def __init__(self,  groups=None, attribs={}):
+	def __init__(self,  groups=[], attribs={}):
 		super(Presentation, self).__init__(attribs=attribs)
 		self.groups=groups
 
@@ -124,11 +127,11 @@ class Presentation(Base):
 		for index, group in enumerate(self):
 			if (group.get_id() == id):
 				return index
-		return -1
+		return None
 
 
 class Group(Base):
-	def __init__(self, slides=None, attribs={}):
+	def __init__(self, slides=[], attribs={}):
 		super(Group, self).__init__(attribs=attribs)
 		self.slides=slides
 
@@ -171,16 +174,12 @@ class Group(Base):
 		for index, slide in enumerate(self):
 			if (slide.get_id() == id):
 				return index
-		return -1
+		return None
 
 class Slide(Base):
 	def __init__(self, attribs=config.empty_slide):
 		super(Slide, self).__init__(attribs=attribs)
 	
-	def get_attrib(self, id, default=None):
-		if id in self.attribs:
-			return self.attribs[id]
-
 	def __eq__(self, other):
 		r=isinstance(other, self.__class__) and (self.attribs() == other.attribs())
 		return r

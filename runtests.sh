@@ -1,2 +1,3 @@
 #!/bin/sh
-arch -i386 python2.7 -m unittest discover -s tests -p '*.py' -v
+arch -i386 coverage-2.7 run --branch -m unittest discover -v -v -v -s tests -p '*.py'
+coverage report
