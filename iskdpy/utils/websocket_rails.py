@@ -21,7 +21,9 @@ class Event():
 		self.failure_cb=failure_cb
 
 		if isinstance(data, basestring):
-			data=json.loads(data, "utf8")[0]
+			data=json.loads(data, "utf8")
+			if isinstance(data[0], list):
+				data=data[0]
 		try:
 			self.name=data[0]
 			self.attr=data[1]
@@ -86,10 +88,11 @@ class WebsocketRails():
 			'websocket_rails.ping': self.__pong,
 			'client_connected': self.__connected
 		}
-		self._connect()
 
 		self.thread=None
 		self.lock=RLock()
+
+		self._connect()
 
 	def start(self):
 		if not self.thread:
@@ -193,20 +196,3 @@ class WebsocketRails():
 	def __pong(self, data):
 		self.send(Event.pong(self.conn_id))
 
-
-if __name__ == "__main__":
-	def myprint(data):
-		print data.keys(),data.get('id')
-
-	ws = WebsocketRails("ws://isk0.asm.fi/websocket", 10)
-	ws.send(Event.simple('iskdpy.hello', {'display_name': 'deram-test'}, myprint))
-	#ws.channel('display_1').subscribe()
-	ws.run_all()
-	ws.send(Event.simple('iskdpy.display_data', 1, myprint))
-	ws.send(Event.simple('iskdpy.display_data', 1, myprint))
-	ws.send(Event.simple('iskdpy.display_data', 1, myprint))
-	ws.send(Event.simple('iskdpy.display_data', 1, myprint))
-	ws.send(Event.simple('iskdpy.display_data', 1, myprint))
-	ws.send(Event.simple('iskdpy.display_data', 1, myprint))
-	ws.run_all()
-	ws.close()
