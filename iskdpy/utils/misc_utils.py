@@ -1,13 +1,15 @@
 import time
+import inspect
 
 def RateLimit(interval, default=None):
 	def decorate(f):
-		lastTimeCalled = [0.0]
+		f.lastTimeCalled=[0]
 		def inner(*args,**kargs):
-			elapsed = time.clock() - lastTimeCalled[0]
+			elapsed = time.time() - f.lastTimeCalled[0]
 			if (elapsed < interval):
 				return default
-			lastTimeCalled[0] = time.clock()
+			f.lastTimeCalled[0] = time.time()
 			return f(*args,**kargs)
+		inner.actual=f # for reseting in tests
 		return inner
 	return decorate
