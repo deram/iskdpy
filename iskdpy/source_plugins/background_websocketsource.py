@@ -16,8 +16,8 @@ class BackgroundWebsocketSource(websocketsource.WebsocketSource):
 	#def update_display():
 	
 	@thread.decorate
-	def display_data_cb(self, data):
-		ret=super(BackgroundWebsocketSource, self).display_data_cb(data)
+	def _display_data_cb(self, data):
+		ret=super(BackgroundWebsocketSource, self)._display_data_cb(data)
 		if ret:
 			logger.debug('get_slides')
 			self.__get_slides()
