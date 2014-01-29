@@ -18,8 +18,7 @@ setup(
 	options = {"build_exe": {
 		'include_files': [
 				['base.png', 'base.png'],
-				['local', 'local'],
-				['cache', 'cache'],
+				['run.bat', 'run.bat'],
 				['C:/Windows/System32/Python27.dll', 'Python27.dll'],
 				['C:/Windows/System32/avbin.dll', 'avbin.dll']],
 	}}
