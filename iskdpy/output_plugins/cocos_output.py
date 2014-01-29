@@ -13,7 +13,6 @@ from ..types import Slide
 from cocos.director import director
 from .cocos_scene.graphics import SlideScene
 from .cocos_scene.control import RemoteControlLayer
-from .cocos_scene.transitions import getTransition
 
 
 register=OutputPlugin.register
