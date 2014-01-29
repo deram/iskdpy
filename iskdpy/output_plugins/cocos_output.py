@@ -31,6 +31,9 @@ class CocosOutput(OutputPlugin):
 			director.window.set_size(640, 360)
 		if ( config.fullscreen ):
 			director.window.set_fullscreen(True)
+		if ( config.font_files ):
+			for font in config.font_files:
+				pyglet.resource.add_font(font)
 		director.window.set_mouse_visible(False)
 		RemoteControlLayer().set_task(self.task)
 		self.scene=SlideScene(Slide())
