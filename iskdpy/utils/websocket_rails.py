@@ -90,7 +90,8 @@ class WebsocketRails():
 		}
 
 		self.thread=None
-		self.lock=RLock()
+		self.send_lock=RLock()
+		self.recv_lock=RLock()
 
 		self._connect()
 
@@ -113,7 +114,7 @@ class WebsocketRails():
 
 	@RateLimit(1)
 	def _connect(self):
-		with self.lock:
+		with self.send_lock, self.recv_lock:
 			try:
 				logger.info('Connecting %s' % self.url)
 				self.ws=websocket.create_connection(self.url)
@@ -126,7 +127,7 @@ class WebsocketRails():
 				pass
 
 	def _send(self, ev):
-		with self.lock:
+		with self.send_lock:
 			try:
 				return self.ws.send(repr(ev))
 			except (websocket.WebSocketConnectionClosedException, AttributeError, socket.error):
@@ -134,7 +135,7 @@ class WebsocketRails():
 				self._connect()
 		
 	def _recv(self):
-		with self.lock:
+		with self.recv_lock:
 			try:
 				(rlist, wlist, xlist) = select([self.ws.fileno()],[],[],self.timeout)
 				if rlist:
@@ -172,6 +173,7 @@ class WebsocketRails():
 			logger.debug("UNHANDLED: %s" % ev.__dict__)
 
 	def run_all(self):
+		logger.info("run_all: Entering infinite loop")
 		while len(self.queue):
 			self.run()
 
