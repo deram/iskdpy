@@ -102,11 +102,18 @@ def _get_presentation():
 
 def _get_current_group():
 	global gpos
-	return _get_presentation()[gpos]
+	try:
+		return _get_presentation()[gpos]
+	except (IndexError, AttributeError, TypeError):
+		logger.warning("Current group not existing")
 
 def _get_current_slide():
 	global gpos, spos
-	return _get_presentation()[gpos][spos]
+	try:
+		return _get_presentation()[gpos][spos]
+	except (IndexError, AttributeError, TypeError):
+		logger.warning("Current slide not existing")
+		return Slide()
 
 def _set_current_slide(gid, sid):
 	global spos, gpos
