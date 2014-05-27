@@ -93,6 +93,7 @@ class WebsocketSource(Source):
 
 	@thread.decorate
 	def slide_done(self, slide):
+		logger.debug("slide_done: %s" % slide)
 		if (slide.is_override()):
 			data = {'display_id': self.displayid, 
 				'slide_id': slide.get_attrib('id'),
@@ -102,6 +103,7 @@ class WebsocketSource(Source):
 				'group_id': slide.get_attrib('group_id'), 
 				'slide_id': slide.get_attrib('id') }
 		self.socket.send(Event.simple('iskdpy.current_slide', data))
+		logger.debug("slide_done end")
 
 	@thread.decorate
 	def get_path(self):

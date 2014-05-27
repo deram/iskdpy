@@ -173,7 +173,6 @@ class WebsocketRails():
 			logger.debug("UNHANDLED: %s" % ev.__dict__)
 
 	def run_all(self):
-		logger.info("run_all: Entering infinite loop")
 		while len(self.queue):
 			self.run()
 
@@ -194,7 +193,7 @@ class WebsocketRails():
 
 	def __connected(self, data):
 		self.conn_id=data.get('connection_id')
+		logger.debug("Connected: id=%s" % self.conn_id)
 
 	def __pong(self, data):
 		self.send(Event.pong(self.conn_id))
-
