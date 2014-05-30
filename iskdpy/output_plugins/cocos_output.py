@@ -10,21 +10,21 @@ from .. import config
 from .. import presenter
 from ..types import Slide
 
-from cocos.director import director
-from .cocos_scene.graphics import SlideScene
-from .cocos_scene.control import RemoteControlLayer
-
-
 register=OutputPlugin.register
 
 @register('CocosOutput')
 class CocosOutput(OutputPlugin):
 	def __init__(self):
 		super(CocosOutput, self).__init__()
-		self.slide=Slide()
+		self.slide=None
 
 	@thread.decorate
 	def run(self):
+		logger.info("importing")
+		from cocos.director import director
+		from .cocos_scene.graphics import SlideScene
+		from .cocos_scene.control import RemoteControlLayer
+
 		logger.info("started")
 		director.init(**config.window)
 		if ( config.scale_down ):
@@ -36,22 +36,18 @@ class CocosOutput(OutputPlugin):
 				pyglet.resource.add_font(font)
 		director.window.set_mouse_visible(False)
 		RemoteControlLayer().set_task(self.task)
-		self.scene=SlideScene(Slide())
+		self.slide=Slide()
+		self.scene=SlideScene(self.slide)
 		director.run(self.scene)
 
 	@thread.decorate
 	def set_slide(self, slide, *args, **kwargs):
 		logger.debug("Slide received %s" % slide)
 		if slide.get_id() == self.slide.get_id():
-			#transition=getTransition('CrossFadeTransition')
 			self.scene.set_slide(slide, 'update')
 		else:
 			self.scene.set_slide(slide)
-			#transition=getTransition('FadeBLTransition')
-			#transition=getTransition('CrossFadeTransition')
-		#director.replace(transition(SlideScene(slide), 1.25))
 		self.slide=slide
-		#director.replace(SlideScene(slide))
 		gc.collect()
 		del gc.garbage[:]
 

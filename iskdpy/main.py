@@ -8,7 +8,7 @@ from . import source_plugins
 from . import output_plugins
 from . import config
 
-from .output import OutputPlugin
+from .output import OutputPlugin, thread
 
 def setup_logger():
 	logging.basicConfig(filename='iskdpy.log', 
@@ -35,5 +35,5 @@ def main():
 	presenter.goto_next_slide()
 	output=OutputPlugin.factory(config.output)
 	output.run()
-
+	thread.thread.join()
 	logger.info('Stopped')

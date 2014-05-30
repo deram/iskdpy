@@ -1,10 +1,9 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from threading import current_thread
 from .utils.queued_thread import QueuedThread
-thread=QueuedThread(thread=current_thread())
-
+thread=QueuedThread()
+thread.start()
 
 class OutputPlugin(object):
 	_subs_ = {}
