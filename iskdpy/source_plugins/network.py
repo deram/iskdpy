@@ -81,21 +81,18 @@ class NetworkSource(Source):
 	
 	def __create_display_tree(self, data):
 		presentation_data=data.pop('presentation')
-		groups=[]
-		for group in presentation_data.pop('groups', []):
-			slides=[]
-			for slide in group.pop('slides', []):
-				s=types.Slide(attribs=slide)
-				s.set_attrib('filename', '%s/%d.%s' % (self.cache_path, s.get_id(), s.get_suffix()))
-				slides.append(s)
-			groups.append(types.Group(slides=slides, attribs=group))
-		presentation = types.Presentation(groups=groups, attribs=presentation_data)
+		slides=[]
+		for slide in presentation_data.pop('slides', []):
+			s=types.Slide(attribs=slide)
+			s.set_attrib('filename', '%s/%d.%s' % (self.cache_path, s.get_id(), s.get_suffix()))
+			slides.append(s)
+		presentation = types.Presentation(slides=slides, attribs=presentation_data)
 		slides=[]
 		for slide in data.pop('override_queue', []):
 			s=types.OverrideSlide(attribs=slide)
 			s.set_attrib('filename', '%s/%d.%s' % (self.cache_path, s.get_id(), s.get_suffix()))
 			slides.append(s)
-		override=types.OverrideGroup(slides=slides)
+		override=slides
 
 		display=types.Display(presentation=presentation, override=override, attribs=data, name=self.display_name)
 		return display

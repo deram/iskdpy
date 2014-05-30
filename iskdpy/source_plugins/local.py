@@ -29,7 +29,6 @@ class LocalSource(Source):
 			logger.info("Contents of '%s' changed, rebuilding display..." % (self.local_dir))
 			self.files=files
 			slides=[]
-			groups=[]
 			for item in files:
 				if item.endswith(('avi', 'mp4', 'mov', 'mkv')):
 					slidetype='video'
@@ -38,8 +37,7 @@ class LocalSource(Source):
 				slide=types.Slide({'id':item,'type':slidetype, 'filename':item.replace('\\','/'), 'position':len(slides)+1, 'updated_at':1})
 				slide.set_attrib('foo', item)
 				slides.append(slide)
-			groups.append(types.Group(slides=slides))
-			presentation=types.Presentation(groups=groups, attribs={'total_slides':len(slides)})
+			presentation=types.Presentation(slides=slides, attribs={'total_slides':len(slides)})
 			self.display=types.Display(presentation=presentation)
 			return True
 		return False

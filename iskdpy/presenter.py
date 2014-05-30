@@ -15,7 +15,7 @@ thread.start()
 
 timer=None
 display=None
-gpos, spos = (0,-1)
+pos=-1
 
 def _connect(conf):
 	global display
@@ -58,16 +58,14 @@ def _handle_display_changed(old, new):
 
 
 def _handle_presentation_updated(old, new):
-	global spos, gpos
+	global pos
 	try:
-		new_gpos = new.locate_group(_get_current_groupid(), old=gpos)
-		new_spos = new[new_gpos].locate_slide(_get_current_slideid(), old=spos)
+		new_pos = new.locate_slide(_get_current_groupid(), _get_current_slideid(), old=pos)
 	except (IndexError, AttributeError):
 		logger.warning("Current slide not in presentation, restarting presentation")
 		_seek_to_presentation_beginning()
 	else:
-		gpos=new_gpos
-		spos=new_spos
+		pos=new_pos
 	return True
 
 def _update_display():
@@ -87,11 +85,11 @@ def _update_display():
 	return False
 
 def _seek_to_presentation_beginning():
-	global gpos, spos
-	gpos, spos = (0,-1)
+	global pos
+	pos = -1
 
 def _get_current_groupid():
-	return _get_current_group().get_id()
+	return _get_current_slide().get_groupid()
 
 def _get_current_slideid():
 	return _get_current_slide().get_id()
@@ -100,71 +98,52 @@ def _get_presentation():
 	global display
 	return display.get_presentation()
 
-def _get_current_group():
-	global gpos
-	try:
-		return _get_presentation()[gpos]
-	except (IndexError, AttributeError, TypeError):
-		logger.warning("Current group not existing")
-
 def _get_current_slide():
-	global gpos, spos
+	global pos
 	try:
-		return _get_presentation()[gpos][spos]
+		return _get_presentation()[pos]
 	except (IndexError, AttributeError, TypeError):
 		logger.warning("Current slide not existing")
 		return Slide()
 
 def _set_current_slide(gid, sid):
-	global spos, gpos
+	global pos
 	try:
-		new_gpos = _get_presentation().locate_group(gid)
-		new_spos = _get_presentation()[new_gpos].locate_slide(sid)
+		new_pos = _get_presentation().locate_slide(gid, sid)
 
-		if _get_presentation()[new_gpos][new_spos].is_valid():
-			spos=new_spos
-			gpos=new_gpos
+		if _get_presentation()[new_pos].is_valid():
+			pos=new_pos
 			return True
 	except (IndexError, AttributeError, TypeError):
 		logger.warning("Slide not in presentation. Not changing.")
 	return False
 
 def _seek_to_next_valid_slide_in_presentation():
-	global gpos, spos
-	n_groups = len(_get_presentation())
+	global pos
+	n_slides = len(_get_presentation())
 	for i in xrange(_get_presentation().get_total_slides()):
-		n_slides = len(_get_current_group())
-		spos += 1
-		if ( spos >= n_slides ):
-			spos = 0
-			gpos += 1
-			if ( gpos >= n_groups ):
-				spos = 0
-				gpos = 0
-				logger.info("Presentation wrapped")
-			logger.info("Next: %s" % unicode(_get_current_group()).split('\n', 1)[0])
+		pos += 1
+		if ( pos >= n_slides ):
+			pos = 0
+			logger.info("Presentation wrapped")
+		logger.debug("Next: %s" % unicode(_get_current_slide()).split('\n', 1)[0])
 
-		if ( len(_get_current_group()) > 0 ):
-			if _get_current_slide().is_valid():
-				return True
+		if _get_current_slide().is_valid():
+			return True
 	return False
 
 def _seek_to_previous_valid_slide_in_presentation():
-	global gpos, spos
-	n_groups = len(_get_presentation())
+	global pos
+	n_slides = len(_get_presentation())
 	for i in xrange(_get_presentation().get_total_slides()):
-		spos -= 1
-		if ( spos < 0 ):
-			gpos -= 1
-			if ( gpos < 0 ):
-				gpos = n_groups - 1
-				logger.info("Presentation wrapped")
-			logger.info("Prev: %s" % unicode(_get_current_group()).split('\n', 1)[0])
-			spos = len(_get_current_group()) - 1
+		pos -= 1
+		if ( pos < 0 ):
+			pos = n_slides - 1
+			logger.info("Presentation wrapped")
+		logger.debug("Prev: %s" % unicode(_get_current_slide()).split('\n', 1)[0])
 
-		if ( len(_get_current_group()) > 0 ):
-			if _get_current_slide().is_valid():
-				return True
+		if _get_current_slide().is_valid():
+			return True
 	return False
 
 def _is_override():
@@ -215,7 +194,7 @@ def _get_slide(slide='next'):
 			_seek_to_previous_valid_slide_in_presentation()
 		ret = _get_current_slide()
 
-	logger.info("Next: %s" % ret)
+	logger.debug("Next: %s" % ret)
 	return ret
 
 def _cancel_slide_change():

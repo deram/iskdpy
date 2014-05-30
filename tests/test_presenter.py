@@ -5,15 +5,12 @@ from iskdpy.types import *
 
 
 def gen_test_dpy():
-	groups=[]
+	slides=[]
 	for i in xrange(3):
-		slides=[]
 		for j in xrange(4):
-			slides.append(Slide(attribs=dict(id="%d%d"%(i,j), name="testslide %d%d" % (i,j))))
-		groups.append(Group(attribs=dict(id="%d"%i, name="testgroup_%d" % (i)), slides=slides))
-	presentation=Presentation(attribs=dict(id=1, name="testpresentation_1"), groups=groups)
-	override=OverrideGroup()
-	return Display(attribs=dict(id=1, name="testdisplay"), presentation=presentation, override=override)
+			slides.append(Slide(attribs=dict(id="%d%d"%(i,j), name="testslide %d%d" % (i,j), group="%d" % i)))
+	presentation=Presentation(attribs=dict(id=1, name="testpresentation_1"), slides=slides)
+	return Display(attribs=dict(id=1, name="testdisplay"), presentation=presentation)
 
 class FakePlugin():
 	def __init__(self):
@@ -62,8 +59,7 @@ class TestPresenter(unittest.TestCase):
 
 	def test003_set_current_slide(self):
 		self.assertTrue(presenter._set_current_slide("2","23"))
-		self.assertTrue(presenter.gpos==2)
-		self.assertTrue(presenter.spos==3)
+		self.assertTrue(presenter.pos==11)
 
 		self.assertFalse(presenter._set_current_slide("5","53"))
 

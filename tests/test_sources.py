@@ -24,7 +24,7 @@ class TestLocalSource(unittest.TestCase):
 		self.assertTrue(display)
 		self.assertEqual(len(display.get_override()), 0)
 		presentation=display.get_presentation()
-		self.assertEqual(len(presentation), 1)
+		self.assertEqual(len(presentation), 5)
 		self.assertGreater(len(presentation[0]), 0)
 		
 class TestWebsocketSource(unittest.TestCase):
