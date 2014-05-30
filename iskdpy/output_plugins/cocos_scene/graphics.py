@@ -89,7 +89,7 @@ class SlideLayer(Layer):
 		super( SlideLayer, self ).__init__()
 		try:
 			self.g = Sprite( file, anchor=(0,0) )
-		except pyglet.image.codecs.ImageDecodeException:
+		except (pyglet.image.codecs.ImageDecodeException, pyglet.resource.ResourceNotFoundException):
 			self.invalid = True
 		else:
 			self.add( self.g )
@@ -101,7 +101,8 @@ class SlideLayer(Layer):
 	@opacity.setter
 	def opacity(self, o):
 		self._opacity=o
-		self.g.opacity=o
+		if 'g' in self.__dict__:
+			self.g.opacity=o
 
 
 class VideoLayer (SlideLayer):
@@ -169,7 +170,7 @@ class SlideScene(Scene):
 
 		self.add(out_layer, z=1, name='temp')
 		self.add(in_layer, z=0, name='slide')
-
+		
 		if transition == 'normal':
 			out_layer.do(FadeOutBLTiles(grid=(16,9), duration=1) + Hide() + StopGrid())
 		else:
