@@ -13,7 +13,7 @@ websocketsource.presenter.display_updated=NOP
 class TestLocalSource(unittest.TestCase):
 	def setUp(self):
 		conf=test_configs['LocalSource']
-		self.source=Source.factory(conf.pop('source_name'), conf)
+		self.source=Source.factory(conf.get('source_name'), conf)
 
 	def test_update_display(self):
 		self.assertTrue(self.source)
@@ -30,9 +30,9 @@ class TestLocalSource(unittest.TestCase):
 class TestWebsocketSource(unittest.TestCase):
 	def setUp(self):
 		conf=test_configs['WebsocketSource']
-		self.source=Source.factory(conf.pop('source_name'), conf)
+		self.source=Source.factory(conf.get('source_name'), conf)
 
-	def test_update_display(self):
+	def test001_update_display(self):
 		self.assertTrue(self.source)
 		self.assertTrue(self.source.connect())
 		display=self.source.get_display()
@@ -41,6 +41,12 @@ class TestWebsocketSource(unittest.TestCase):
 		presentation=display.get_presentation()
 		self.assertGreater(len(presentation), 0)
 		self.assertGreater(len(presentation[0]), 0)
+
+	def test002_slide_effect(self):
+		self.assertTrue(self.source.connect())
+		display=self.source.get_display()
+		presentation=display.get_presentation()
+		self.assertEqual(presentation[0].get_effect(),'normal')
 
 
 

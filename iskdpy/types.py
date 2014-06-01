@@ -162,6 +162,12 @@ class Slide(Base):
 	def get_type(self):
 		return self.get_attrib('type', '')
 
+	def get_effect(self):
+		try:
+			return config.effect_ids[self.get_attrib('effect_id', 0)]
+		except KeyError:
+			return 'unknown'
+
 	def get_suffix(self):
 		if (self.get_type()=='video'): 
 			return 'mp4'

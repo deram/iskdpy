@@ -9,6 +9,11 @@ empty_slide=dict(filename= 'base.png', duration=10, type= 'image', show_clock=Fa
 default_duration=5
 default_cache_path='cache'
 
+effect_ids=[ 'unknown', 'normal', 'subtle', 'alert' ]
+effect_mapping=dict(update=dict(normal='crossfade', subtle='crossfade', alert='fade_red'),
+					normal=dict(normal='tile_swipe', subtle='crossfade', alert='fade_red'))
+
+
 sources=[ dict( source_name='LocalSource', display_name="test_display", local_dir="local") ]
 output="CocosOutput"
 font_files=[]
