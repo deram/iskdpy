@@ -39,6 +39,8 @@ class CocosOutput(OutputPlugin):
 		self.slide=Slide()
 		self.scene=SlideScene(self.slide)
 		director.run(self.scene)
+		logger.info("ended")
+		thread.end()
 
 	@thread.decorate
 	def set_slide(self, slide, *args, **kwargs):
