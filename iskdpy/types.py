@@ -136,7 +136,7 @@ class Slide(Base):
 		return len(self.attribs)
 
 	def __unicode__(self):
-		return 'Slide "%s" (%s) Group "%s" (%s) Position %s file: %s (%s) %s' % ( self.get_name(), self.get_id(), "n/a", self.get_groupid(), self.get_position(), self.get_filename(), strftime('%X', gmtime(self.get_update_time())), '' if self.is_ready() else 'NOT READY' )
+		return 'Slide "%s" (%s) Group "%s" (%s) Position %s file: %s (%s) %s' % ( self.get_name(), self.get_id(), self.get_groupname(), self.get_groupid(), self.get_position(), self.get_filename(), strftime('%X', gmtime(self.get_update_time())), '' if self.is_ready() else 'NOT READY' )
 
 	def __str__(self):
 		return unicode(self)
@@ -152,6 +152,9 @@ class Slide(Base):
 
 	def get_groupid(self):
 		return self.get_attrib('group', 0)
+
+	def get_groupname(self):
+		return self.get_attrib('group_name', '')
 
 	def get_duration(self):
 		return self.get_attrib('duration', config.default_duration)
