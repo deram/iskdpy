@@ -6,6 +6,7 @@ from exceptions import Exception
 class QueuedThread():
 	def __init__(self, thread=None, daemon=True):
 		self.queue=Queue()
+		self.running=False
 		if thread:
 			self.thread=thread
 		else:
@@ -16,7 +17,14 @@ class QueuedThread():
 		if current_thread() == self.thread:
 			return None
 		else:
+			self.running=True
 			return self.thread.start()
+
+	def end(self):
+		if current_thread() == self.thread:
+			self.running=False
+		else:
+			raise NotAuthorizedToEnd
 
 	def work_one(self, block=False):
 		if current_thread() == self.thread:
@@ -33,8 +41,9 @@ class QueuedThread():
 				self.work_one()
 
 	def _worker(self):
-		while True:
+		while self.running:
 			self.work_one(True)
+		self.work_all()
 
 	def decorate(self, func):
 		def decorator(*args, **kwargs):
@@ -74,6 +83,8 @@ class QueuedThread():
 	class JobNotDone(Exception):
 		pass
 
+	class NotAuthorizedToEnd(Exception):
+		pass
 
 if __name__ == "__main__":
 	qt=QueuedThread()
