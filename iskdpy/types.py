@@ -44,9 +44,6 @@ class Display(Base):
 	def __unicode__(self):
 		return 'Display "%s" Updated: %s\n %s\n %s' % (self.get_name(), strftime('%x-%X', gmtime(self.get_metadata_updated_at())), unicode(self.override).replace('\n', '\n '), unicode(self.presentation).replace('\n', '\n '))
 
-	def __str__(self):
-		return unicode(self)
-
 	def get_presentation(self):
 		return self.presentation
 
@@ -94,9 +91,6 @@ class Presentation(Base):
 			tmp+="%s\n" % unicode(i)
 		return 'Presentation "%s" Slides: %d\n %s' % ( self.get_name(), self.get_total_slides(), tmp.replace('\n', '\n '))
 
-	def __str__(self):
-		return unicode(self)
-
 	def get_id(self):
 		return self.get_attrib('id', 0)
 	
@@ -113,9 +107,7 @@ class Presentation(Base):
 	def get_slides(self):
 		return self.slides
 
-	def locate_slide(self, gid, sid, old=0):
-		if self[old].get_groupid() == gid and self[old].get_id() == sid:
-			return old
+	def locate_slide(self, sid, gid):
 		for index, slide in enumerate(self):
 			if (slide.get_groupid() == gid and slide.get_id() == sid):
 				return index
@@ -137,9 +129,6 @@ class Slide(Base):
 
 	def __unicode__(self):
 		return 'Slide "%s" (%s) Group "%s" (%s) Position %s file: %s (%s) %s' % ( self.get_name(), self.get_id(), self.get_groupname(), self.get_groupid(), self.get_position(), self.get_filename(), strftime('%X', gmtime(self.get_update_time())), '' if self.is_ready() else 'NOT READY' )
-
-	def __str__(self):
-		return unicode(self)
 
 	def get_name(self):
 		return self.get_attrib('name', "unnamed")
@@ -168,7 +157,7 @@ class Slide(Base):
 	def get_effect(self):
 		try:
 			return config.effect_ids[self.get_attrib('effect_id', 0)]
-		except KeyError:
+		except (KeyError, IndexError):
 			return 'unknown'
 
 	def get_suffix(self):

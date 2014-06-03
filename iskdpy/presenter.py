@@ -60,7 +60,8 @@ def _handle_display_changed(old, new):
 def _handle_presentation_updated(old, new):
 	global pos
 	try:
-		new_pos = new.locate_slide(_get_current_groupid(), _get_current_slideid(), old=pos)
+		slide=_get_current_slide()
+		new_pos = new.locate_slide(slide.get_id(), slide.get_groupid()) 
 	except (IndexError, AttributeError):
 		logger.warning("Current slide not in presentation, restarting presentation")
 		_seek_to_presentation_beginning()
@@ -88,12 +89,6 @@ def _seek_to_presentation_beginning():
 	global pos
 	pos = -1
 
-def _get_current_groupid():
-	return _get_current_slide().get_groupid()
-
-def _get_current_slideid():
-	return _get_current_slide().get_id()
-
 def _get_presentation():
 	global display
 	return display.get_presentation()
@@ -109,7 +104,7 @@ def _get_current_slide():
 def _set_current_slide(gid, sid):
 	global pos
 	try:
-		new_pos = _get_presentation().locate_slide(gid, sid)
+		new_pos = _get_presentation().locate_slide(sid, gid)
 
 		if _get_presentation()[new_pos].is_valid():
 			pos=new_pos

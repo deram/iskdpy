@@ -20,5 +20,5 @@ font_files=[]
 # local configuration overrides defaults
 try:
 	from local_config import *
-except:
+except: # pragma: no cover
 	print 'local_config.py not found'
