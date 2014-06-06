@@ -15,7 +15,10 @@ class MockConnection():
 	def _report_call(self, func, *a, **kw):
 		self.callstack.append(dict(f=func, a=a, kw=kw))
 	def _mock_message(self, message):
-		self.messages_in.append("[%s]" % message)
+		if message:
+			self.messages_in.append("[%s]" % message)
+		else:
+			self.messages_in.append(message)
 	def _get_message(self, i=0):
 		return self.messages_out.pop(i)
 	def _pop(self, i=0):
@@ -43,6 +46,8 @@ class MockConnection():
 			raise WebSocketConnectionClosedException()
 		elif len(self.messages_in):
 			return self.messages_in.pop()
+		else:
+			return
 	def close(self, *a, **kw):
 		self._report_call('close', *a, **kw)
 		self.connected=False
@@ -55,6 +60,39 @@ class MockConnection():
 		else:
 			self.connected=True
 			return self
+
+foo=None
+class TestWebsocketRailsMisc(unittest.TestCase):
+	def setUp(self):
+		self.ws=websocket_rails.WebsocketRails("")
+
+	def test_event_with_no_data_dict(self):
+		ev=websocket_rails.Event(['testname', ''])
+		self.assertEqual(ev.name, 'testname')
+
+	def test_pong_without_connid(self):
+		ev=websocket_rails.Event.pong(None)
+		self.assertEqual(ev, None)
+
+	def test_websocketrails_run(self):
+		global foo
+		def fail(ev):
+			global foo
+			foo=ev
+		ev=websocket_rails.Event(['testname', {'id': 1, 'data': 1, 'success': False}], failure_cb=fail)
+		self.ws.queue.update({ev.id: ev})
+		self.ws._run(ev)
+		self.assertEqual(foo, ev.data)
+
+		ev=websocket_rails.Event(['testname', {'id': 16, 'data': 2}])
+		self.ws.queue.update({ev.id: ev})
+		self.ws._run(ev)
+		self.assertNotEqual(foo, ev.data)
+
+		ev=websocket_rails.Event(['testname', {'id': 1, 'data': 3, 'success': True}], success_cb=None)
+		self.ws.queue.update({ev.id: ev})
+		self.ws._run(ev)
+		self.assertNotEqual(foo, ev.data)
 
 class TestWebsocketRailsConnection(unittest.TestCase):
 	SAMPLE_EVENT_DATA = ['event','message']
@@ -135,6 +173,8 @@ class TestWebsocketRailsConnection(unittest.TestCase):
 		ev=websocket_rails.Event.simple('event', 'message')
 		self.conn._mock_message(ev)
 		self.assertTrue(repr(ws._recv()) == repr(ev))
+		self.conn._mock_message(None)
+		self.assertTrue(ws._recv() is None)
 
 	def test004_run(self):
 		ws=websocket_rails.WebsocketRails(self.URL)

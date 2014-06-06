@@ -31,7 +31,7 @@ class Event():
 				self.id = self.attr.get('id', random.randint(1, 65535))
 				self.channel = self.attr.get('channel')
 				self.data = self.attr.pop('data')
-				if 'success' in self.attr and self.attr.get('success'):
+				if 'success' in self.attr:
 					self.result = True
 					self.success = self.attr.get('success')
 				else:
@@ -145,8 +145,7 @@ class WebsocketRails():
 			except (websocket.WebSocketConnectionClosedException, AttributeError, socket.error):
 				self._connect()
 
-	def run(self):
-		ev=self._recv()
+	def _run(self, ev):
 		if not ev:
 			return
 		if ev.id and ev.id in self.queue:
@@ -171,6 +170,11 @@ class WebsocketRails():
 			return func(ev.data)
 		elif ev:
 			logger.debug("UNHANDLED: %s" % ev.__dict__)
+		else: #pragma: no cover
+			return #this is impossible
+
+	def run(self):
+		self._run(self._recv())
 
 	def run_all(self):
 		while len(self.queue):
