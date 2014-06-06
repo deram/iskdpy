@@ -3,11 +3,11 @@ import config
 from time import gmtime, strftime
 
 class Base(object):
-	def __init__(self, attribs={}):
-		self.attribs=attribs
-
-	def __unicode__(self):
-		return unicode(self.attribs)
+	def __init__(self, attribs=None):
+		if attribs:
+			self.attribs=attribs
+		else:
+			self.attribs={}
 
 	def __str__(self):
 		return unicode(self)
@@ -15,8 +15,8 @@ class Base(object):
 	def __eq__(self, other):
 		return isinstance(other, self.__class__) and (self.__dict__== other.__dict__)
 
-	def __neq__(self, other):
-		return not self == other
+	def __ne__(self, other):
+		return not self.__eq__(other)
 
 	def set_attribs(self, dict):
 		self.attribs.update(dict)
@@ -25,24 +25,30 @@ class Base(object):
 		self.attribs[name]=value
 
 	def get_attrib(self, name, coalesce=None):
-		try:
-			return self.attribs[name]
-		except KeyError:
-			return coalesce
+		return self.attribs.get(name, coalesce)
 
+	def get_id(self):
+		return self.get_attrib('id',  0)
 
 class Display(Base):
-	def __init__(self, presentation=None, override=[], attribs={}, name=None):
+	def __init__(self, presentation=None, override=None, attribs=None, name=None):
 		super(Display, self).__init__(attribs=attribs)
-		if name: self.set_attrib('name', name)
-		self.override=override
+		if name: 
+			self.set_attrib('name', name)
+		if override:
+			self.override=override
+		else:
+			self.override=[]
 		if presentation:
 			self.presentation=presentation
 		else:
 			self.presentation=Presentation()
 
 	def __unicode__(self):
-		return 'Display "%s" Updated: %s\n %s\n %s' % (self.get_name(), strftime('%x-%X', gmtime(self.get_metadata_updated_at())), unicode(self.override).replace('\n', '\n '), unicode(self.presentation).replace('\n', '\n '))
+		tmp=""
+		for i in self.override:
+			tmp+="\n%s" % unicode(i)
+		return 'Display "%s" (%d) Updated: %s\n Overrides: %d%s\n %s' % (self.get_name(), self.get_id(), strftime('%x-%X', gmtime(self.get_metadata_updated_at())), len(self.get_override()), tmp.replace('\n', '\n '), unicode(self.get_presentation()).replace('\n', '\n '))
 
 	def get_presentation(self):
 		return self.presentation
@@ -72,9 +78,12 @@ class Display(Base):
 
 
 class Presentation(Base):
-	def __init__(self,  slides=[], attribs={}):
+	def __init__(self,  slides=None, attribs=None):
 		super(Presentation, self).__init__(attribs=attribs)
-		self.slides=slides
+		if slides:
+			self.slides=slides
+		else:
+			self.slides=[]
 
 	def __iter__(self):
 		return self.slides.__iter__()
@@ -88,12 +97,9 @@ class Presentation(Base):
 	def __unicode__(self):
 		tmp=""
 		for i in self:
-			tmp+="%s\n" % unicode(i)
-		return 'Presentation "%s" Slides: %d\n %s' % ( self.get_name(), self.get_total_slides(), tmp.replace('\n', '\n '))
+			tmp+="\n%s" % unicode(i)
+		return 'Presentation "%s" (%d) Slides: %d%s' % (self.get_name(), self.get_id(), self.get_total_slides(), tmp.replace('\n', '\n '))
 
-	def get_id(self):
-		return self.get_attrib('id', 0)
-	
 	def get_total_slides(self):
 		total=self.get_attrib('total_slides', 0)
 		if total==0:
@@ -103,9 +109,6 @@ class Presentation(Base):
 	
 	def get_name(self):
 		return self.get_attrib('name', 'unnamed')
-
-	def get_slides(self):
-		return self.slides
 
 	def locate_slide(self, sid, gid):
 		for index, slide in enumerate(self):
@@ -135,9 +138,6 @@ class Slide(Base):
 
 	def get_position(self):
 		return self.get_attrib('position',  0)
-
-	def get_id(self):
-		return self.get_attrib('id',  0)
 
 	def get_groupid(self):
 		return self.get_attrib('group', 0)
@@ -170,7 +170,7 @@ class Slide(Base):
 		return self.get_attrib('filename', '%s.%s' % (self.get_id(), self.get_suffix()))
 
 	def get_update_time(self):
-		return self['updated_at']
+		return self.get_attrib('updated_at', 0)
 
 	def is_ready(self):
 		return self.get_attrib('ready', True)

@@ -2,7 +2,7 @@ import unittest
 import json
 from iskdpy.types import *
 
-class TestcwSlide(unittest.TestCase):
+class TestSlide(unittest.TestCase):
 	def setUp(self):
 		test_json='''{
         "id": 658,
@@ -53,3 +53,28 @@ class TestcwSlide(unittest.TestCase):
 		self.assertEqual(self.override.get_override_id(), 0)
 		self.assertTrue(self.override.is_override())
 		self.assertEqual(self.override.is_ready(), self.override.is_valid())
+
+
+class TestDisplay(unittest.TestCase):
+	def setUp(self):
+		slide=Slide({})
+		oslide=OverrideSlide({})
+		presentation=Presentation([slide])
+		self.dpy=Display(presentation, [oslide])
+		self.dpy2=Display()
+
+	def test_display_attribs(self):
+		self.assertEqual(self.dpy.get_updated_at(), 0)
+		self.assertEqual(len(self.dpy.get_all_slides()), 1)
+		self.assertEqual(self.dpy.get_updated_at(), 0)
+		self.assertEqual(self.dpy.get_presentation().get_total_slides(), 1)
+		self.assertEqual(str(self.dpy), 'Display "unnamed" (0) Updated: 01/01/70-00:00:00\n Overrides: 1\n OverrideSlide "unnamed" Position 0 file: 0.png\n Presentation "unnamed" (0) Slides: 1\n  Slide "unnamed" (0) Group "" (0) Position 0 file: 0.png (00:00:00) ')
+
+	def test_empty_display_attribs(self):
+		self.assertEqual(self.dpy2.get_updated_at(), 0)
+		self.assertEqual(len(self.dpy2.get_all_slides()), 0)
+		self.assertEqual(self.dpy2.get_updated_at(), 0)
+		self.assertEqual(len(self.dpy2.get_presentation()), 0)
+		self.assertEqual(self.dpy2.get_presentation().get_total_slides(), 0)
+		self.assertEqual(str(self.dpy2), 'Display "unnamed" (0) Updated: 01/01/70-00:00:00\n Overrides: 0\n Presentation "unnamed" (0) Slides: 0')
+
