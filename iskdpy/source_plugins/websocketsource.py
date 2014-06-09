@@ -22,8 +22,12 @@ class WebsocketSource(Source):
 		self.cache_path=conf['cache_path']
 		self.displayid=None
 		self.display_name=conf['display_name']
-		self.http=AuthHttp(conf['user'], conf['passwd'])
-		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'), 60)
+		self.http=AuthHttp('%s/login' % self.server, {'username': conf['user'], 'password': conf['passwd']})
+		for cookie in self.http.cookiejar:
+			self.cookie=cookie
+			print '%s' %cookie
+			break
+		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'), cookie=self.cookie, timeout=60)
 		self.channel=None
 		if not os.path.exists(self.cache_path):
 			os.makedirs(self.cache_path)
