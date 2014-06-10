@@ -10,9 +10,7 @@ from .. import config
 from .. import presenter
 from ..types import Slide
 
-register=OutputPlugin.register
-
-@register('CocosOutput')
+@OutputPlugin.register()
 class CocosOutput(OutputPlugin):
 	def __init__(self):
 		super(CocosOutput, self).__init__()

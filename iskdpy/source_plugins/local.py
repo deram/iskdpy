@@ -7,9 +7,7 @@ from ..source import Source, thread
 from .. import types
 import os
 
-register=Source.register
-
-@register('LocalSource')
+@Source.register()
 class LocalSource(Source):
 	def __init__(self, config):
 		super(LocalSource, self).__init__()

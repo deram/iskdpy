@@ -6,8 +6,7 @@ from multiprocessing.pool import ThreadPool
 from . import websocketsource
 from ..source import Source, thread
 
-register=Source.register
-@register('BackgroundWebsocketSource')
+@Source.register()
 class BackgroundWebsocketSource(websocketsource.WebsocketSource):
 	def __init__(self, config):
 		super(BackgroundWebsocketSource, self).__init__(config)

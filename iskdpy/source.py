@@ -48,8 +48,9 @@ class Source(object):
 			raise FactoryError(name, "Unknown subclass")
 
 	@classmethod
-	def register(cls, name):
+	def register(cls):
 		def decorator(subclass):
+			name=subclass.__name__
 			logger.debug("Registered %s" % name)
 			cls._subs_[name] = subclass
 			return subclass

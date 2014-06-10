@@ -5,9 +5,7 @@ import time
 
 from ..output import OutputPlugin, thread
 
-register=OutputPlugin.register
-
-@register('DummyLog')
+@OutputPlugin.register()
 class DummyLog(OutputPlugin):
 	def __init__(self):
 		super(DummyLog, self).__init__()

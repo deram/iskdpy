@@ -12,9 +12,7 @@ from .. import presenter
 
 import os
 
-register=Source.register
-
-@register('WebsocketSource')
+@Source.register()
 class WebsocketSource(Source):
 	def __init__(self, conf):
 		super(WebsocketSource, self).__init__(conf)
