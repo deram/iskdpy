@@ -22,8 +22,8 @@ class WebsocketSource(Source):
 		self.display_name=conf['display_name']
 		self.http=AuthHttp('%s/login' % self.server, {'username': conf['user'], 'password': conf['passwd']})
 		for cookie in self.http.cookiejar:
-			self.cookie=cookie
-			print '%s' %cookie
+			self.cookie= "%s=%s" % (cookie.name, cookie.value)
+			print '%s' % self.cookie
 			break
 		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'), cookie=self.cookie, timeout=60)
 		self.channel=None
@@ -41,6 +41,8 @@ class WebsocketSource(Source):
 
 	@thread.decorate
 	def _display_data_cb(self, data):
+		if 'username' in data:
+			logger.info('user: %s' % data['username'])
 		if self.__is_display_updated(data):
 			file.write(os.path.join(self.cache_path, "display.json"), json.dumps(data))
 			self.display=self.__create_display_tree(data)
