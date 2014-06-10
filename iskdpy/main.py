@@ -1,16 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-import gc
-
-from . import presenter
-from . import source_plugins
-from . import output_plugins
-from . import config
-
-from .output import OutputPlugin, thread
-
-def setup_logger():
+def setup_logger(): #pragma: no cover
 	logging.basicConfig(filename='iskdpy.log', 
 						level=logging.DEBUG,
 						format='%(asctime)s %(name)-32s %(levelname)-8s %(message)s',
@@ -26,9 +17,23 @@ def setup_logger():
 
 	root.addHandler(console)
 
-def main():
+def main(): #pragma: no cover
 	setup_logger()
 
+	logger.info('Importing components...')
+	logger.debug(' - config...')
+	from . import config
+	logger.debug(' - presenter...')
+	from . import presenter
+	logger.debug(' - source plugins...')
+	from . import source_plugins
+	logger.debug(' - output plugins...')
+	from . import output_plugins
+	logger.info('Importing components DONE')
+
+	from .output import OutputPlugin, thread
+
+	import gc
 	gc.disable()
 
 	logger.info('Started')
