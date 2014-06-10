@@ -48,8 +48,7 @@ class Event():
 
 	@classmethod
 	def pong(cls, conn_id):
-		if conn_id:
-			return cls(['websocket_rails.pong', {'data':{'connection_id': conn_id }}])
+		return cls(['websocket_rails.pong', {'data':{'connection_id': conn_id }}])
 
 	@classmethod
 	def simple(cls, name, data, *args, **kwargs):

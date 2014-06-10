@@ -70,9 +70,9 @@ class TestWebsocketRailsMisc(unittest.TestCase):
 		ev=websocket_rails.Event(['testname', ''])
 		self.assertEqual(ev.name, 'testname')
 
-	def test_pong_without_connid(self):
-		ev=websocket_rails.Event.pong(None)
-		self.assertEqual(ev, None)
+	#def test_pong_without_connid(self):
+	#	ev=websocket_rails.Event.pong(None)
+	#	self.assertEqual(ev, None)
 
 	def test_websocketrails_run(self):
 		global foo
