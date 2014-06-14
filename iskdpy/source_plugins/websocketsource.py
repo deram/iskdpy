@@ -51,7 +51,7 @@ class WebsocketSource(Source):
 
 	@thread.decorate
 	def _goto_slide_cb(self, data):
-		logger.debug('Received goto_slide')
+		logger.debug('Received goto_slide %s' % data)
 		if 'slide' in data.keys():
 			if data['slide']=='next':
 				presenter.goto_next_slide()

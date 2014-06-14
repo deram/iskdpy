@@ -110,7 +110,7 @@ def _set_current_slide(gid, sid):
 			pos=new_pos
 			return True
 	except (IndexError, AttributeError, TypeError):
-		logger.warning("Slide not in presentation. Not changing.")
+		logger.warning("Slide not in presentationi (%s,%s). Not changing."%(gid,sid))
 	return False
 
 def _seek_to_next_valid_slide_in_presentation():
