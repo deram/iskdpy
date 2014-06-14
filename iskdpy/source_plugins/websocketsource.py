@@ -20,7 +20,7 @@ class WebsocketSource(Source):
 		self.cache_path=conf['cache_path']
 		self.displayid=None
 		self.display_name=conf['display_name']
-		self.http=AuthHttp('%s/login' % self.server, {'username': conf['user'], 'password': conf['passwd']})
+		self.http=AuthHttp('%s/login?format=json' % self.server, {'username': conf['user'], 'password': conf['passwd']})
 		for cookie in self.http.cookiejar:
 			self.cookie= "%s=%s" % (cookie.name, cookie.value)
 			print '%s' % self.cookie
