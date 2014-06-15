@@ -15,6 +15,12 @@ class AuthHttp():
 		self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
 		self.post(loginurl, credentials)
 
+	def get_cookie(self, name):
+		for c in self.cookiejar:
+			if c.name == name:
+				return c
+		return None
+
 	def get(self, url, data=None):
 		try:
 			request = urllib2.Request(url)

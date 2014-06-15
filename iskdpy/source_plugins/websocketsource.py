@@ -18,15 +18,26 @@ class WebsocketSource(Source):
 		super(WebsocketSource, self).__init__(conf)
 		self.server=conf['server']
 		self.cache_path=conf['cache_path']
-		self.displayid=None
 		self.display_name=conf['display_name']
-		self.http=AuthHttp('%s/login?format=json' % self.server, {'username': conf['user'], 'password': conf['passwd']})
-		for cookie in self.http.cookiejar:
-			self.cookie= "%s=%s" % (cookie.name, cookie.value)
-			print '%s' % self.cookie
-			break
-		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'), cookie=self.cookie, timeout=60)
+
+		self.displayid=None
+		self.cookie=None
 		self.channel=None
+
+		# create authenticated http handler
+		credentials={'username': conf['user'], 'password': conf['passwd']}
+		login_url='%s/login?format=json' % self.server
+		self.http=AuthHttp(login_url, credentials)
+
+		# extract cookie in "key=val" format	
+		cookie=self.http.get_cookie("_isk_session")
+		if cookie:
+			self.cookie= "%s=%s" % (cookie.name, cookie.value)
+
+		# create websocket-rails connection, with the authenticated cookie
+		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'), cookie=self.cookie, timeout=60)
+
+		# create cache path if not excists
 		if not os.path.exists(self.cache_path):
 			os.makedirs(self.cache_path)
 
