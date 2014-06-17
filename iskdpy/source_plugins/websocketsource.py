@@ -28,7 +28,10 @@ class WebsocketSource(Source):
 		credentials={'username': conf['user'], 'password': conf['passwd']}
 		login_url='%s/login?format=json' % self.server
 		self.http=AuthHttp(login_url, credentials)
-
+		logger.debug("AuthHttp result: %s" % self.http.auth_result)
+		if not self.http.auth_result:
+			logger.info("Authentication failed, trying unauthenticated")
+		
 		# extract cookie in "key=val" format	
 		cookie=self.http.get_cookie("_isk_session")
 		if cookie:
@@ -53,7 +56,7 @@ class WebsocketSource(Source):
 	@thread.decorate
 	def _display_data_cb(self, data):
 		if 'username' in data:
-			logger.info('user: %s' % data['username'])
+			logger.info('Authenticated user: %s' % data['username'])
 		if self.__is_display_updated(data):
 			file.write(os.path.join(self.cache_path, "display.json"), json.dumps(data))
 			self.display=self.__create_display_tree(data)

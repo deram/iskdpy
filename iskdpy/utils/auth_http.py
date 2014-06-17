@@ -13,7 +13,7 @@ class AuthHttp():
 		self.timeout=timeout
 		self.cookiejar = cookielib.CookieJar()
 		self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
-		self.post(loginurl, credentials)
+		self.auth_result=self.post(loginurl, credentials)
 
 	def get_cookie(self, name):
 		for c in self.cookiejar:
