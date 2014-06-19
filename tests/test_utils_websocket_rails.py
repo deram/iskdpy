@@ -64,7 +64,8 @@ class MockConnection():
 foo=None
 class TestWebsocketRailsMisc(unittest.TestCase):
 	def setUp(self):
-		self.ws=websocket_rails.WebsocketRails("")
+		URL = "ws://example.com:3000"
+		self.ws=websocket_rails.WebsocketRails(URL)
 
 	def test_event_with_no_data_dict(self):
 		ev=websocket_rails.Event(['testname', ''])
