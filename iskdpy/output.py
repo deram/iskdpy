@@ -1,38 +1,42 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from .utils.queued_thread import QueuedThread
-thread=QueuedThread()
-thread.start()
+from .utils.async_proc import AsyncProcess
 
 class OutputPlugin(object):
 	_subs_ = {}
 	_current_ = None
 
-	@thread.decorate
 	def __init__(self):
 		pass
 
-	@thread.decorate
 	def run(self):
 		pass
 
-	@thread.decorate
 	def set_slide(self, slide):
 		pass
 
-	@thread.decorate
 	def refresh_slide_cache(self, slide):
 		pass
 
 	def task(self):
-		global thread
-		thread.work_all()
+		pass
+	
+	def get_callback(self):
+		return self._AsyncProcess__callback
+
+	# Callbacks to output plugins needing to command presenter
+	def goto_next_slide(self):
+		from .presenter import goto_next_slide
+		goto_next_slide()
+	def goto_previous_slide(self):
+		from .presenter import goto_previous_slide
+		goto_previous_slide()
 
 	@classmethod
 	def factory(cls, name, *args, **kwargs):
 		try:
-			cls._current_ = cls._subs_[name](*args, **kwargs)
+			cls._current_ = AsyncProcess(cls._subs_[name](*args, **kwargs))
 			return cls._current_
 		except KeyError:
 			raise FactoryError(name, "Unknown subclass")

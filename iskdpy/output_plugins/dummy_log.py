@@ -3,7 +3,7 @@ logger = logging.getLogger(__name__)
 
 import time
 
-from ..output import OutputPlugin, thread
+from ..output import OutputPlugin
 
 @OutputPlugin.register()
 class DummyLog(OutputPlugin):
@@ -16,7 +16,6 @@ class DummyLog(OutputPlugin):
 			self.task()
 			time.sleep(0)
 
-	@thread.decorate
 	def set_slide(self, slide, *args, **kwargs):
 		logger.info("started %s" % slide)
 		pass

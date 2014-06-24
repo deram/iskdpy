@@ -5,7 +5,7 @@ from cocos.layer import Layer
 from cocos.actions import Delay, CallFunc
 from pyglet.window import key
 
-from ... import presenter
+from ...output import OutputPlugin
 
 class _KeyboardControlLayer(Layer):
 
@@ -17,13 +17,13 @@ class _KeyboardControlLayer(Layer):
 
 	def on_key_press( self, k , m ):
 		if k == key.ENTER:
-			presenter.goto_next_slide()
+			RemoteControlLayer().callback.goto_next_slide().get()
 			return True
 		elif k == key.RIGHT:
-			presenter.goto_next_slide()
+			RemoteControlLayer().callback.goto_next_slide().get()
 			return True
 		elif k == key.LEFT:
-			presenter.goto_previous_slide()
+			RemoteControlLayer().callback.goto_previous_slide().get()
 			return True
 
 
@@ -32,6 +32,9 @@ class _RemoteControlLayer(Layer):
 		super(_RemoteControlLayer, self).__init__(*args, **kwargs)
 		self.schedule_interval(self.run, 0.1)
 		self.task=None
+
+	def set_callback(self, cb):
+		self.callback=cb
 
 	def set_task(self, task):
 		self.task=task

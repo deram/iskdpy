@@ -43,14 +43,15 @@ def main(): #pragma: no cover
 
 	adjust_logger_levels(config.logger_levels)
 
-	from .output import OutputPlugin, thread
+	from .output import OutputPlugin#, thread
 
 	import gc
 	gc.disable()
 
 	logger.info('Started')
-	presenter.goto_next_slide()
 	output=OutputPlugin.factory(config.output)
-	output.run()
-	thread.thread.join()
+	ret=output.run()
+	presenter.goto_next_slide()
+	#thread.thread.join()
+	ret.get()
 	logger.info('Stopped')
