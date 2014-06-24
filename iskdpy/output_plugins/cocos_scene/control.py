@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from cocos.layer import Layer
 from cocos.actions import Delay, CallFunc
 from pyglet.window import key

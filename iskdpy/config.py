@@ -13,6 +13,7 @@ effect_ids=[ 'unknown', 'normal', 'subtle', 'alert' ]
 effect_mapping=dict(update=dict(normal='crossfade', subtle='crossfade', alert='fade_red'),
 					normal=dict(normal='tile_swipe', subtle='crossfade', alert='fade_red'))
 
+logger_levels=dict( iskdpy='INFO' )
 
 sources=[ dict( source_name='LocalSource', display_name="test_display", local_dir="local") ]
 output="CocosOutput"

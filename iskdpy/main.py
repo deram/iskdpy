@@ -10,12 +10,22 @@ def setup_logger(): #pragma: no cover
 	root=logging.getLogger()
 
 	console = logging.StreamHandler()
-	console.setLevel(logging.INFO)
+	console.setLevel(logging.DEBUG)
 
 	formatter = logging.Formatter('%(name)s: %(levelname)-8s %(message)s')
 	console.setFormatter(formatter)
 
 	root.addHandler(console)
+
+	logging.getLogger("iskdpy.output_plugins").setLevel(logging.DEBUG)
+
+def adjust_logger_levels(conf=None):
+	logger.info('Adjusting logger levels')
+	levels={ "DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING, "ERROR": logging.ERROR, "CRITICAL": logging.CRITICAL }
+	if conf:
+		for log, level in conf.items():
+			logging.debug(' - %s -> %s', log, level)
+			logging.getLogger(log).setLevel(levels[level])
 
 def main(): #pragma: no cover
 	setup_logger()
@@ -29,7 +39,9 @@ def main(): #pragma: no cover
 	from . import source_plugins
 	logger.debug(' - output plugins...')
 	from . import output_plugins
-	logger.info('Importing components DONE')
+	logger.info('DONE')
+
+	adjust_logger_levels(config.logger_levels)
 
 	from .output import OutputPlugin, thread
 
