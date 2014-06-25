@@ -47,7 +47,7 @@ class WebsocketSource(Source):
 		return False
 
 	def _goto_slide_cb(self, data):
-		logger.debug('Received goto_slide')
+		logger.debug('Received goto_slide %s' % data)
 		if 'slide' in data.keys():
 			if data['slide']=='next':
 				self.get_callback()._goto_next_slide()
