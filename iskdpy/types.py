@@ -9,6 +9,13 @@ class Base(object):
 		else:
 			self.attribs={}
 
+	def __enter__(self):
+		"Stub for testing without AsyncProcesses"
+		return self
+	def __exit__(self, *a,**kw):
+		"Stub for testing without AsyncProcesses"
+		pass
+
 	def __str__(self):
 		return unicode(self)
 

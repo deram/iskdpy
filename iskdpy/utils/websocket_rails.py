@@ -93,7 +93,8 @@ class WebsocketRails():
 		self.send_lock=RLock()
 		self.recv_lock=RLock()
 
-		self._connect()
+		if self.url:
+			self._connect()
 
 	def start(self):
 		if not self.thread:
