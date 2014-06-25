@@ -24,7 +24,7 @@ class AsyncProcess(object):
 		self.thread.start()
 
 	def __getattr__( self, name ):
-		print current_process(), name
+		logger.debug("%s->%s Callable: %s.%s",current_process().name, self.proc.name, self.obj, name)
 		return getattr( self.local, name )
 
 	def _remote_target(self):
@@ -87,18 +87,30 @@ class Job(object):
 		cls._next_id+=1
 		return cls._next_id
 
-class ReturnValue(object):
+class ReturnValue():
 	def __init__(self):
 		self.ev=Event()
 		self.ret=None
 
+	def __enter__(self):
+		return self.get()
+
+	def __exit__(self, *args, **kwargs):
+		pass
+
 	def __getattr__( self, name ):
 		if self.ev.is_set() or self.ev.wait():
-			if isinstance(self.ret, Exception):
-				raise self.ret
+			self._get()
 			return getattr( self.ret, name )
 		else:
 			raise JobNotDone()
+
+	def _get(self):
+		if isinstance(self.ret, Exception):
+			ex=self.ret
+			self.ret=None
+			raise ex
+		return self.ret
 
 	def set(self, ret):
 		self.ret=ret
@@ -107,14 +119,10 @@ class ReturnValue(object):
 	def get(self, block=True, timeout=None):
 		if block:
 			if self.ev.wait(timeout):
-				if isinstance(self.ret, Exception):
-					raise self.ret
-				return self.ret
+				return self._get()
 		else:
 			if self.ev.is_set():
-				if isinstance(self.ret, Exception):
-					raise self.ret
-				return self.ret
+				return self._get()
 		raise JobNotDone()
 
 class JobNotDone(Exception):

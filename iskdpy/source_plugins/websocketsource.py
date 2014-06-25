@@ -6,9 +6,8 @@ from ..utils import file
 import json
 
 from ..utils.websocket_rails import WebsocketRails, Event, NOP
-from ..source import Source, thread
+from ..source import Source
 from .. import types
-from .. import presenter
 
 import os
 
@@ -28,14 +27,12 @@ class WebsocketSource(Source):
 
 	#def get_display():
 
-	@thread.decorate
 	def update_display(self):
 		if self.display:
 			return True
 		else:
 			return False
 
-	@thread.decorate
 	def _display_data_cb(self, data):
 		if self.__is_display_updated(data):
 			file.write(os.path.join(self.cache_path, "display.json"), json.dumps(data))
@@ -44,32 +41,29 @@ class WebsocketSource(Source):
 																len(self.display.get_override()), 
 																('manual' if self.display.is_manual() else '') ))
 			logger.debug('\n%s' % (self.display) )
-			presenter.display_updated()
+			self.get_callback()._display_updated()
 			return True
 		logger.debug('Received old display_data')
 		return False
 
-	@thread.decorate
 	def _goto_slide_cb(self, data):
 		logger.debug('Received goto_slide')
 		if 'slide' in data.keys():
 			if data['slide']=='next':
-				presenter.goto_next_slide()
+				self.get_callback()._goto_next_slide()
 			elif data['slide']=='previous':
-				presenter.goto_previous_slide()
+				self.get_callback()._goto_previous_slide()
 		else:		
-			presenter.goto_slide(data['group_id'], data['slide_id'])
+			self.get_callback()._goto_slide(data['group_id'], data['slide_id'])
 
-	@thread.decorate
 	def update_slide(self, slide):
 		if (not slide.is_uptodate()) and slide.is_ready():
 			logger.info("Updating: %s" % slide)
 			if self.__get_slide(slide):
 				self.__set_slide_timestamp(slide)
-				presenter.refresh_slide_cache(slide)
+				self.get_callback()._refresh_slide_cache(slide)
 		return slide
 
-	@thread.decorate
 	def connect(self):
 		data = {'display_name': self.display_name}
 		self.socket.send(Event.simple('iskdpy.hello', data, self._display_data_cb))
@@ -89,7 +83,6 @@ class WebsocketSource(Source):
 		while True:
 			self.socket.run()
 
-	@thread.decorate
 	def slide_done(self, slide):
 		logger.debug("slide_done: %s" % slide)
 		if (slide.is_override()):
@@ -103,7 +96,6 @@ class WebsocketSource(Source):
 		self.socket.send(Event.simple('iskdpy.current_slide', data))
 		logger.debug("slide_done end")
 
-	@thread.decorate
 	def get_path(self):
 		return self.cache_path
 

@@ -7,11 +7,8 @@ from .output import OutputPlugin
 #import gc
 from . import config
 
-from .utils.queued_thread import QueuedThread
 from threading import Timer
 
-thread=QueuedThread()
-thread.start()
 
 timer=None
 display=None
@@ -20,9 +17,11 @@ pos=-1
 def _connect(conf):
 	global display
 	source = Source.factory(conf.pop('source_name'), conf)
-	source.connect()
-	display=source.get_display()
-	_seek_to_presentation_beginning()
+	if source.connect():
+		with source.get_display() as disp:
+			if disp:
+				display=disp
+				_seek_to_presentation_beginning()
 
 def _next_source():
 	if len(config.sources):
@@ -72,7 +71,10 @@ def _handle_presentation_updated(old, new):
 def _update_display():
 	global display
 	if (get_source().update_display()):
-		new_display=get_source().get_display()
+		new_display=None
+		with get_source().get_display() as disp:
+			if disp:
+				new_display=disp
 		old_display=display
 		if _handle_display_changed(old_display, new_display):
 			display=new_display
@@ -202,6 +204,7 @@ def _schedule_slide_change(duration=1):
 	global timer
 	if not timer:
 		timer=Timer(duration, goto_next_slide)
+		timer.daemon=True
 		timer.start()
 
 def _show_slide(slide):
@@ -211,7 +214,8 @@ def _show_slide(slide):
 		logger.error('Show Slide skipped: %s' % (slide, ))
 	else:
 		if not slide.is_uptodate():
-			repr(get_source().update_slide(slide)) # repr makes possibly async call finish
+			with get_source().update_slide(slide):
+				pass
 		output=OutputPlugin.get_current()
 		output.set_slide(slide)
 		get_source().slide_done(slide)
@@ -220,23 +224,19 @@ def _show_slide(slide):
 	if duration > 0 and not _is_manual():
 		_schedule_slide_change(duration)
 
-@thread.decorate
 def display_updated():
 	return _update_display()
 
-@thread.decorate
 def goto_next_slide():
 	slide=_get_next()
 	_show_slide(slide)
 	return True
 
-@thread.decorate
 def goto_previous_slide():
 	slide=_get_previous()
 	_show_slide(slide)
 	return True
 
-@thread.decorate
 def goto_slide(gid, sid):
 	if _set_current_slide(gid, sid):
 		slide=_get_current_slide()
@@ -244,7 +244,6 @@ def goto_slide(gid, sid):
 		return True
 	return False
 
-@thread.decorate
 def get_source():
 	if not Source.get_current():
 		_next_source()
@@ -252,6 +251,6 @@ def get_source():
 
 #@thread.decorate
 def refresh_slide_cache(slide):
-	return OutputPlugin.get_current().refresh_slide_cache(slide).get()
-	pass
+	with OutputPlugin.get_current().refresh_slide_cache(slide) as ret:
+		return ret
 

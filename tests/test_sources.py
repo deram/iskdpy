@@ -7,8 +7,8 @@ from iskdpy.source import Source
 def NOP(*a,**kw):
 	pass
 
-websocketsource.presenter.refresh_slide_cache=NOP
-websocketsource.presenter.display_updated=NOP
+Source._signal_refresh_slide_cache=NOP
+Source._signal_display_updated=NOP
 
 class TestLocalSource(unittest.TestCase):
 	def setUp(self):
