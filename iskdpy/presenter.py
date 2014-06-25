@@ -213,10 +213,11 @@ def _show_slide(slide):
 	if not slide.is_ready():
 		logger.error('Show Slide skipped: %s' % (slide, ))
 	else:
+		output=OutputPlugin.get_current()
+		output.cancel_transition()
 		if not slide.is_uptodate():
 			with get_source().update_slide(slide):
 				pass
-		output=OutputPlugin.get_current()
 		output.set_slide(slide)
 		get_source().slide_done(slide)
 

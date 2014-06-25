@@ -45,6 +45,9 @@ class CocosOutput(OutputPlugin):
 		#thread.end()
 		return True
 
+	def cancel_transition(self):
+		self.schedule_call(self.scene.cancel_transition)
+
 	def set_slide(self, slide, *args, **kwargs):
 		from .cocos_scene.control import RemoteControlLayer
 		logger.debug("Slide received %s" % slide)
@@ -60,17 +63,17 @@ class CocosOutput(OutputPlugin):
 		self.schedule_call(helper, slide)
 
 	def refresh_slide_cache(self, slide):
-		def helper(slide):
-			filename=slide.get_filename()
+		def helper(filename):
 			if filename in pyglet.resource._default_loader._cached_images:
 				pyglet.resource._default_loader._cached_images.pop( filename )
 			pyglet.resource.reindex()
-		self.schedule_call(helper, slide)
+		filename=slide.get_filename()
+		self.schedule_call(helper, filename)
 
 	def task(self):
 		#super(CocosOutput, self).task()
 		try:
-			while not self.tasks.empty():
+			if not self.tasks.empty():
 				(func, args, kwargs)=self.tasks.get(block=False)
 				func(*args,**kwargs)
 		except Empty:
