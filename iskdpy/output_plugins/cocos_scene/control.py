@@ -17,13 +17,16 @@ class _KeyboardControlLayer(Layer):
 
 	def on_key_press( self, k , m ):
 		if k == key.ENTER:
-			RemoteControlLayer().callback.goto_next_slide().get()
+			self.parent.cancel_transition()
+			RemoteControlLayer().callback.goto_next_slide()
 			return True
 		elif k == key.RIGHT:
-			RemoteControlLayer().callback.goto_next_slide().get()
+			self.parent.cancel_transition()
+			RemoteControlLayer().callback.goto_next_slide()
 			return True
 		elif k == key.LEFT:
-			RemoteControlLayer().callback.goto_previous_slide().get()
+			self.parent.cancel_transition()
+			RemoteControlLayer().callback.goto_previous_slide()
 			return True
 
 

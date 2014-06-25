@@ -155,6 +155,11 @@ class SlideScene(Scene):
 		else:
 			return SlideLayer(slide.get_filename())
 
+	def cancel_transition(self):
+		try:
+			self.remove('temp')
+		except:
+			pass
 
 
 	def set_slide(self, slide, transition='normal'):
