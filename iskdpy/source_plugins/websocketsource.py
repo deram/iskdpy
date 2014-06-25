@@ -17,11 +17,29 @@ class WebsocketSource(Source):
 		super(WebsocketSource, self).__init__(conf)
 		self.server=conf['server']
 		self.cache_path=conf['cache_path']
-		self.displayid=None
 		self.display_name=conf['display_name']
-		self.http=AuthHttp(conf['user'], conf['passwd'])
-		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'), 60)
+
+		self.displayid=None
+		self.cookie=None
 		self.channel=None
+
+		# create authenticated http handler
+		credentials={'username': conf['user'], 'password': conf['passwd']}
+		login_url='%s/login?format=json' % self.server
+		self.http=AuthHttp(login_url, credentials)
+		logger.debug("AuthHttp result: %s" % self.http.auth_result)
+		if not self.http.auth_result:
+			logger.info("Authentication failed, trying unauthenticated")
+		
+		# extract cookie in "key=val" format	
+		cookie=self.http.get_cookie("_isk_session")
+		if cookie:
+			self.cookie= "%s=%s" % (cookie.name, cookie.value)
+
+		# create websocket-rails connection, with the authenticated cookie
+		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'), cookie=self.cookie, timeout=60)
+
+		# create cache path if not excists
 		if not os.path.exists(self.cache_path):
 			os.makedirs(self.cache_path)
 
@@ -34,6 +52,8 @@ class WebsocketSource(Source):
 			return False
 
 	def _display_data_cb(self, data):
+		if 'username' in data:
+			logger.info('Authenticated user: %s' % data['username'])
 		if self.__is_display_updated(data):
 			file.write(os.path.join(self.cache_path, "display.json"), json.dumps(data))
 			self.display=self.__create_display_tree(data)
