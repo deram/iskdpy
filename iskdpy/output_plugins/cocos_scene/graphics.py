@@ -1,3 +1,5 @@
+from __future__ import division
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -89,6 +91,9 @@ class SlideLayer(Layer):
 		super( SlideLayer, self ).__init__()
 		try:
 			self.g = Sprite( file, anchor=(0,0) )
+			ratio_h = config.window['height'] / self.g.height
+			ratio_w = config.window['width'] / self.g.width
+			self.g.scale=min(ratio_h, ratio_w)
 		except (pyglet.image.codecs.ImageDecodeException, pyglet.resource.ResourceNotFoundException):
 			self.invalid = True
 		else:
