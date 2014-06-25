@@ -249,7 +249,6 @@ def get_source():
 		_next_source()
 	return Source.get_current()
 
-#@thread.decorate
 def refresh_slide_cache(slide):
 	with OutputPlugin.get_current().refresh_slide_cache(slide) as ret:
 		return ret
