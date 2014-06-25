@@ -33,4 +33,6 @@ class BackgroundWebsocketSource(websocketsource.WebsocketSource):
 		def worker(slide):
 			if slide.is_ready():
 				self.update_slide(slide)
-		self.pool.map_async(worker, self.display.get_all_slides().values())
+		#self.pool.map_async(worker, self.display.get_all_slides().values())
+		for i in self.display.get_all_slides().values():
+			worker(i)
