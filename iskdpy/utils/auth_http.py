@@ -4,7 +4,6 @@ logger = logging.getLogger(__name__)
 import cookielib
 import urllib2
 from urllib import urlencode
-import base64
 from . import file
 import socket
 

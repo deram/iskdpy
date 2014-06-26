@@ -15,6 +15,7 @@ class CocosOutput(OutputPlugin):
 	def __init__(self):
 		super(CocosOutput, self).__init__()
 		self.slide=None
+		self.scene=None
 		self.tasks=Queue()
 
 	def run(self):
@@ -46,13 +47,13 @@ class CocosOutput(OutputPlugin):
 		return True
 
 	def cancel_transition(self):
-		self.schedule_call(self.scene.cancel_transition)
+		if self.scene:
+			self.schedule_call(self.scene.cancel_transition)
 
 	def set_slide(self, slide, *args, **kwargs):
-		from .cocos_scene.control import RemoteControlLayer
-		logger.debug("Slide received %s" % slide)
+		logger.debug("Slide received %s", slide)
 		def helper(slide):
-			logger.debug("gl_thread: Slide received %s" % slide)
+			logger.debug("gl_thread: Slide received %s", slide)
 			if slide.get_id() == self.slide.get_id():
 				self.scene.set_slide(slide, 'update')
 			else:
@@ -75,7 +76,7 @@ class CocosOutput(OutputPlugin):
 		try:
 			if not self.tasks.empty():
 				(func, args, kwargs)=self.tasks.get(block=False)
-				func(*args,**kwargs)
+				func(*args, **kwargs)
 		except Empty:
 			pass
 

@@ -12,7 +12,7 @@ class Base(object):
 	def __enter__(self):
 		"Stub for testing without AsyncProcesses"
 		return self
-	def __exit__(self, *a,**kw):
+	def __exit__(self, *a, **kw):
 		"Stub for testing without AsyncProcesses"
 		pass
 
@@ -25,8 +25,8 @@ class Base(object):
 	def __ne__(self, other):
 		return not self.__eq__(other)
 
-	def set_attribs(self, dict):
-		self.attribs.update(dict)
+	def set_attribs(self, attribs):
+		self.attribs.update(attribs)
 
 	def set_attrib(self, name, value):
 		self.attribs[name]=value
@@ -124,15 +124,17 @@ class Presentation(Base):
 		return None
 
 class Slide(Base):
-	def __init__(self, attribs=config.empty_slide):
+	def __init__(self, attribs=None):
+		if not attribs:
+			attribs=config.empty_slide
 		super(Slide, self).__init__(attribs=attribs)
 	
 	def __eq__(self, other):
 		r=isinstance(other, self.__class__) and (self.attribs == other.attribs)
 		return r
 
-	def __getitem__(self, id):
-		return self.get_attrib(id)
+	def __getitem__(self, key):
+		return self.get_attrib(key)
 
 	def __len__(self):
 		return len(self.attribs)
@@ -183,9 +185,9 @@ class Slide(Base):
 		return self.get_attrib('ready', True)
 
 	def is_uptodate(self):
-		file=self.get_filename()
-		if os.path.isfile(file):
-			file_mtime=os.stat(file).st_mtime
+		filename=self.get_filename()
+		if os.path.isfile(filename):
+			file_mtime=os.stat(filename).st_mtime
 			slide_mtime=self.get_update_time()
 			return (slide_mtime <= file_mtime)
 		else:

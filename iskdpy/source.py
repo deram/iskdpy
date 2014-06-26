@@ -31,7 +31,7 @@ class Source(object):
 		return "."
 
 	def get_callback(self):
-		return self._AsyncProcess__callback
+		return getattr(self, '_AsyncProcess__callback')
 
 	# Signals from source plugin to presenter
 	def _display_updated(self):
@@ -43,12 +43,12 @@ class Source(object):
 	def _goto_previous_slide(self):
 		from .presenter import goto_previous_slide
 		return goto_previous_slide()
-	def _goto_slide(self, *args,**kwargs):
+	def _goto_slide(self, *args, **kwargs):
 		from .presenter import goto_slide
-		return goto_slide(*args,**kwargs)
-	def _refresh_slide_cache(self, *args,**kwargs):
+		return goto_slide(*args, **kwargs)
+	def _refresh_slide_cache(self, *args, **kwargs):
 		from .presenter import refresh_slide_cache
-		return refresh_slide_cache(*args,**kwargs)
+		return refresh_slide_cache(*args, **kwargs)
 
 	@classmethod
 	def factory(cls, name, *args, **kwargs):
@@ -62,7 +62,7 @@ class Source(object):
 	def register(cls):
 		def decorator(subclass):
 			name=subclass.__name__
-			logger.debug("Registered %s" % name)
+			logger.debug("Registered %s", name)
 			cls._subs_[name] = subclass
 			return subclass
 		return decorator

@@ -17,13 +17,11 @@ class DummyLog(OutputPlugin):
 			time.sleep(0)
 
 	def set_slide(self, slide, *args, **kwargs):
-		logger.info("started %s" % slide)
-		pass
+		logger.info("started %s", slide)
 
 	#def refresh_slide_cache(self, slide):
 
-	def task(self):
-		thread.work_one(block=True)
+	#def task(self):
 
 if __name__ == "__main__":
 	#from pprint import pprint

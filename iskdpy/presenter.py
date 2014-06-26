@@ -1,7 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from .types import Slide, Display
+from .types import Slide
 from .source import Source
 from .output import OutputPlugin 
 #import gc

@@ -23,7 +23,7 @@ class OutputPlugin(object):
 		pass
 	
 	def get_callback(self):
-		return self._AsyncProcess__callback
+		return getattr(self, '_AsyncProcess__callback')
 
 	# Callbacks to output plugins needing to command presenter
 	def goto_next_slide(self):
@@ -45,7 +45,7 @@ class OutputPlugin(object):
 	def register(cls):
 		def decorator(subclass):
 			name=subclass.__name__
-			logger.debug("Registered %s" % name)
+			logger.debug("Registered %s", name)
 			cls._subs_[name] = subclass
 			return subclass
 		return decorator

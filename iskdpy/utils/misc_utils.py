@@ -1,5 +1,4 @@
 import time
-import inspect
 
 def RateLimit(interval, default=None):
 	def decorate(f):

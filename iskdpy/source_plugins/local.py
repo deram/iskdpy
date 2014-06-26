@@ -23,7 +23,7 @@ class LocalSource(Source):
 	def update_display(self):
 		files=glob.glob('%s/*.*' % self.local_dir)
 		if ( self.files != files ):
-			logger.info("Contents of '%s' changed, rebuilding display..." % (self.local_dir))
+			logger.info("Contents of '%s' changed, rebuilding display...", (self.local_dir))
 			self.files=files
 			slides=[]
 			for item in files:
@@ -31,7 +31,7 @@ class LocalSource(Source):
 					slidetype='video'
 				else:
 					slidetype='image'
-				slide=types.Slide({'id':item,'type':slidetype, 'filename':item.replace('\\','/'), 'position':len(slides)+1, 'updated_at':1})
+				slide=types.Slide({'id':item, 'type':slidetype, 'filename':item.replace('\\', '/'), 'position':len(slides)+1, 'updated_at':1})
 				slide.set_attrib('foo', item)
 				slides.append(slide)
 			presentation=types.Presentation(slides=slides, attribs={'total_slides':len(slides)})

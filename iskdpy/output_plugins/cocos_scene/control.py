@@ -2,10 +2,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from cocos.layer import Layer
-from cocos.actions import Delay, CallFunc
 from pyglet.window import key
-
-from ...output import OutputPlugin
 
 class _KeyboardControlLayer(Layer):
 
@@ -35,6 +32,7 @@ class _RemoteControlLayer(Layer):
 		super(_RemoteControlLayer, self).__init__(*args, **kwargs)
 		self.schedule_interval(self.run, 0.1)
 		self.task=None
+		self.callback=None
 
 	def set_callback(self, cb):
 		self.callback=cb
@@ -46,16 +44,12 @@ class _RemoteControlLayer(Layer):
 		if self.task:
 			self.task()
 
-__rcl=None
 def RemoteControlLayer():
-	global __rcl
-	if not __rcl:
-		__rcl=_RemoteControlLayer()
-	return __rcl
+	if "__rcl" not in RemoteControlLayer.__dict__:
+		RemoteControlLayer.__rcl=_RemoteControlLayer()
+	return RemoteControlLayer.__rcl
 
-__kcl=None
 def KeyboardControlLayer():
-	global __kcl
-	if not __kcl:
-		__kcl=_KeyboardControlLayer()
-	return __kcl
+	if "__kcl" not in KeyboardControlLayer.__dict__:
+		_KeyboardControlLayer.__kcl=_KeyboardControlLayer()
+	return _KeyboardControlLayer.__kcl

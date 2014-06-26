@@ -52,6 +52,5 @@ def main(): #pragma: no cover
 	output=OutputPlugin.factory(config.output)
 	ret=output.run()
 	presenter.goto_next_slide()
-	#thread.thread.join()
 	ret.get()
 	logger.info('Stopped')
