@@ -4,7 +4,6 @@ logger = logging.getLogger(__name__)
 import cookielib
 import urllib2
 from urllib import urlencode
-from . import file
 import socket
 
 class AuthHttp():
@@ -26,9 +25,9 @@ class AuthHttp():
 			result = self.opener.open(request, data, self.timeout)
 			return result.read()
 		except urllib2.HTTPError, e:
-			logger.error("HTTPError: %s %s %s" % (url, e.code, e.reason))
+			logger.error("HTTPError: %s %s %s", url, e.code, e.reason)
 		except urllib2.URLError, e:
-			logger.error("URLError: %s %s" % (url, e.reason))
+			logger.error("URLError: %s %s", url, e.reason)
 		except socket.timeout:
 			logger.error("Timeout connecting")
 		return False
@@ -36,7 +35,8 @@ class AuthHttp():
 	def get_and_save(self, url, filename):
 		resource = self.get(url)
 		if resource:
-			file.write(filename, resource)
+			with open(filename, 'w') as f:
+				f.write(filename, resource)
 		return resource
 	
 	def post(self, url, data):

@@ -2,7 +2,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 from ..utils.auth_http import AuthHttp
-from ..utils import file
 import json
 
 from ..utils.websocket_rails import WebsocketRails, Event, NOP
@@ -27,7 +26,7 @@ class WebsocketSource(Source):
 		credentials={'username': conf['user'], 'password': conf['passwd']}
 		login_url='%s/login?format=json' % self.server
 		self.http=AuthHttp(login_url, credentials)
-		logger.debug("AuthHttp result: %s" % self.http.auth_result)
+		logger.debug("AuthHttp result: %s", self.http.auth_result)
 		if not self.http.auth_result:
 			logger.info("Authentication failed, trying unauthenticated")
 		
@@ -53,21 +52,26 @@ class WebsocketSource(Source):
 
 	def _display_data_cb(self, data):
 		if 'username' in data:
-			logger.info('Authenticated user: %s' % data['username'])
+			logger.info('Authenticated user: %s', data['username'])
 		if self.__is_display_updated(data):
-			file.write(os.path.join(self.cache_path, "display.json"), json.dumps(data))
+			try:
+				with open(os.path.join(self.cache_path, "display.json"), 'w') as f:
+					f.write(json.dumps(data, indent=4, separators=(',', ': ')))
+			except IOError:
+				logger.exception('Failed to write display_data to backup file')
 			self.display=self.__create_display_tree(data)
-			logger.info('Received display_data. S:%d O:%d %s' % (self.display.get_presentation().get_total_slides(), 
-																len(self.display.get_override()), 
-																('manual' if self.display.is_manual() else '') ))
-			logger.debug('\n%s' % (self.display) )
+			logger.info('Received display_data. S:%d O:%d %s',
+						self.display.get_presentation().get_total_slides(),
+						len(self.display.get_override()),
+						('manual' if self.display.is_manual() else ''))
+			logger.debug('\n%s', self.display )
 			self.get_callback()._display_updated()
 			return True
 		logger.debug('Received old display_data')
 		return False
 
 	def _goto_slide_cb(self, data):
-		logger.debug('Received goto_slide %s' % data)
+		logger.debug('Received goto_slide %s', data)
 		if 'slide' in data.keys():
 			if data['slide']=='next':
 				self.get_callback()._goto_next_slide()
@@ -78,7 +82,7 @@ class WebsocketSource(Source):
 
 	def update_slide(self, slide):
 		if (not slide.is_uptodate()) and slide.is_ready():
-			logger.info("Updating: %s" % slide)
+			logger.info("Updating: %s", slide)
 			if self.__get_slide(slide):
 				self.__set_slide_timestamp(slide)
 				self.get_callback()._refresh_slide_cache(slide)
@@ -104,7 +108,7 @@ class WebsocketSource(Source):
 			self.socket.run()
 
 	def slide_done(self, slide):
-		logger.debug("slide_done: %s" % slide)
+		logger.debug("slide_done: %s", slide)
 		if (slide.is_override()):
 			data = {'display_id': self.displayid, 
 				'slide_id': slide.get_attrib('id'),

@@ -77,6 +77,7 @@ class WebsocketRails():
 	def __init__(self, url, cookie=None, timeout=0):
 		websocket.enableTrace(False)
 		self.timeout=timeout
+		self.running=False
 		self.conn_id=None
 		self.url=url
 		self.cookie=cookie
@@ -115,17 +116,18 @@ class WebsocketRails():
 
 	@RateLimit(1)
 	def _connect(self):
-		with self.send_lock, self.recv_lock:
-			try:
-				logger.info('Connecting %s' % self.url)
-				self.ws=websocket.create_connection(self.url, cookie=self.cookie)
-				self.queue={}
-				for channel in self.channels.values():
-					channel.subscribe()
-				while len(self.messages):
-					self.send(self.messages.pop(0))
-			except (websocket.WebSocketException, socket.error):
-				pass
+		with self.send_lock:
+			with self.recv_lock:
+				try:
+					logger.info('Connecting %s', self.url)
+					self.ws=websocket.create_connection(self.url, cookie=self.cookie)
+					self.queue={}
+					for channel in self.channels.values():
+						channel.subscribe()
+					while len(self.messages):
+						self.send(self.messages.pop(0))
+				except (websocket.WebSocketException, socket.error):
+					pass
 
 	def _send(self, ev):
 		with self.send_lock:
@@ -138,7 +140,7 @@ class WebsocketRails():
 	def _recv(self):
 		with self.recv_lock:
 			try:
-				(rlist, wlist, xlist) = select([self.ws.fileno()],[],[],self.timeout)
+				(rlist, _, _) = select([self.ws.fileno()], [], [], self.timeout)
 				if rlist:
 					data=self.ws.recv()
 					if data:
@@ -156,9 +158,9 @@ class WebsocketRails():
 				else:
 					func=self.queue.pop(ev.id).failure_cb
 			else:
-				logger.error("UNKNOWN RESULT FOR: %s id:%d" % (ev.name, ev.id))
-				logger.debug("SENT: %s" % self.queue.pop(ev.id).__dict__)
-				logger.debug("RECEIVED: %s" % ev.__dict__)
+				logger.error("UNKNOWN RESULT FOR: %s id:%d", ev.name, ev.id)
+				logger.debug("SENT: %s", self.queue.pop(ev.id).__dict__)
+				logger.debug("RECEIVED: %s", ev.__dict__)
 				func=NOP
 
 		elif ev.channel:
@@ -170,7 +172,7 @@ class WebsocketRails():
 		if func:
 			return func(ev.data)
 		elif ev:
-			logger.debug("UNHANDLED: %s" % ev.__dict__)
+			logger.debug("UNHANDLED: %s", ev.__dict__)
 		else: #pragma: no cover
 			return #this is impossible
 
@@ -198,7 +200,7 @@ class WebsocketRails():
 
 	def __connected(self, data):
 		self.conn_id=data.get('connection_id')
-		logger.debug("Connected: id=%s" % self.conn_id)
+		logger.debug("Connected: id=%s", self.conn_id)
 
 	def __pong(self, data):
 		self.send(Event.pong(self.conn_id))
