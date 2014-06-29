@@ -93,7 +93,6 @@ class Job(object):
 		self.kwargs=kwargs
 		self.ret=None
 		self.done=False
-		self.signal=None
 		self.id=self.next_id()
 
 	def __str__(self):
