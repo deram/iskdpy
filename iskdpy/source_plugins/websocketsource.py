@@ -36,7 +36,9 @@ class WebsocketSource(Source):
 			self.cookie= "%s=%s" % (cookie.name, cookie.value)
 
 		# create websocket-rails connection, with the authenticated cookie
-		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'), cookie=self.cookie, timeout=60)
+		header=["Content-Type:	application/json; charset=utf-8",
+				"User-Agent: ISKdpy"]
+		self.socket=WebsocketRails('%s/websocket' % self.server.replace('http', 'ws'), cookie=self.cookie, header=header, timeout=60)
 
 		# create cache path if not excists
 		if not os.path.exists(self.cache_path):
