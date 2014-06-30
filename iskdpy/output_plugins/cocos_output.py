@@ -54,7 +54,7 @@ class CocosOutput(OutputPlugin):
 		logger.debug("Slide received %s", slide)
 		def helper(slide):
 			logger.debug("gl_thread: Slide received %s", slide)
-			if slide.get_id() == self.slide.get_id():
+			if slide.id == self.slide.id:
 				self.scene.set_slide(slide, 'update')
 			else:
 				self.scene.set_slide(slide)
@@ -68,8 +68,7 @@ class CocosOutput(OutputPlugin):
 			if filename in pyglet.resource._default_loader._cached_images:
 				pyglet.resource._default_loader._cached_images.pop( filename )
 			pyglet.resource.reindex()
-		filename=slide.get_filename()
-		self.schedule_call(helper, filename)
+		self.schedule_call(helper, slide.filename)
 
 	def task(self):
 		#super(CocosOutput, self).task()

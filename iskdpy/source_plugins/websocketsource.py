@@ -58,16 +58,19 @@ class WebsocketSource(Source):
 		if self.__is_display_updated(data):
 			try:
 				with open(os.path.join(self.cache_path, "display.json"), 'w') as f:
-					f.write(json.dumps(data, indent=4, separators=(',', ': ')))
+					json.dump(data, f, indent=4, separators=(',', ': '), encoding="utf-8")
 			except IOError:
 				logger.exception('Failed to write display_data to backup file')
 			self.display=self.__create_display_tree(data)
 			logger.info('Received display_data. S:%d O:%d %s',
-						self.display.get_presentation().get_total_slides(),
-						len(self.display.get_override()),
-						('manual' if self.display.is_manual() else ''))
+						self.display.presentation.total_slides,
+						len(self.display.override_queue),
+						('manual' if self.display.manual else ''))
 			logger.debug('\n%s', self.display )
-			self.get_callback()._display_updated()
+			try:
+				self.get_callback()._display_updated()
+			except AttributeError:
+				logger.exception("Callback missing, running without factory?")
 			return True
 		logger.debug('Received old display_data')
 		return False
@@ -83,7 +86,7 @@ class WebsocketSource(Source):
 			self.get_callback()._goto_slide(data['group_id'], data['slide_id'])
 
 	def update_slide(self, slide):
-		if (not slide.is_uptodate()) and slide.is_ready():
+		if (not slide.uptodate) and slide.ready:
 			logger.info("Updating: %s", slide)
 			if self.__get_slide(slide):
 				self.__set_slide_timestamp(slide)
@@ -111,14 +114,14 @@ class WebsocketSource(Source):
 
 	def slide_done(self, slide):
 		logger.debug("slide_done: %s", slide)
-		if (slide.is_override()):
+		if (isinstance (slide, types.OverrideSlide)):
 			data = {'display_id': self.displayid, 
-				'slide_id': slide.get_attrib('id'),
-				'override_queue_id': slide.get_attrib('override_queue_id') }
+				'slide_id': slide.id,
+				'override_queue_id': slide.override_queue_id }
 		else:
 			data = {'display_id': self.displayid, 
-				'group_id': slide.get_groupid(), 
-				'slide_id': slide.get_id() }
+				'group_id': slide.group, 
+				'slide_id': slide.id }
 		self.socket.send(Event.simple('iskdpy.current_slide', data))
 		logger.debug("slide_done end")
 
@@ -130,7 +133,7 @@ class WebsocketSource(Source):
 			self.displayid=data['id']
 			return True #First time, data always used.
 		try:
-			return data['metadata_updated_at'] > self.display.get_metadata_updated_at()
+			return data['metadata_updated_at'] > self.display.metadata_updated_at
 		except:
 			return True
 	
@@ -138,32 +141,32 @@ class WebsocketSource(Source):
 		presentation_data=data.pop('presentation')
 		slides=[]
 		for slide in presentation_data.pop('slides', []):
-			s=types.Slide(attribs=slide)
-			s.set_attrib('filename', '%s/%d.%s' % (self.cache_path, s.get_id(), s.get_suffix()))
+			s=types.Slide(**slide)
+			s.filename='%s/%d.%s' % (self.cache_path, s.id, s.suffix)
 			slides.append(s)
-		presentation = types.Presentation(slides=slides, attribs=presentation_data)
+		presentation = types.Presentation(slides=slides, **presentation_data)
 		slides=[]
 		for slide in data.pop('override_queue', []):
-			s=types.OverrideSlide(attribs=slide)
-			s.set_attrib('filename', '%s/%d.%s' % (self.cache_path, s.get_id(), s.get_suffix()))
+			s=types.OverrideSlide(**slide)
+			s.filename='%s/%d.%s' % (self.cache_path, s.id, s.suffix)
 			slides.append(s)
 		override=slides
 
-		display=types.Display(presentation=presentation, override=override, attribs=data, name=self.display_name)
+		display=types.Display(presentation=presentation, override_queue=override, **data)
 		return display
 
 	def __get_slide(self, slide):
-		location=slide.get_filename()
-		sid=slide.get_id()
+		location=slide.filename
+		sid=slide.id
 		return self.http.get_and_save('%s/slides/%d/full' % (self.server, sid), location)
 
 	def __set_slide_timestamp(self, slide):
-		time=slide.get_update_time()
-		location=slide.get_filename()
+		time=slide.updated_at
+		location=slide.filename
 		os.utime(location, (time, time))
 	
 	def __fill_cache(self):
-		slides=self.display.get_all_slides()
+		slides=self.display.all_slides
 		for slide in slides.values():
 			self.update_slide(slide)
 		return self.display

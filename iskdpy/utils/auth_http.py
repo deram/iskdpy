@@ -35,8 +35,8 @@ class AuthHttp():
 	def get_and_save(self, url, filename):
 		resource = self.get(url)
 		if resource:
-			with open(filename, 'w') as f:
-				f.write(filename, resource)
+			with open(filename, 'wb') as f:
+				f.write(resource)
 		return resource
 	
 	def post(self, url, data):

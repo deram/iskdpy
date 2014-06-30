@@ -21,7 +21,7 @@ class Event():
 		self.failure_cb=failure_cb
 
 		if isinstance(data, basestring):
-			data=json.loads(data, "utf8")
+			data=json.loads(data, "utf-8")
 			if isinstance(data[0], list):
 				data=data[0]
 		try:

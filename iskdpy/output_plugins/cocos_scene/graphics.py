@@ -146,16 +146,16 @@ class SlideScene(Scene):
 		self.add(self.__get_slide_layer(slide), z=0, name='slide')
 
 		self.add(ClockLayer(), z=5, name='clock')
-		ClockLayer().clock_shown(slide.get_clock())
+		ClockLayer().clock_shown(slide.show_clock)
 
 		self.add(control.KeyboardControlLayer(), z=10)
 		self.add(control.RemoteControlLayer(), z=10)
 
 	def __get_slide_layer(self, slide):
-		if (slide.get_type()=="video"):
-			return VideoLayer(slide.get_filename())
+		if (slide.type=="video"):
+			return VideoLayer(slide.filename)
 		else:
-			return SlideLayer(slide.get_filename())
+			return SlideLayer(slide.filename)
 
 	def cancel_transition(self):
 		try:
@@ -165,7 +165,7 @@ class SlideScene(Scene):
 
 
 	def set_slide(self, slide, transition='normal'):
-		self.get('clock').clock_shown(slide.get_clock())
+		self.get('clock').clock_shown(slide.show_clock)
 		
 		out_layer=self.get('slide')
 		in_layer=self.__get_slide_layer(slide)
