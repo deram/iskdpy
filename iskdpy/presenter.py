@@ -2,7 +2,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from .types import Slide
-from .source import Source
+from .source import SourcePlugin
 from .output import OutputPlugin 
 #import gc
 from . import config
@@ -20,7 +20,7 @@ _state=_PresenterState()
 
 
 def _connect(conf):
-	source = Source.factory(conf.pop('source_name'), conf)
+	source = SourcePlugin.factory(conf.pop('source_name'), conf)
 	if source.connect():
 		with source.get_display() as disp:
 			if disp:
@@ -235,9 +235,9 @@ def goto_slide(gid, sid):
 	return False
 
 def get_source():
-	if not Source.get_current():
+	if not SourcePlugin.get_current():
 		_next_source()
-	return Source.get_current()
+	return SourcePlugin.get_current()
 
 def refresh_slide_cache(slide):
 	with OutputPlugin.get_current().refresh_slide_cache(slide) as ret:

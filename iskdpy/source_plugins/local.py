@@ -3,12 +3,12 @@ logger = logging.getLogger(__name__)
 
 import glob
 
-from ..source import Source
+from ..source import SourcePlugin
 from .. import types
 import os
 
-@Source.register()
-class LocalSource(Source):
+@SourcePlugin.register()
+class LocalSource(SourcePlugin):
 	def __init__(self, config):
 		super(LocalSource, self).__init__()
 		self.local_dir=config['local_dir']

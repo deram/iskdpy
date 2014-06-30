@@ -4,9 +4,9 @@ logger = logging.getLogger(__name__)
 from multiprocessing.pool import ThreadPool
 
 from . import websocketsource
-from ..source import Source
+from ..source import SourcePlugin
 
-@Source.register()
+@SourcePlugin.register()
 class BackgroundWebsocketSource(websocketsource.WebsocketSource):
 	def __init__(self, config):
 		super(BackgroundWebsocketSource, self).__init__(config)

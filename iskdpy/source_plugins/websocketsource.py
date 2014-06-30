@@ -5,13 +5,13 @@ from ..utils.auth_http import AuthHttp
 import json
 
 from ..utils.websocket_rails import WebsocketRails, Event, NOP
-from ..source import Source
+from ..source import SourcePlugin
 from .. import types
 
 import os
 
-@Source.register()
-class WebsocketSource(Source):
+@SourcePlugin.register()
+class WebsocketSource(SourcePlugin):
 	def __init__(self, conf):
 		super(WebsocketSource, self).__init__(conf)
 		self.server=conf['server']
@@ -174,10 +174,15 @@ class WebsocketSource(Source):
 
 if __name__ == "__main__":
 	#from pprint import pprint
-	import config
-	source=Source.factory('WebsocketSource')(config.sources[0])
+	from .. import config
+	from ..main import setup_logger
+	setup_logger()
+	#source=Source.factory('WebsocketSource')(config.sources[0])
+	source=WebsocketSource(config.sources[0])
 	source.connect()
 	source.update_display()
 	#source._WebsocketSource__fill_cache()
-	print "%s" % source.display
+	print "%s" % (source.display, )
+	print "%s" % repr(source.display.presentation[45])
+	print "%s" % repr(types.Slide())
 

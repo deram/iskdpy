@@ -3,7 +3,7 @@ logger = logging.getLogger(__name__)
 
 from .utils.async_proc import AsyncProcess
 
-class Source(object):
+class SourcePlugin(object):
 	_subs_ = {}
 	_current_ = None
 	def __init__(self, config=None):
