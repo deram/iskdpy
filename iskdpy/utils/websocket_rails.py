@@ -74,14 +74,13 @@ class Channel():
 		return self
 
 class WebsocketRails():
-	def __init__(self, url, header=None, cookie=None, timeout=0):
+	def __init__(self, url, timeout=0, **options):
 		websocket.enableTrace(False)
 		self.timeout=timeout
 		self.running=False
 		self.conn_id=None
 		self.url=url
-		self.header=header
-		self.cookie=cookie
+		self.options=options
 		self.ws=None
 		self.channels={}
 		self.queue={}
@@ -121,7 +120,7 @@ class WebsocketRails():
 			with self.recv_lock:
 				try:
 					logger.info('Connecting %s', self.url)
-					self.ws=websocket.create_connection(self.url, cookie=self.cookie, header=self.header)
+					self.ws=websocket.create_connection(self.url, **self.options)
 					self.queue={}
 					for channel in self.channels.values():
 						channel.subscribe()
