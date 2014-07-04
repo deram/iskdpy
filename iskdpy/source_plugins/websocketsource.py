@@ -20,17 +20,17 @@ class WebsocketSource(SourcePlugin):
 
 		self.sslopt={}
 		if conf.get('ignore_hostname', False):
-			logger.debug('Ignoring certificate hostname check')
+			logger.warning('SSL: Ignoring certificate hostname check')
 			from ..utils.websocket_rails import websocket
 			def ignore(*a, **kw): return True
 			websocket.match_hostname=ignore
 		if conf.get('ignore_cert', False):
 			import ssl
-			logger.debug('Ignoring certificate check')
+			logger.warning('SSL: Ignoring certificate check')
 			self.sslopt["cert_reqs"]=ssl.CERT_NONE
 		certs=conf.get('ca_certs', False)
 		if certs and os.path.isfile(certs):
-			logger.debug('Loading CA Certificates from %s', certs)
+			logger.warning('SSL: Loading CA Certificates from %s', certs)
 			self.sslopt["ca_certs"]=certs
 
 		self.displayid=None
