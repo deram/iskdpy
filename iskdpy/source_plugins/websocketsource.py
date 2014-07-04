@@ -10,6 +10,16 @@ from .. import types
 
 import os
 
+# PATCHING
+from ..utils.websocket_rails import websocket
+def _match_hostname(*a, **kw):
+	if _match_hostname.__dict__.get('ignore', False):
+		return True
+	return _match_hostname.real(*a, **kw)
+_match_hostname.real=websocket.match_hostname
+websocket.match_hostname=_match_hostname
+
+
 @SourcePlugin.register()
 class WebsocketSource(SourcePlugin):
 	def __init__(self, conf):
@@ -21,9 +31,9 @@ class WebsocketSource(SourcePlugin):
 		self.sslopt={}
 		if conf.get('ignore_hostname', False):
 			logger.warning('SSL: Ignoring certificate hostname check')
-			from ..utils.websocket_rails import websocket
-			def ignore(*a, **kw): return True
-			websocket.match_hostname=ignore
+			_match_hostname.ignore=True
+		else:
+			_match_hostname.ignore=False
 		if conf.get('ignore_cert', False):
 			import ssl
 			logger.warning('SSL: Ignoring certificate check')
