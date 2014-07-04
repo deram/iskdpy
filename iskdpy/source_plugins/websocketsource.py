@@ -19,6 +19,11 @@ class WebsocketSource(SourcePlugin):
 		self.display_name=conf['display_name']
 
 		self.sslopt={}
+		if conf.get('ignore_hostname', False):
+			logger.debug('Ignoring certificate hostname check')
+			from ..utils.websocket_rails import websocket
+			def ignore(*a, **kw): return True
+			websocket.match_hostname=ignore
 		if conf.get('ignore_cert', False):
 			import ssl
 			logger.debug('Ignoring certificate check')
