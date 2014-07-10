@@ -131,15 +131,23 @@ class WebsocketSource(SourcePlugin):
 
 	def slide_done(self, slide):
 		logger.debug("slide_done: %s", slide)
+		data=None
 		if (isinstance (slide, types.OverrideSlide)):
-			data = {'display_id': self.displayid, 
-				'slide_id': slide.id,
-				'override_queue_id': slide.override_queue_id }
+			if slide.id > 0:
+				data = {'display_id': self.displayid, 
+					'slide_id': slide.id,
+					'override_queue_id': slide.override_queue_id }
 		else:
 			data = {'display_id': self.displayid, 
 				'group_id': slide.group, 
 				'slide_id': slide.id }
-		self.socket.send(Event.simple('iskdpy.current_slide', data))
+		if data:
+			self.socket.send(Event.simple('iskdpy.current_slide', data))
+		else:
+			logger.debug("sent error instead of empty slide")
+			data = {'display_id': self.displayid,
+					'message': 'Empty slide shown'}
+			self.socket.send(Event.simple('iskdpy.error', data))
 		logger.debug("slide_done end")
 
 	def get_path(self):
