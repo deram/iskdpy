@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 import cocos
 from cocos.layer import Layer, ColorLayer
 from cocos.scene import Scene
-from cocos.actions import MoveTo, FadeOutBLTiles, FadeOut, StopGrid, AccelDeccel, Hide
+from cocos.actions import MoveTo, FadeOutBLTiles, FadeOut, FadeIn, StopGrid, AccelDeccel, Hide, Delay
 from cocos.sprite import Sprite
 import pyglet
 from pyglet import font
@@ -139,8 +139,6 @@ class SlideScene(Scene):
 	def __init__(self, slide):
 		super(SlideScene, self).__init__()
 
-		self.slide=weak(slide)
-
 		self.add(ColorLayer(0, 0, 0, 255), z=-10, name='color')
 
 		self.add(self.__get_slide_layer(slide), z=0, name='slide')
@@ -161,10 +159,9 @@ class SlideScene(Scene):
 		try:
 			self.remove('temp')
 		except Exception:
-			pass
+			pass # no transition running.
 
-
-	def set_slide(self, slide, transition='normal'):
+	def set_slide(self, slide, change='normal'):
 		self.get('clock').clock_shown(slide.show_clock)
 		
 		out_layer=self.get('slide')
@@ -172,16 +169,29 @@ class SlideScene(Scene):
 		try:
 			self.remove('temp')
 		except Exception:
-			pass
+			pass # no transition running.
+		try:
+			self.remove('temp_col')
+		except Exception:
+			pass # no transition running.
 		self.remove('slide')
 
 		self.add(out_layer, z=1, name='temp')
 		self.add(in_layer, z=0, name='slide')
-		
-		if transition == 'normal':
+
+		transition=config.effect_mapping[change][slide.effect]
+		logger.debug("Changing slide with transition: %s", transition)
+		if transition == 'tile_swipe':
 			out_layer.do(FadeOutBLTiles(grid=(16, 9), duration=1) + Hide() + StopGrid())
-		else:
+		elif transition == 'crossfade':
 			out_layer.do(FadeOut(duration=1))
+		elif transition == 'fade_red':
+			col_layer=ColorLayer(255, 0, 0, 0)
+			self.add(col_layer, z=1.1, name='temp_col')
+			col_layer.do(FadeIn(duration=0.3)+Delay(0.5)+FadeOut(duration=1.5))
+			out_layer.do(Delay(0.3) + Hide())
+		else:
+			out_layer.do(Hide())
 
 
 

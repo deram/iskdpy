@@ -8,7 +8,7 @@ from Queue import Queue, Empty
 from ..output import OutputPlugin
 
 from .. import config
-from ..types import Slide
+from ..types import OverrideSlide
 
 @OutputPlugin.register()
 class CocosOutput(OutputPlugin):
@@ -36,7 +36,7 @@ class CocosOutput(OutputPlugin):
 		director.window.set_mouse_visible(False)
 		RemoteControlLayer().set_task(self.task)
 		RemoteControlLayer().set_callback(self.get_callback())
-		self.slide=Slide()
+		self.slide=OverrideSlide(**config.empty_slide)
 		self.scene=SlideScene(self.slide)
 		director.run(self.scene)
 		# Destroy window if director exits
@@ -53,10 +53,11 @@ class CocosOutput(OutputPlugin):
 	def set_slide(self, slide, *args, **kwargs):
 		logger.debug("Slide received %s", slide)
 		def helper(slide):
-			logger.debug("gl_thread: Slide received %s", slide)
 			if slide.id == self.slide.id:
+				logger.debug("Slides are equal:\n	new	%s\n	old	%s", slide, self.slide)
 				self.scene.set_slide(slide, 'update')
 			else:
+				logger.debug("Slides differ:\n	new	%s\n	old	%s", slide, self.slide)
 				self.scene.set_slide(slide)
 			self.slide=slide
 			gc.collect()
