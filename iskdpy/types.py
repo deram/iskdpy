@@ -5,11 +5,17 @@ from time import gmtime, strftime
 class Base(object):
 	_fields=()
 	_defaults=()
+	_uid=('id')
 	def __init__(self, *args, **kwargs):
 		self.data=dict(zip(self._fields, self._defaults))
 		if len(args) == len(self._fields):
 			self.data.update(zip(self._fields, args))
 		self.data.update(kwargs)
+
+		uid=[self.__class__.__name__]
+		for item in self._uid:
+			uid.append(str(self.data[item]))
+		self.uid=".".join(uid)
 
 	def __getnewargs__(self):
 		return (self.data, )
@@ -41,10 +47,14 @@ class Base(object):
 		return repr(self)
 
 	def __eq__(self, other):
-		return isinstance(other, self.__class__) and (self.data == other.data)
-
+		return isinstance(other, self.__class__) and (self.uid == other.uid)
 	def __ne__(self, other):
 		return not self.__eq__(other)
+
+	def __ge__(self, other):
+		return (self == other) and (self.updated_at >= other.updated_at)
+	def __le__(self, other):
+		return (self == other) and (self.updated_at <= other.updated_at)
 
 class SlideBase(Base):
 	@property
@@ -87,7 +97,8 @@ class SlideBase(Base):
 
 class Display(Base):
 	_fields=('current_slide_id', 'name', 'presentation', 'created_at', 'manual', 'updated_at', 'state_updated_at', 'last_contact_at', 'id', 'metadata_updated_at', 'current_group_id', 'override_queue')
-	_defaults=(0, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+	_defaults=(0, "unnamed", None, 0, 0, 0, 0, 0, 0, 0, 0, ())
+	_uid=('id', 'created_at', 'name')
 
 	def __getitem__(self, i):
 		return self.override_queue.__getitem__(i)
@@ -110,8 +121,9 @@ class Display(Base):
 		return tmp
 
 class Presentation(Base):
-	_fields=('name', 'created_at', 'updated_at', 'effect', 'slides', 'total_groups', 'total_slides', 'id')
-	_defaults=('unnamed', 0, 0, 0, None, 0, 0, 0)
+	_fields=('name', 'created_at', 'updated_at', 'effect', 'slides', 'total_groups', 'id')
+	_defaults=('unnamed', 0, 0, 0, (), 0, 0)
+	_uid=('id', 'created_at')
 
 	def __getitem__(self, i):
 		return self.slides.__getitem__(i)
@@ -135,16 +147,23 @@ class Presentation(Base):
 class Slide(SlideBase):
 	_fields=('group', 'name', 'deleted', 'created_at', 'updated_at', 'show_clock', 'group_name', 'duration', 'images_updated_at', 'effect_id', 'ready', 'master_group', 'type', 'id')
 	_defaults=(0, "unnamed", 0, 0, 0, False, "unnamed", config.default_duration, 0, 0, True, 0, "image", 0)
+	_uid=('id', 'group', 'created_at')
 
 	def __unicode__(self):
 		return 'Slide "%s" (%s) Group "%s" (%s) file: %s (%s)%s' % ( self.name, self.id, self.group_name, self.group, self.filename, strftime('%X', gmtime(self.updated_at)), '' if self.ready else ' NOT READY' )
 
-	pass
-
+	def __eq__(self, other):
+		return isinstance(other, self.__class__) and (self.id == other.id) and (self.group == other.group)
 class OverrideSlide(SlideBase):
 	_fields=('name', 'deleted', 'created_at', 'updated_at', 'show_clock', 'group_name', 'duration', 'images_updated_at', 'effect_id', 'ready', 'override_queue_id', 'master_group', 'type', 'id')
 	_defaults=("unnamed", 0, 0, 0, False, "unnamed", config.default_duration, 0, 0, True, 0, 0, "image", 0)
+	_uid=('id', 'override_queue_id', 'created_at')
+
 	def __unicode__(self):
 		return 'OverrideSlide "%s" file: %s' % (self.name, self.filename)
-	pass
+
+	def __eq__(self, other):
+		return isinstance(other, self.__class__) and (self.id == other.id) and (self.override_queue_id == other.override_queue_id)
+
+
 
