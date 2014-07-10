@@ -31,11 +31,12 @@ class LocalSource(SourcePlugin):
 					slidetype='video'
 				else:
 					slidetype='image'
-				slide=types.Slide({'id':item, 'type':slidetype, 'filename':item.replace('\\', '/'), 'position':len(slides)+1, 'updated_at':1})
-				slide.set_attrib('foo', item)
+				slide=types.Slide(id=item, type=slidetype, filename=item.replace('\\', '/'))
+				print slide
 				slides.append(slide)
-			presentation=types.Presentation(slides=slides, attribs={'total_slides':len(slides)})
+			presentation=types.Presentation(slides=slides, total_slides=len(slides))
 			self.display=types.Display(presentation=presentation)
+			print self.display
 			return True
 		return False
 
