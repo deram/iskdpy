@@ -11,6 +11,18 @@ from threading import Thread, RLock
 
 from .misc_utils import RateLimit
 
+# PATCHING
+def _match_hostname(*a, **kw):
+	if _match_hostname.__dict__.get('ignore', False):
+		return True
+	return _match_hostname.real(*a, **kw)
+_match_hostname.real=websocket.match_hostname
+websocket.match_hostname=_match_hostname
+
+def ignore_hostname_check(ignore=True):
+	logger.warning('Setting ignore certificate hostname to: %s', ignore)
+	_match_hostname.ignore=ignore
+
 def NOP(data):
 	pass
 
