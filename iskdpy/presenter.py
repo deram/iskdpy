@@ -1,7 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from .types import Slide
+from .types import Slide, OverrideSlide
 from .source import SourcePlugin
 from .output import OutputPlugin 
 #import gc
@@ -11,12 +11,83 @@ from threading import Timer
 
 
 class _PresenterState(object):
-	def __init__(self):
+	def __init__(self, display=None):
 		self.timer=None
-		self.display=None
+		self._display=display
+		self._pos=-1
+		self._current_slide=get_empty_slide()
+		self._schedule_show_slide=False
+
+	def __str__(self):
+		return "%s disp: %.25s pos: %3d %s" % (self.__class__.__name__, self.display, self.pos, self.current_slide)
+
+	def seek_to_first(self):
 		self.pos=-1
 
-_state=_PresenterState()
+	def show_slide(self, slide=None):
+		if self is _state:
+			if self.pos<0 and len(self.presentation):
+				self.pos=0
+			_show_slide(self.current_slide)
+		else:
+			self._schedule_show_slide=True
+
+	def update(self, new):
+		logger.debug("state updated")
+		self._display=new._display
+		self._pos=new._pos
+		self._current_slide=new._current_slide
+		if new._schedule_show_slide:
+			self.show_slide()
+
+	@property	
+	def display(self):
+		return self._display
+	@property
+	def presentation(self):
+			return self.display.presentation
+	@property
+	def manual(self):
+		try:
+			return self.display.manual
+		except (AttributeError):
+			return False
+
+	@property
+	def current_slide(self):
+		try:
+			return self._current_slide
+		except (IndexError, AttributeError, TypeError):
+			logger.warning("No active slide, returning empty")
+			return get_empty_slide()
+
+	@current_slide.setter
+	def current_slide(self, slide):
+		if slide is None:
+			self.seek_to_first()
+		elif isinstance(slide,OverrideSlide):
+			self._current_slide=slide
+		elif slide == self.current_presentation_slide:
+			self._current_slide=slide
+		else:
+			self.pos=self.presentation.locate_slide(sid=slide.id, gid=slide.group)
+			if self.pos is None:
+				self.seek_to_first()
+
+	@property
+	def current_presentation_slide(self):
+		if self.pos >=0:
+			return self.presentation[self.pos]
+
+	@property
+	def pos(self):
+		return self._pos
+
+	@pos.setter
+	def pos(self, pos):
+		self._pos=pos
+		if pos>=0:
+			self.current_slide=self.current_presentation_slide
 
 
 def _connect(conf):
