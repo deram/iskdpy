@@ -10,8 +10,8 @@ default_duration=5
 default_cache_path='cache'
 
 effect_ids=[ 'unknown', 'normal', 'subtle', 'alert' ]
-effect_mapping=dict(update=dict(normal='crossfade', subtle='crossfade', alert='fade_red'),
-					normal=dict(normal='tile_swipe', subtle='crossfade', alert='fade_red'))
+effect_mapping=dict(update=dict(unknown='crossfade', normal='crossfade', subtle='crossfade', alert='fade_red'),
+					normal=dict(unknown='crossfade', normal='tile_swipe', subtle='crossfade', alert='fade_red'))
 
 logger_levels=dict( iskdpy='INFO' )
 
