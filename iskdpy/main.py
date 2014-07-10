@@ -56,7 +56,6 @@ def main(): #pragma: no cover
 	gc.disable()
 
 	logger.info(log_break("STARTED"))
-	ret=output.run()
-	presenter.goto_next_slide()
-	ret.get()
+	#output=OutputPlugin.factory(config.output)
+	presenter.run()
 	logger.info(log_break("STOPPED"))

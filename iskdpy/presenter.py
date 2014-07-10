@@ -89,6 +89,13 @@ class _PresenterState(object):
 		if pos>=0:
 			self.current_slide=self.current_presentation_slide
 
+def run():
+	output=OutputPlugin.factory(config.output)
+	output_ret=output.run()
+	_next_source()
+
+	output_ret.get()
+
 
 def _connect(conf):
 	source = SourcePlugin.factory(conf.pop('source_name'), conf)
