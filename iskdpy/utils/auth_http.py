@@ -25,11 +25,11 @@ class AuthHttp():
 			result = self.opener.open(request, data, self.timeout)
 			return result.read()
 		except urllib2.HTTPError, e:
-			logger.error("HTTPError: %s %s %s", url, e.code, e.reason)
+			logger.exception("HTTPError: %s %s %s", url, e.code, e.reason)
 		except urllib2.URLError, e:
-			logger.error("URLError: %s %s", url, e.reason)
+			logger.exception("URLError: %s %s", url, e.reason)
 		except socket.timeout:
-			logger.error("Timeout connecting")
+			logger.exception("Timeout connecting")
 		return False
 	
 	def get_and_save(self, url, filename):
