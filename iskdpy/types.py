@@ -95,13 +95,18 @@ class SlideBase(Base):
 		except (KeyError, IndexError):
 			return 'unknown'
 
+	@property
+	def is_override(self):
+		return isinstance(self, OverrideSlide)
+
 class Display(Base):
 	_fields=('current_slide_id', 'name', 'presentation', 'created_at', 'manual', 'updated_at', 'state_updated_at', 'last_contact_at', 'id', 'metadata_updated_at', 'current_group_id', 'override_queue')
 	_defaults=(0, "unnamed", None, 0, 0, 0, 0, 0, 0, 0, 0, ())
 	_uid=('id', 'created_at', 'name')
 
 	def __getitem__(self, i):
-		return self.override_queue.__getitem__(i)
+		if self.override_queue:
+			return self.override_queue.__getitem__(i)
 	def __iter__(self):
 		return iter(self.override_queue)
 
@@ -112,9 +117,19 @@ class Display(Base):
 		return 'Display "%s" (%d) Updated: %s\n Overrides: %d%s\n %s' % (self.name, self.id, strftime('%x-%X', gmtime(self.metadata_updated_at)), len(self.override_queue), tmp.replace('\n', '\n '), unicode(self.presentation).replace('\n', '\n '))
 
 	@property
+	def presentation(self):
+		pres=self.data.get('presentation', None)
+		if pres:
+			return pres
+		else:
+			pres=Presentation()
+			self.data['presentation']=pres
+			return pres
+
+	@property
 	def all_slides(self):
 		tmp={}
-		for slide in self.presentation.slides:
+		for slide in self.presentation:
 			tmp[slide.id] = slide
 		for slide in self.override_queue:
 			tmp[slide.id] = slide
@@ -137,6 +152,10 @@ class Presentation(Base):
 		for i in self:
 			tmp+="\n%s" % unicode(i)
 		return 'Presentation "%s" (%d) Slides: %d%s' % (self.name, self.id, self.total_slides, tmp.replace('\n', '\n '))
+
+	@property
+	def total_slides(self):
+		return self.data.get('total_slides', len(self.slides))
 
 	def locate_slide(self, sid, gid):
 		for index, slide in enumerate(self):
