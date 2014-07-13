@@ -67,7 +67,7 @@ class _PresenterState(object):
 			self.seek_to_first()
 		elif isinstance(slide,OverrideSlide):
 			self._current_slide=slide
-		elif slide == self.current_presentation_slide:
+		elif slide is self.current_presentation_slide:
 			self._current_slide=slide
 		else:
 			self.pos=self.presentation.locate_slide(sid=slide.id, gid=slide.group)
