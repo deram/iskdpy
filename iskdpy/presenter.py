@@ -165,8 +165,8 @@ def _set_updated_display(new_display):
 		_current_slide_updated(old_state, new_state)
 		_manual_mode_updated(old_state, new_state)
 
-		_state.update(new_state)
 		logger.debug('State Change "%s" -> "%s"', old_state, new_state)
+		_state.update(new_state)
 		return True
 	return False
 
