@@ -203,12 +203,6 @@ def _pop_override_slide():
 		return ret
 	return False
 
-def _is_manual():
-	return _state.display and _state.display.manual
-
-def _is_empty_presentation():
-	return ((_state.display.presentation.total_slides) == 0)
-
 def _get_next():
 	return _get_slide('next')
 
@@ -223,7 +217,7 @@ def _get_slide(dir='next'):
 	if ( _is_override() ):
 		ret = _pop_override_slide()
 	else:
-		if (_is_empty_presentation()):
+		if (len(_state.presentation) == 0):
 			logger.warning("EMPTY PRESENTATION")
 			return get_empty_slide()
 		if dir=='next' or dir=='previous':
@@ -260,7 +254,7 @@ def _show_slide(slide):
 			get_source().slide_done(slide)
 
 	duration=slide.duration
-	if duration > 0 and not _is_manual():
+	if duration > 0 and not _state.manual:
 		_schedule_slide_change(duration)
 
 def display_updated(display=None):
