@@ -150,6 +150,10 @@ class Presentation(Base):
 	_defaults=('unnamed', 0, 0, 0, (), 0, 0)
 	_uid=('id', 'created_at')
 
+	def __init__(self, *a, **kw):
+		super(Presentation, self).__init__(*a, **kw)
+		self.slides=tuple(self.slides)
+
 	def __getitem__(self, i):
 		return self.slides.__getitem__(i)
 	def __len__(self):
