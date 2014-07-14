@@ -189,20 +189,6 @@ def _seek_to_valid_slide_in_presentation(dir='next'):
 			return True
 	return False
 
-def _is_override():
-	override=_state.display.override_queue
-	if len( override ):
-		return override[0].valid
-	return False
-
-def _pop_override_slide():
-	override=_state.display.override_queue
-	if len( override ):
-		ret = override[0]
-		del override[0]
-		return ret
-	return False
-
 def _get_next():
 	return _get_slide('next')
 
@@ -214,8 +200,9 @@ def _get_slide(dir='next'):
 		if not _update_display():
 			logger.error("NO DISPLAY FROM SOURCE")
 			return get_empty_slide()
-	if ( _is_override() ):
-		ret = _pop_override_slide()
+	override=_state.display.pop_override_slide()
+	if override:
+		ret = override
 	else:
 		if (len(_state.presentation) == 0):
 			logger.warning("EMPTY PRESENTATION")

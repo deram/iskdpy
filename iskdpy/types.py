@@ -1,6 +1,7 @@
 import os
 import config
 from time import gmtime, strftime
+from collections import deque
 
 class Base(object):
 	_fields=()
@@ -104,6 +105,10 @@ class Display(Base):
 	_defaults=(0, "unnamed", None, 0, 0, 0, 0, 0, 0, 0, 0, ())
 	_uid=('id', 'created_at', 'name')
 
+	def __init__(self, *a, **kw):
+		super(Display, self).__init__(*a, **kw)
+		self.override_queue=deque(self.override_queue)
+
 	def __getitem__(self, i):
 		if self.override_queue:
 			return self.override_queue.__getitem__(i)
@@ -134,6 +139,11 @@ class Display(Base):
 		for slide in self.override_queue:
 			tmp[slide.id] = slide
 		return tmp
+
+	def pop_override_slide(self):
+		if self.override_queue:
+			if self.override_queue[0].valid:
+				return override_queue.popleft()
 
 class Presentation(Base):
 	_fields=('name', 'created_at', 'updated_at', 'effect', 'slides', 'total_groups', 'id')
