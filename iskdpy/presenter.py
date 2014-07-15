@@ -45,7 +45,7 @@ class _PresenterState(object):
 		return self._display
 	@property
 	def presentation(self):
-			return self.display.presentation
+		return self.display.presentation
 	@property
 	def manual(self):
 		try:
@@ -65,7 +65,7 @@ class _PresenterState(object):
 	def current_slide(self, slide):
 		if slide is None:
 			self.seek_to_first()
-		elif isinstance(slide,OverrideSlide):
+		elif isinstance(slide, OverrideSlide):
 			self._current_slide=slide
 		elif slide is self.current_presentation_slide:
 			self._current_slide=slide
@@ -76,7 +76,7 @@ class _PresenterState(object):
 
 	@property
 	def current_presentation_slide(self):
-		if self.pos >=0:
+		if self.pos >= 0:
 			return self.presentation[self.pos]
 
 	@property
@@ -226,7 +226,7 @@ def _schedule_slide_change(duration=1):
 		_state.timer.start()
 
 def _show_slide(slide):
-	logger.debug("_show_slide(%.100s)" % slide)
+	logger.debug("_show_slide(%.100s)", slide)
 	_cancel_slide_change()
 
 	if not slide.ready:
@@ -245,25 +245,23 @@ def _show_slide(slide):
 		_schedule_slide_change(duration)
 
 def display_updated(display=None):
-	logger.debug("display_updated(%.100s)" % display)
-	if display:
-		return _set_updated_display(display)
-	return _update_display()
+	logger.debug("display_updated(%.100s)", display)
+	return _update_display(display)
 
 def goto_next_slide():
 	logger.debug("goto_next_slide()")
-	slide=_get_next()
+	slide=_get_slide('next')
 	_show_slide(slide)
 	return True
 
 def goto_previous_slide():
 	logger.debug("goto_previous_slide()")
-	slide=_get_previous()
+	slide=_get_slide('previous')
 	_show_slide(slide)
 	return True
 
 def goto_slide(gid, sid):
-	logger.debug("goto_slide(G_%s, S_%s)" % (gid, sid))
+	logger.debug("goto_slide(G_%s, S_%s)", gid, sid)
 	if _set_current_slide(gid, sid):
 		slide=_state.current_slide
 		_show_slide(slide)
@@ -276,7 +274,7 @@ def get_source():
 	return SourcePlugin.get_current()
 
 def refresh_slide_cache(slide):
-	logger.debug("refresh_slide_cache(%.100s)" % slide)
+	logger.debug("refresh_slide_cache(%.100s)", slide)
 	with OutputPlugin.get_current().refresh_slide_cache(slide) as ret:
 		return ret
 

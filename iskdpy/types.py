@@ -111,7 +111,7 @@ class Display(Base):
 
 	def __getitem__(self, i):
 		if self.override_queue:
-			return self.override_queue.__getitem__(i)
+			return self.override_queue[i]
 	def __iter__(self):
 		return iter(self.override_queue)
 
@@ -143,7 +143,7 @@ class Display(Base):
 	def pop_override_slide(self):
 		if self.override_queue:
 			if self.override_queue[0].valid:
-				return override_queue.popleft()
+				return self.override_queue.popleft()
 
 class Presentation(Base):
 	_fields=('name', 'created_at', 'updated_at', 'effect', 'slides', 'total_groups', 'id')
@@ -175,7 +175,6 @@ class Presentation(Base):
 		for index, slide in enumerate(self):
 			if (slide.group == gid and slide.id == sid):
 				return index
-		return None
 
 class Slide(SlideBase):
 	_fields=('group', 'name', 'deleted', 'created_at', 'updated_at', 'show_clock', 'group_name', 'duration', 'images_updated_at', 'effect_id', 'ready', 'master_group', 'type', 'id')

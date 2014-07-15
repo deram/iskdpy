@@ -52,7 +52,7 @@ class LocalSource(SourcePlugin):
 
 if __name__ == "__main__":
 	#from pprint import pprint
-	source=Source.factory('LocalSource')()
+	source=SourcePlugin.factory('LocalSource')()
 	source.connect()
 	source.update_display()
 	print "%s" % source.display

@@ -50,12 +50,9 @@ def main(): #pragma: no cover
 
 	adjust_logger_levels(config.logger_levels)
 
-	from .output import OutputPlugin#, thread
-
 	import gc
 	gc.disable()
 
 	logger.info(log_break("STARTED"))
-	#output=OutputPlugin.factory(config.output)
 	presenter.run()
 	logger.info(log_break("STOPPED"))
