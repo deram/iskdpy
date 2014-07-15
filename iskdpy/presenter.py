@@ -24,6 +24,22 @@ class _PresenterState(object):
 	def seek_to_first(self):
 		self.pos=-1
 
+	def seek_to_next(self):
+		pos=self.presentation.next(self.pos)
+		if pos is not None:
+			if pos < self.pos:
+				logger.info("Presentation wrapped")
+			logger.debug("Next: %s", unicode(self.presentation[pos]))
+			self.pos=pos
+
+	def seek_to_prev(self):
+		pos=self.presentation.prev(self.pos)
+		if pos is not None:
+			if pos > self.pos:
+				logger.info("Presentation wrapped")
+			logger.debug("Next: %s", unicode(self.presentation[pos]))
+			self.pos=pos
+
 	def show_slide(self, slide=None):
 		if self is _state:
 			if self.pos<0 and len(self.presentation):
@@ -177,45 +193,21 @@ def _set_current_slide(gid, sid):
 	_state.current_slide=Slide(id=sid, group=gid)
 	return _state.current_slide.id==sid and _state.current_slide.group==gid
 
-def _seek_to_valid_slide_in_presentation(dir='next'):
-	delta={'next':1, 'previous':-1}[dir]
-	n_slides = len(_state.presentation)
-	pos=_state.pos
-	for _ in xrange(n_slides):
-		pos = (pos + delta) % n_slides
-		if pos == 0:
-			logger.info("Presentation wrapped")
-		logger.debug("Next: %s", unicode(_state.presentation[pos]))
-
-		if _state.presentation[pos].valid:
-			_state.pos=pos
-			return True
-	return False
-
-def _get_next():
-	return _get_slide('next')
-
-def _get_previous():
-	return _get_slide('previous')
-
-def _get_slide(dir='next'):
+def _get_slide(direction='next'):
 	if not _state.display:
-		if not _update_display():
-			logger.error("NO DISPLAY FROM SOURCE")
-			return get_empty_slide()
-	override=_state.display.pop_override_slide()
-	if override:
-		ret = override
-	else:
-		if (len(_state.presentation) == 0):
-			logger.warning("EMPTY PRESENTATION")
-			return get_empty_slide()
-		if dir=='next' or dir=='previous':
-			_seek_to_valid_slide_in_presentation(dir)
-		ret = _state.current_slide
-
-	logger.debug("Next: %s", ret)
-	return ret
+		return get_empty_slide()
+	if direction=='next':
+		override=_state.display.pop_override_slide()
+		if override:
+			return override
+	if not _state.presentation:
+		logger.warning("EMPTY PRESENTATION")
+		return get_empty_slide()
+	if direction=='next':
+		_state.seek_to_next()
+	if direction=='previous':
+		_state.seek_to_prev()
+	return _state.current_slide
 
 def _cancel_slide_change():
 	if _state.timer and _state.timer.is_alive():

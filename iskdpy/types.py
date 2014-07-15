@@ -176,6 +176,17 @@ class Presentation(Base):
 			if (slide.group == gid and slide.id == sid):
 				return index
 
+	def next(self, old_pos, delta=1):
+		pos=old_pos
+		n_slides=self.total_slides
+		for _ in xrange(n_slides):
+			pos = (pos + delta) % n_slides
+			if self[pos].valid:
+				return pos
+
+	def prev(self, old_pos):
+		return self.next(old_pos, delta=-1)
+
 class Slide(SlideBase):
 	_fields=('group', 'name', 'deleted', 'created_at', 'updated_at', 'show_clock', 'group_name', 'duration', 'images_updated_at', 'effect_id', 'ready', 'master_group', 'type', 'id')
 	_defaults=(0, "unnamed", 0, 0, 0, False, "unnamed", config.default_duration, 0, 0, True, 0, "image", 0)
