@@ -108,53 +108,56 @@ def _next_source():
 	if len(config.sources):
 		_connect(config.sources.pop())
 
-def _update_display():
+def _manual_mode_updated(old_state, new_state):
+	if old_state.manual == new_state.manual:
+		return
+	if new_state.manual:
+		_cancel_slide_change()
+	else:
+		_schedule_slide_change()
+
+def _current_slide_updated(old_state, new_state):
+	if old_state.current_slide.id == new_state.current_slide.id:
+		if new_state.current_slide.ready and (old_state.current_slide <= new_state.current_slide):
+			if old_state.current_slide.type != 'video':
+				new_state.show_slide()
+
+def _display_changed(old_state, new_state):
+	if old_state.display != new_state.display:
+		logger.info("Display changed.")
+		new_state.seek_to_first()
+		if config.future.get('fast_presentation_change', False):
+			new_state.show_slide()
+		return True
+def _presentation_changed(old_state, new_state):
+	if old_state.presentation.id != new_state.presentation.id:
+		logger.info("Presentation changed.")
+		new_state.seek_to_first()
+		if config.future.get('fast_presentation_change', False):
+			new_state.show_slide()
+		return True
+def _presentation_updated(old_state, new_state):
+	if old_state.presentation <= new_state.presentation:
+		new_state.current_slide=old_state.current_presentation_slide
+		new_state.current_slide=old_state.current_slide
+		if old_state.current_presentation_slide != new_state.current_presentation_slide:
+			logger.warning("Current slide not in presentation, restarting presentation")
+			_state.seek_to_first()
+		return True
+
+def _update_display(new_display=None):
 	logger.debug("_update_display")
-	if (get_source().update_display()):
-		with get_source().get_display() as display:
-			if display:
-				logger.debug("got display")
-				return _set_updated_display(display)
-
-def _set_updated_display(new_display):
-	def _manual_mode_updated(old_state, new_state):
-		if old_state.manual == new_state.manual:
-				return
-		if new_state.manual:
-			_cancel_slide_change()
+	if not new_display:
+		if (get_source().update_display()):
+			with get_source().get_display() as display:
+				if display:
+					logger.debug("Got display")
+					new_display=display
+				else:
+					logger.error("Could not get display from source")
 		else:
-			_schedule_slide_change()
-	def _current_slide_updated(old_state, new_state):
-		if old_state.current_slide.id == new_state.current_slide.id:
-			if new_state.current_slide.ready and (old_state.current_slide <= new_state.current_slide):
-				if old_state.current_slide.type != 'video':
-					new_state.show_slide()
+			logger.error("No display form source")
 
-	def _display_changed(old_state, new_state):
-		if old_state.display != new_state.display:
-			logger.info("Display changed.")
-			new_state.seek_to_first()
-			if config.future.get('fast_presentation_change', False):
-				new_state.show_slide()
-			return True
-	def _presentation_changed(old_state, new_state):
-		if old_state.presentation.id != new_state.presentation.id:
-			logger.info("Presentation changed.")
-			new_state.seek_to_first()
-			if config.future.get('fast_presentation_change', False):
-				new_state.show_slide()
-			return True
-	def _presentation_updated(old_state, new_state):
-		if old_state.presentation <= new_state.presentation:
-			new_state.current_slide=old_state.current_presentation_slide
-			new_state.current_slide=old_state.current_slide
-			if old_state.current_presentation_slide != new_state.current_presentation_slide:
-				logger.warning("Current slide not in presentation, restarting presentation")
-				_state.seek_to_first()
-			return True
-
-
-	logger.debug("_set_updated_display")
 	old_state=_state
 	new_state=_PresenterState(new_display)
 
