@@ -34,9 +34,9 @@ class SourcePlugin(object):
 		return getattr(self, '_AsyncProcess__callback')
 
 	# Signals from source plugin to presenter
-	def _display_updated(self):
+	def _display_updated(self, display=None):
 		from .presenter import display_updated
-		return display_updated()
+		return display_updated(display)
 	def _goto_next_slide(self):
 		from .presenter import goto_next_slide
 		return goto_next_slide()

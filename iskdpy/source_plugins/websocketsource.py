@@ -85,7 +85,7 @@ class WebsocketSource(SourcePlugin):
 						('manual' if self.display.manual else ''))
 			logger.debug('\n%s', self.display )
 			try:
-				self.get_callback()._display_updated()
+				self.get_callback()._display_updated(self.display)
 			except AttributeError:
 				logger.exception("Callback missing, running without factory?")
 			return True
