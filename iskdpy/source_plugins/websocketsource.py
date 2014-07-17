@@ -8,6 +8,7 @@ from ..utils.websocket_rails import WebsocketRails, Event, NOP
 from ..source import SourcePlugin
 from .. import types
 
+import hashlib
 import os
 
 @SourcePlugin.register()
@@ -36,6 +37,8 @@ class WebsocketSource(SourcePlugin):
 			self.sslopt["ca_certs"]=certs
 
 		self.displayid=None
+		self.dhash=None
+
 		self.cookie=None
 		self.channel=None
 
@@ -150,6 +153,13 @@ class WebsocketSource(SourcePlugin):
 			self.socket.send(Event.simple('iskdpy.error', data))
 		logger.debug("slide_done end")
 
+	def __data_hash_updated(self, data):
+		d=(data['presentation'], data['override_queue'], data['manual'])
+		dhash=hashlib.md5(json.dumps(d, sort_keys=True)).hexdigest()
+		if dhash != self.dhash:
+			self.dhash=dhash
+			return True
+		return False
 	def get_path(self):
 		return self.cache_path
 
@@ -158,7 +168,7 @@ class WebsocketSource(SourcePlugin):
 			self.displayid=data['id']
 			return True #First time, data always used.
 		try:
-			return data['metadata_updated_at'] > self.display.metadata_updated_at
+			return self.__data_hash_updated(data)
 		except:
 			return True
 	
