@@ -1,4 +1,10 @@
 *.pyc
-cache/*.*
+*.ttf
+*.pem
+*.log
+cache*/*.*
+local*/*.*
 profile
 local_config.*
+htmlcov
+.coverage
