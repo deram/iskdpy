@@ -117,7 +117,7 @@ def get_empty_slide():
 
 def _connect(conf):
 	source = SourcePlugin.factory(conf.pop('source_name'), conf)
-	if source.connect():
+	with source.connect():
 		pass
 
 def _next_source():
