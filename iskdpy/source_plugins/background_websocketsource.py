@@ -27,8 +27,6 @@ class BackgroundWebsocketSource(websocketsource.WebsocketSource):
 
 	#def slide_done(self, slide):
 
-	#def get_path(self):
-	
 	def __get_slides(self):
 		def worker(slide):
 			if slide.ready:

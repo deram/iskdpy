@@ -66,11 +66,7 @@ class WebsocketSource(SourcePlugin):
 
 	#def get_display():
 
-	def update_display(self):
-		if self.display:
-			return True
-		else:
-			return False
+	#def update_display(self):
 
 	def _display_data_cb(self, data):
 		if 'username' in data:
@@ -128,10 +124,6 @@ class WebsocketSource(SourcePlugin):
 			return True
 		return False
 		
-	def __socket_run(self):
-		while True:
-			self.socket.run()
-
 	def slide_done(self, slide):
 		logger.debug("slide_done: %s", slide)
 		data=None
@@ -160,14 +152,15 @@ class WebsocketSource(SourcePlugin):
 			self.dhash=dhash
 			return True
 		return False
-	def get_path(self):
-		return self.cache_path
+		
 
 	def __is_display_updated(self, data):
 		if not self.displayid and 'id' in data: 
 			self.displayid=data['id']
 			return True #First time, data always used.
 		try:
+			#print 'UPDATED:', data['updated_at'], data['metadata_updated_at'], data['state_updated_at']
+			#return data['metadata_updated_at'] > self.display.metadata_updated_at
 			return self.__data_hash_updated(data)
 		except:
 			return True

@@ -27,9 +27,6 @@ class SourcePlugin(object):
 	def slide_done(self, slide):
 		return False
 
-	def get_path(self):
-		return "."
-
 	def get_callback(self):
 		return getattr(self, '_AsyncProcess__callback')
 
