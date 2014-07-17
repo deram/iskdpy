@@ -70,7 +70,10 @@ class Channel():
 	def __init__(self, wsr, channel_name):
 		self.wsr=wsr
 		self.channel_name=channel_name
-		self.actions={}
+		self.token=None
+		self.actions={
+			'websocket_rails.channel_token': self.__channel_token,
+		}
 
 	def unsubscribe(self):
 		self.wsr.send(Event(['websocket_rails.unsubscribe', {'data':{'channel': self.channel_name }}]))
@@ -84,6 +87,10 @@ class Channel():
 		ev.channel=self.channel_name
 		self.wsr.send(ev)
 		return self
+
+	def __channel_token(self, data):
+		self.token=data.get('token', None)
+		logger.debug('Got channel token "%s"', self.token)
 
 class WebsocketRails():
 	def __init__(self, url, timeout=0, **options):
