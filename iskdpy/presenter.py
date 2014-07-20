@@ -1,9 +1,12 @@
+'''
+Presenter module.
+'''
 import logging
 logger = logging.getLogger(__name__)
 
 from .types import Slide, OverrideSlide
 from .source import SourcePlugin
-from .output import OutputPlugin 
+from .output import OutputPlugin
 #import gc
 from . import config
 
@@ -11,7 +14,16 @@ from threading import Timer
 
 
 class _PresenterState(object):
+	'''
+	Class used for containing presenter module internal state.
+	'''
 	def __init__(self, display=None):
+		'''
+		Class constructor
+
+		Args:
+			display (iskdpy.types.Display) -- states Display object. Default: None
+		'''
 		self.timer=None
 		self._display=display
 		self._pos=-1
@@ -22,9 +34,15 @@ class _PresenterState(object):
 		return "%s disp: %.25s pos: %3d %s" % (self.__class__.__name__, self.display, self.pos, self.current_slide)
 
 	def seek_to_first(self):
+		'''
+		Makes the next slide be the first of the display presentation
+		'''
 		self.pos=-1
 
 	def seek_to_next(self):
+		'''
+		Go forward to next slide in presentation
+		'''
 		pos=self.presentation.next(self.pos)
 		if pos is not None:
 			if pos < self.pos:
@@ -33,6 +51,9 @@ class _PresenterState(object):
 			self.pos=pos
 
 	def seek_to_prev(self):
+		'''
+		Go backward to previous slide in presentation
+		'''
 		pos=self.presentation.prev(self.pos)
 		if pos is not None:
 			if pos > self.pos:
@@ -42,6 +63,8 @@ class _PresenterState(object):
 
 	def show_current_slide(self):
 		'''
+		Initiate slide change or pend the change if self is not the module state object.
+		'''
 		if self is _state:
 			if self.pos<0 and len(self.presentation):
 				self.pos=0
@@ -50,7 +73,14 @@ class _PresenterState(object):
 			self._schedule_show_slide=True
 
 	def update(self, new):
-		logger.debug("state updated")
+		'''
+		Updates the state object to new state.
+		If new state has pending slide showing, execute it after update.
+
+		Args:
+			new (_PresenterState) -- new state to be copied over the self
+		'''
+		logger.debug("State updated")
 		self._display=new._display
 		self._pos=new._pos
 		self._current_slide=new._current_slide
@@ -59,12 +89,15 @@ class _PresenterState(object):
 
 	@property	
 	def display(self):
+		'''Get the display object'''
 		return self._display
 	@property
 	def presentation(self):
+		'''Shortcut to get the display objects presentation object'''
 		return self.display.presentation
 	@property
 	def manual(self):
+		'''Shortcut to get the display objects 'manual' flag.'''
 		try:
 			return self.display.manual
 		except (AttributeError):
@@ -93,11 +126,17 @@ class _PresenterState(object):
 
 	@property
 	def current_presentation_slide(self):
+		'''
+		Get the slide indicated by state pos from the presentation.
+		'''
 		if self.pos >= 0:
 			return self.presentation[self.pos]
 
 	@property
 	def pos(self):
+		'''
+		State objects position. This is index of the current slide in presentation
+		'''
 		return self._pos
 
 	@pos.setter
@@ -107,6 +146,14 @@ class _PresenterState(object):
 			self.current_slide=self.current_presentation_slide
 
 def run():
+	'''
+	Run the presenter.
+	The main function.
+
+	Instantiates the output and source stated in config.
+
+	Returns after the output has ended.
+	'''
 	output=OutputPlugin.factory(config.output)
 	output_ret=output.run()
 	_next_source()
@@ -114,6 +161,12 @@ def run():
 	output_ret.get()
 
 def get_empty_slide():
+	'''
+	Fallback to get empty slide for showing something when nothing else is to show.
+
+	Return:
+		Instance of OverrideSlide with values set in configuration.
+	'''
 	return OverrideSlide(**config.empty_slide)
 
 def _connect(conf):
@@ -241,22 +294,41 @@ def _show_slide(slide):
 		_schedule_slide_change(duration)
 
 def display_updated(display=None):
+	'''
+	New display.
+
+	Args:
+		display (iskdpy.types.Display) -- New display to be used by presenter.
+	'''
 	logger.debug("display_updated(%.100s)", display)
 	return _update_display(display)
 
 def goto_next_slide():
+	'''
+	Executes slide change to next instantly
+	'''
 	logger.debug("goto_next_slide()")
 	slide=_get_slide('next')
 	_show_slide(slide)
 	return True
 
 def goto_previous_slide():
+	'''
+	Executes slide change to previous instantly
+	'''
 	logger.debug("goto_previous_slide()")
 	slide=_get_slide('previous')
 	_show_slide(slide)
 	return True
 
 def goto_slide(gid, sid):
+	'''
+	Executes slide change to selected slide instantly
+
+	Args:
+		gid (str) -- Group identifier of the slide to go to
+		sid (str) -- Slide identifier of the slide to go to
+	'''
 	logger.debug("goto_slide(G_%s, S_%s)", gid, sid)
 	if _set_current_slide(gid, sid):
 		slide=_state.current_slide
@@ -265,6 +337,11 @@ def goto_slide(gid, sid):
 	return False
 
 def get_source():
+	'''
+	Helper to get the singleton source plugin from source module.
+
+	If not existing, forece creation of next source plugin.
+	'''
 	if not SourcePlugin.get_current():
 		_next_source()
 	return SourcePlugin.get_current()
@@ -274,5 +351,5 @@ def refresh_slide_cache(slide):
 	with OutputPlugin.get_current().refresh_slide_cache(slide) as ret:
 		return ret
 
-# presenter state
 _state=_PresenterState()
+'''Module global state object'''

@@ -11,18 +11,40 @@ class OutputPlugin(object):
 		pass
 
 	def run(self):
+		'''
+		Plugin main method.
+		Should return only after the output is closed.
+		'''
 		pass
 
 	def set_slide(self, slide):
+		'''
+		Change the shown slide to another.
+
+		Args:
+			slide (iskdpy.types.Slide or iskdpy.types.OverrideSlide) -- Slide to be shown.
+		'''
+		pass
+
+	def cancel_transition(self):
+		'''Cancel any ongoing transition and set the transition target current'''
 		pass
 
 	def refresh_slide_cache(self, slide):
+		'''
+		Force refreshing the slide image from filesystem.
+
+		Args:
+			slide (iskdpy.types.Slide or iskdpy.types.OverrideSlide) -- Slide needing cache refresh.
+		'''
 		pass
 
 	def task(self):
 		pass
-	
+
 	def _get_callback(self):
+		'''
+		Return object that can be used for calling methods in main process.
 		'''
 		return getattr(self, '_AsyncProcess__callback')
 
