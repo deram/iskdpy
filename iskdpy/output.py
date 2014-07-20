@@ -94,7 +94,7 @@ def set_slide(slide):
 
 def cancel_transition():
 	'''Shortcut to current OutputPlugin x.cancel_transition()'''
-	with OutputPlugin.get_current().set_slide(slide) as ret:
+	with OutputPlugin.get_current().cancel_transition() as ret:
 		return ret
 
 def refresh_slide_cache(slide):
