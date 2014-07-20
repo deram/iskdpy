@@ -22,14 +22,15 @@ class OutputPlugin(object):
 	def task(self):
 		pass
 	
-	def get_callback(self):
+	def _get_callback(self):
+		'''
 		return getattr(self, '_AsyncProcess__callback')
 
 	# Callbacks to output plugins needing to command presenter
-	def goto_next_slide(self):
+	def _goto_next_slide(self):
 		from .presenter import goto_next_slide
 		goto_next_slide()
-	def goto_previous_slide(self):
+	def _goto_previous_slide(self):
 		from .presenter import goto_previous_slide
 		goto_previous_slide()
 

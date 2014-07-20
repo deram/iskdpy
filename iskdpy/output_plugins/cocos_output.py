@@ -35,7 +35,7 @@ class CocosOutput(OutputPlugin):
 				pyglet.resource.add_font(font)
 		director.window.set_mouse_visible(False)
 		RemoteControlLayer().set_task(self.task)
-		RemoteControlLayer().set_callback(self.get_callback())
+		RemoteControlLayer().set_callback(self._get_callback())
 		self.slide=OverrideSlide(**config.empty_slide)
 		self.scene=SlideScene(self.slide)
 		director.run(self.scene)

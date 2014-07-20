@@ -121,7 +121,7 @@ class VideoLayer (SlideLayer):
 		self.media_player = pyglet.media.Player()
 		self.media_player.queue(source)
 		self.media_player.eos_action=self.media_player.EOS_PAUSE
-		self.media_player.set_handler('on_eos', control.RemoteControlLayer().callback.goto_next_slide)
+		self.media_player.set_handler('on_eos', control.RemoteControlLayer().callback._goto_next_slide)
 
 	def on_enter(self):
 		self.media_player.play()
