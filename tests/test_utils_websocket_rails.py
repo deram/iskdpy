@@ -25,7 +25,7 @@ class MockConnection():
 		return self.callstack.pop(i)
 
 	def fileno(self):
-		return -1
+		return None
 	def select(self, *a, **kw):
 		if self.fail or not self.connected:
 			self.connected=False
