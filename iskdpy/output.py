@@ -84,17 +84,23 @@ class FactoryError(Exception):
 
 def run():
 	'''Shortcut to current OutputPlugin.run'''
+	logger.debug("output.run")
 	with OutputPlugin.get_current().run() as ret:
+		logger.debug("output.run end")
 		return ret
 
 def set_slide(slide):
 	'''Shortcut to current OutputPlugin.set_slide'''
+	logger.debug("output.set_slide (%.100s)", slide)
 	with OutputPlugin.get_current().set_slide(slide) as ret:
+		logger.debug("output.set_slide end")
 		return ret
 
 def cancel_transition():
 	'''Shortcut to current OutputPlugin x.cancel_transition()'''
+	logger.debug("output.cancel_transition")
 	with OutputPlugin.get_current().cancel_transition() as ret:
+		logger.debug("output.cancel_transition end")
 		return ret
 
 def refresh_slide_cache(slide):
@@ -107,5 +113,6 @@ def refresh_slide_cache(slide):
 	'''
 	logger.debug("refresh_slide_cache(%.100s)", slide)
 	with OutputPlugin.get_current().refresh_slide_cache(slide) as ret:
+		logger.debug("output.refresh_slide_cache end")
 		return ret
 
