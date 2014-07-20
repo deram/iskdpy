@@ -44,7 +44,7 @@ class SourcePlugin(object):
 		from .presenter import goto_slide
 		return goto_slide(*args, **kwargs)
 	def _refresh_slide_cache(self, *args, **kwargs):
-		from .presenter import refresh_slide_cache
+		from .output import refresh_slide_cache
 		return refresh_slide_cache(*args, **kwargs)
 
 	@classmethod

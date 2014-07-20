@@ -346,10 +346,5 @@ def get_source():
 		_next_source()
 	return SourcePlugin.get_current()
 
-def refresh_slide_cache(slide):
-	logger.debug("refresh_slide_cache(%.100s)", slide)
-	with OutputPlugin.get_current().refresh_slide_cache(slide) as ret:
-		return ret
-
 _state=_PresenterState()
 '''Module global state object'''
