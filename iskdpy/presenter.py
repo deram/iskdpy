@@ -40,7 +40,8 @@ class _PresenterState(object):
 			logger.debug("Next: %s", unicode(self.presentation[pos]))
 			self.pos=pos
 
-	def show_slide(self, slide=None):
+	def show_current_slide(self):
+		'''
 		if self is _state:
 			if self.pos<0 and len(self.presentation):
 				self.pos=0
@@ -54,7 +55,7 @@ class _PresenterState(object):
 		self._pos=new._pos
 		self._current_slide=new._current_slide
 		if new._schedule_show_slide:
-			self.show_slide()
+			self.show_current_slide()
 
 	@property	
 	def display(self):
@@ -136,21 +137,21 @@ def _current_slide_updated(old_state, new_state):
 	if old_state.current_slide.id == new_state.current_slide.id:
 		if new_state.current_slide.ready and (old_state.current_slide <= new_state.current_slide):
 			if old_state.current_slide.type != 'video':
-				new_state.show_slide()
+				new_state.show_current_slide()
 
 def _display_changed(old_state, new_state):
 	if old_state.display != new_state.display:
 		logger.info("Display changed.")
 		new_state.seek_to_first()
 		if config.future.get('fast_presentation_change', False):
-			new_state.show_slide()
+			new_state.show_current_slide()
 		return True
 def _presentation_changed(old_state, new_state):
 	if old_state.presentation.id != new_state.presentation.id:
 		logger.info("Presentation changed.")
 		new_state.seek_to_first()
 		if config.future.get('fast_presentation_change', False):
-			new_state.show_slide()
+			new_state.show_current_slide()
 		return True
 def _presentation_updated(old_state, new_state):
 	if old_state.presentation <= new_state.presentation:
