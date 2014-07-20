@@ -70,3 +70,29 @@ class SourcePlugin(object):
 
 class FactoryError(Exception):
 	pass
+
+
+def get_display():
+	'''Shortcut to current SourcePlugin.get_display'''
+	with SourcePlugin.get_current().get_display() as ret:
+		return ret
+
+def update_display():
+	'''Shortcut to current SourcePlugin.update_display'''
+	with SourcePlugin.get_current().update_display() as ret:
+		return ret
+
+def update_slide(slide):
+	'''Shortcut to current SourcePlugin.update_slide'''
+	with SourcePlugin.get_current().update_slide(slide) as ret:
+		return ret
+
+def connect():
+	'''Shortcut to current SourcePlugin.connect'''
+	with SourcePlugin.get_current().connect() as ret:
+		return ret
+
+def slide_done(slide):
+	'''Shortcut to current SourcePlugin.slide_done'''
+	with SourcePlugin.get_current().slide_done(slide) as ret:
+		return ret

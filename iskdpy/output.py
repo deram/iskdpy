@@ -58,3 +58,32 @@ class OutputPlugin(object):
 class FactoryError(Exception):
 	pass
 
+### Module methods
+
+def run():
+	'''Shortcut to current OutputPlugin.run'''
+	with OutputPlugin.get_current().run() as ret:
+		return ret
+
+def set_slide(slide):
+	'''Shortcut to current OutputPlugin.set_slide'''
+	with OutputPlugin.get_current().set_slide(slide) as ret:
+		return ret
+
+def cancel_transition():
+	'''Shortcut to current OutputPlugin x.cancel_transition()'''
+	with OutputPlugin.get_current().set_slide(slide) as ret:
+		return ret
+
+def refresh_slide_cache(slide):
+	'''Shortcut to current OutputPlugin.refresh_slide_cache'''
+	'''
+	Force refreshing the slide image from filesystem.
+
+	Args:
+		slide (iskdpy.types.Slide or iskdpy.types.OverrideSlide)
+	'''
+	logger.debug("refresh_slide_cache(%.100s)", slide)
+	with OutputPlugin.get_current().refresh_slide_cache(slide) as ret:
+		return ret
+
