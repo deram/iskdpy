@@ -19,7 +19,7 @@ class Base(object):
 		self.uid=".".join(uid)
 
 	def __getnewargs__(self):
-		return (self.data, )
+		return ()
 
 	def __getattr__(self, name):
 		if name in self._fields:
@@ -107,7 +107,7 @@ class Display(Base):
 
 	def __init__(self, *a, **kw):
 		super(Display, self).__init__(*a, **kw)
-		self.override_queue=deque(self.override_queue)
+		self.data['override_queue']=deque(self.data['override_queue'])
 
 	def __getitem__(self, i):
 		if self.override_queue:
