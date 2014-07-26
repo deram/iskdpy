@@ -83,6 +83,7 @@ class WebsocketSource(SourcePlugin):
 						len(self.display.override_queue),
 						('manual' if self.display.manual else ''))
 			logger.debug('\n%s', self.display )
+			self.__fill_cache()
 			try:
 				self.get_callback()._display_updated(self.display)
 			except AttributeError:
@@ -141,7 +142,7 @@ class WebsocketSource(SourcePlugin):
 		else:
 			logger.debug("sent error instead of empty slide")
 			data = {'display_id': self.displayid,
-					'message': 'Empty slide shown'}
+					'error': 'Empty slide shown'}
 			self.socket.send(Event.simple('iskdpy.error', data))
 		logger.debug("slide_done end")
 
