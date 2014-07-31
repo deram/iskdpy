@@ -253,6 +253,7 @@ def _get_slide(direction='next'):
 	if direction=='next':
 		override=_state.display.pop_override_slide()
 		if override:
+			_state.current_slide=override
 			return override
 	if not _state.presentation:
 		logger.warning("EMPTY PRESENTATION")
