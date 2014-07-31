@@ -178,6 +178,10 @@ def _next_source():
 	if len(config.sources):
 		_connect(config.sources.pop())
 
+def _empty_slide_updated(old_state, new_state):
+	if old_state.current_slide == get_empty_slide():
+		new_state.show_current_slide()
+
 def _manual_mode_updated(old_state, new_state):
 	if old_state.manual == new_state.manual:
 		return
@@ -190,7 +194,8 @@ def _current_slide_updated(old_state, new_state):
 	if old_state.current_slide.id == new_state.current_slide.id:
 		if new_state.current_slide.ready and (old_state.current_slide <= new_state.current_slide):
 			if old_state.current_slide.type != 'video':
-				new_state.show_current_slide()
+				if old_state.current_slide.updated_at != new_state.current_slide.updated_at:
+					new_state.show_current_slide()
 
 def _display_changed(old_state, new_state):
 	if old_state.display != new_state.display:
@@ -237,6 +242,7 @@ def _update_display(new_display=None):
 	if handled:
 		_current_slide_updated(old_state, new_state)
 		_manual_mode_updated(old_state, new_state)
+		_empty_slide_updated(old_state, new_state)
 
 		logger.debug('State Change "%s" -> "%s"', old_state, new_state)
 		_state.update(new_state)
